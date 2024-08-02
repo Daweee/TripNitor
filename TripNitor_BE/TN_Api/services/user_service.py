@@ -1,8 +1,9 @@
 from ..models import User
-from ..serializers import UserSerializer
+from ..serializers import UserSerializer, LogoutSerializer
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.exceptions import TokenError
 
 def create_user(user):
     user_serializer = UserSerializer(data=user)
@@ -21,8 +22,10 @@ def authenticate_user(user_data):
     user_serializer = UserSerializer(user)
     return user_serializer.data, {'access': str(token.access_token), 'refresh': str(token)}, status.HTTP_200_OK
 
-# def logout_user(user):
-#     user_serializer = LogoutSerializer(data=user)
-#     user_serializer.is_valid()
-#     user_serializer.save()
-#     return status.HTTP_204_NO_CONTENT
+def logout_user(refresh_token):
+    try:
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return status.HTTP_205_RESET_CONTENT
+    except TokenError:
+        return status.HTTP_400_BAD_REQUEST

@@ -17,11 +17,11 @@ class User(AbstractUser):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     first_name = None
     last_name = None
-    is_staff = None
-    is_active = None
 
     objects = CustomUserManager()
 

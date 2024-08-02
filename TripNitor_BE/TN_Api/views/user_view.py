@@ -1,12 +1,16 @@
-from ..serializers import UserSerializer, LoginSerializer
+from ..serializers import UserSerializer, LoginSerializer, LogoutSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from ..services import create_user, authenticate_user
+from ..services import create_user, authenticate_user, logout_user
 from rest_framework import status, permissions
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class SignupView(GenericAPIView):
     serializer_class = UserSerializer
 
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         user_data = request.data
         if user_data:
@@ -28,6 +32,8 @@ class SignupView(GenericAPIView):
 class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
 
+    permission_classes = [AllowAny]
+
     def post(self, request):
         user_data = request.data
         user, token, status_code = authenticate_user(user_data)
@@ -46,24 +52,29 @@ class LoginView(GenericAPIView):
             }
             return Response(response_data, status=status_code)
         
-# class LogoutView(GenericAPIView):
-#     serializer_class = LogoutSerializer
+class LogoutView(GenericAPIView):
+    serializer_class = LogoutSerializer
 
-#     # permission_classes = (permissions.IsAuthenticated,)
+    # permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
-#     def post(self, request):
-#         auth_header = request.META.get('HTTP_AUTHORIZATION')
-#         print(f'Auth Header: {auth_header}')
-#         if not auth_header or len(auth_header.split(' ')) != 2:
-#             return Response({'detail': 'Authorization header must contain two space-delimited values hmm', 'code': 'bad_authorization_header'}, status=400)
-#         user_data = request.data
-#         if user_data:
-#             status = logout_user(user_data)
-#             return Response(status=status)
-#         else:
-#             response_data = {
-#                 'status': 400, 
-#                 'data': None,
-#                 'message': 'Bad token'
-#             }
-#             return Response(response_data, status=400)
+    def post(self, request):
+        refresh_token = request.data["refresh"]
+        logout_status = logout_user(refresh_token)
+        if logout_status == status.HTTP_205_RESET_CONTENT:
+            response_data = {
+                'status': logout_status, 
+                'data': None, 
+                'message': 'User logged out successfully'
+            }
+            return Response(response_data, status=logout_status)
+        else:
+            response_data = {
+                'status': logout_status, 
+                'data': None, 
+                'message': 'Invalid token'
+            }
+            return Response(response_data, status=logout_status)
+            
+              
