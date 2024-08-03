@@ -7,7 +7,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # path('logout/', TokenBlacklistView.as_view(), name='logout'),
 
-    path('signup/', SignupView.as_view(), name='signup'),
-    path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('users/signup/', SignupView.as_view(), name='signup'),
+    path('users/login/', LoginView.as_view(), name='login'),
+    path('users/logout/', LogoutView.as_view(), name='logout'),
 ]
