@@ -1,2 +1,6 @@
 #secret
 .env
+.venv/Scripts/pythonw.exe
+.venv/Scripts/python.exe
+.venv/pyvenv.cfg
+__pycache__/
