@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/error/exceptions.dart';
 import '../models/auth_user_model.dart';
 import '../models/auth_token_model.dart';
 
@@ -59,14 +60,22 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
     @override
     Future<AuthTokenModel> getLastToken() {
-        // TODO: implement getLastToken
-        throw UnimplementedError();
+        final jsonString = sharedPreferences.getString('CACHED_TOKEN');
+        if (jsonString != null) {
+            return Future.value(AuthTokenModel.fromJson(json.decode(jsonString)));
+        } else {
+            throw CacheException();
+        }
     }
 
     @override
     Future<AuthUserModel> getLastUser() {
-        // TODO: implement getLastUser
-        throw UnimplementedError();
+        final jsonString = sharedPreferences.getString('CACHED_USER');
+        if (jsonString != null) {
+            return Future.value(AuthUserModel.fromJson(json.decode(jsonString)));
+        } else {
+            throw CacheException();
+        }
     }
 
 }

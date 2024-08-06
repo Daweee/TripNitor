@@ -1,5 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:tripnitor_mobile_app/core/error/failures.dart';
+import '../../data/models/auth_token_model.dart';
+import '../../data/models/auth_user_model.dart';
 import '../entities/auth_response.dart';
 
 abstract class AuthRepository {
@@ -23,4 +25,14 @@ abstract class AuthRepository {
     /// 
     /// Returns an [AuthResponse] on success, or a [Failure] on error.
     Future<Either<Failure, AuthResponse>> logoutUser({required String token});
+
+    /// Retrieves the locally stored authentication token.
+    /// 
+    /// Returns an [AuthTokenModel] on success, or a [Failure] on error.
+    Future<Either<Failure, AuthTokenModel>> getLocalToken();
+
+    /// Retrieves the locally stored user information.
+    /// 
+    /// Returns an [AuthUserModel] on success, or a [Failure] on error.
+    Future<Either<Failure, AuthUserModel>> getLocalUser();
 }

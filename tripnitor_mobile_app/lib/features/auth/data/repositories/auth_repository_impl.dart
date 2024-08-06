@@ -22,14 +22,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
     @override
     Future<Either<Failure, AuthResponse>> loginUser({required String username, required String password}) async {
+        print('Is Connected: ${await networkInfo.isConnected}');
         if (await networkInfo.isConnected) {
             try {
                 final remoteAuthReponse = await remoteDataSource.loginUser(username: username, password: password);
                 localDataSource.cacheUser(remoteAuthReponse.user as AuthUserModel);
                 localDataSource.cacheToken(remoteAuthReponse.token as AuthTokenModel);
                 return Right(remoteAuthReponse);
-            } on ServerException {
-                return Left(ServerFailure());
+            } on ServerException catch (e){
+                return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
             }
         } else {
             return Left(NetworkFailure());
@@ -46,8 +47,8 @@ class AuthRepositoryImpl implements AuthRepository {
                     await localDataSource.clear();
                 }
                 return Right(result);
-            } on ServerException {
-                return Left(ServerFailure());
+            } on ServerException catch (e) {
+                return Left(ServerFailure(message: e.message));
             } on CacheException {
                 return Left(CacheFailure());
             }
@@ -75,12 +76,31 @@ class AuthRepositoryImpl implements AuthRepository {
                 localDataSource.cacheUser(remoteAuthReponse.user as AuthUserModel);
                 localDataSource.cacheToken(remoteAuthReponse.token as AuthTokenModel);
                 return Right(remoteAuthReponse);
-            } on ServerException {
-                return Left(ServerFailure());
+            } on ServerException catch (e) {
+                return Left(ServerFailure(message: e.message));
             }
         } else {
             return Left(NetworkFailure());
         }
     }
 
+    @override
+    Future<Either<Failure, AuthUserModel>> getLocalUser() async {
+        try {
+            final user = await localDataSource.getLastUser();
+            return Right(user);
+        } on CacheException {
+            return Left(CacheFailure());
+        }
+    }
+    
+    @override
+    Future<Either<Failure, AuthTokenModel>> getLocalToken() async {
+        try {
+            final token = await localDataSource.getLastToken();
+            return Right(token);
+        } on CacheException {
+            return Left(CacheFailure());
+        }
+    }
 }

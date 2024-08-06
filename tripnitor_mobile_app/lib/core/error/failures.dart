@@ -5,10 +5,18 @@ abstract class Failure extends Equatable {
 }
 
 class ServerFailure extends Failure {
-    @override
-    List<Object> get props => [];
-}
+    final String message;
+    final int? statusCode;
 
+    ServerFailure({required this.message, this.statusCode});
+
+    @override
+    String toString() => 'ServerFailure(message: $message, statusCode: $statusCode)';
+
+    @override
+    // TODO: implement props
+    List<Object?> get props => throw UnimplementedError();
+    }
 class CacheFailure extends Failure {
     @override
     List<Object> get props => [];
