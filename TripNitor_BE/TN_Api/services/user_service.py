@@ -15,9 +15,14 @@ def create_user(user):
         return user_serializer.errors, None, status.HTTP_400_BAD_REQUEST
 
 def authenticate_user(user_data):
-    user = get_object_or_404(User, username=user_data['username'])
+    try:
+        user = User.objects.get(username=user_data['username'])
+    except User.DoesNotExist:
+        return None, None, status.HTTP_401_UNAUTHORIZED
+
     if not user.check_password(user_data['password']):
         return None, None, status.HTTP_401_UNAUTHORIZED
+
     token = RefreshToken.for_user(user)
     user_serializer = UserSerializer(user)
     return user_serializer.data, {'access': str(token.access_token), 'refresh': str(token)}, status.HTTP_200_OK
