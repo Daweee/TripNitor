@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'name', 'email', 'phone_number', 'password']
+        fields = ['username', 'name', 'email', 'phone_number', 'role', 'password']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -16,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
             name=validated_data['name'],
             email=validated_data['email'],
             phone_number=validated_data['phone_number'],
+            role=validated_data.get('role', User.Role.USER),
             password=validated_data['password']
         )
         return user

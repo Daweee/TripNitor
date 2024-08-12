@@ -12,7 +12,8 @@ def create_user(user):
         token = RefreshToken.for_user(user)
         return user_serializer.data, {'access': str(token.access_token), 'refresh': str(token)}, status.HTTP_201_CREATED
     else:
-        return user_serializer.errors, None, status.HTTP_400_BAD_REQUEST
+        # errors = [f"{field}: {message}" for field, messages in user_serializer.errors.items() for message in messages] 
+        return None, None, status.HTTP_400_BAD_REQUEST
 
 def authenticate_user(user_data):
     try:

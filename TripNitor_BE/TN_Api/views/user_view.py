@@ -13,8 +13,8 @@ class SignupView(GenericAPIView):
     
     def post(self, request):
         user_data = request.data
-        if user_data:
-            user, token, status_code = create_user(user_data)
+        user, token, status_code = create_user(user_data)
+        if status_code == status.HTTP_201_CREATED:
             response_data = {
                 'status': status_code, 
                 'data': {'user': user, 'token': token}, 
@@ -23,11 +23,11 @@ class SignupView(GenericAPIView):
             return Response(response_data, status=status_code)
         else:
             response_data = {
-                'status': 400, 
+                'status': status_code, 
                 'data': None,
-                'message': 'Invalid data'
+                'message': 'User creation failed'
             }
-            return Response(response_data, status=400)
+            return Response(response_data, status=status_code)
         
 class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
