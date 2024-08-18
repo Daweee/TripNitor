@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from TN_Api.models import User
+from TN_Api.models import User, Driver
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -34,6 +34,17 @@ class LoginSerializer(TokenObtainPairSerializer):
             'phone_number': self.user.phone_number,
             'role': self.user.role,
         })
+
+        # checks if the user is a driver and add driver-specific info
+        if self.user.role == User.Role.DRIVER:
+            try:
+                driver = Driver.objects.get(user=self.user)
+                data.update({
+                    'license_number': driver.license_number,
+                    'date_hired': driver.date_hired,
+                })
+            except Driver.DoesNotExist:
+                pass  
         
         return data
 
