@@ -14,7 +14,7 @@ from django.db import IntegrityError
 
 class DriverCreateView(CreateAPIView):
     serializer_class = DriverCreationSerializer
-    permission_classes = [AllowAny]  # Only authorized users (e.g., Admin/Manager) should create drivers
+    permission_classes = [IsAuthenticated] 
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -41,7 +41,7 @@ class DriverCreateView(CreateAPIView):
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 class DriverListView(ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
 
@@ -57,7 +57,7 @@ class DriverListView(ListAPIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
 class DriverDetailView(RetrieveAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
 
@@ -73,7 +73,7 @@ class DriverDetailView(RetrieveAPIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
 class DriverUpdateView(UpdateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
 
@@ -91,7 +91,7 @@ class DriverUpdateView(UpdateAPIView):
         return Response(response_data, status=status.HTTP_200_OK)
     
 class DriverDeleteView(DestroyAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
     serializer_class = DriverSerializer
 
