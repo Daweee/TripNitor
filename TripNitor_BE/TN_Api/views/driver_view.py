@@ -96,11 +96,18 @@ class DriverDeleteView(DestroyAPIView):
     serializer_class = DriverSerializer
 
     def destroy(self, request, *args, **kwargs):
-        response = super().destroy(request, *args, **kwargs)
+        instance = self.get_object()
+        user = instance.user  # Get the associated User object
+
+        # First, delete the Driver instance
+        super().destroy(request, *args, **kwargs)
         
-        response.data = {
+        # Then, delete the associated User
+        user.delete()
+
+        response_data = {
             'status': status.HTTP_204_NO_CONTENT,
             'data': None,
             'message': 'Driver deleted successfully'
         }
-        return Response(response.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(response_data, status=status.HTTP_204_NO_CONTENT)
