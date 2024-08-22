@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from TN_Api.models import User
+from TN_Api.models import User, Driver
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'name', 'email', 'phone_number', 'password']
+        fields = ['username', 'name', 'email', 'phone_number', 'role', 'password']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -16,23 +17,36 @@ class UserSerializer(serializers.ModelSerializer):
             name=validated_data['name'],
             email=validated_data['email'],
             phone_number=validated_data['phone_number'],
+            role=validated_data.get('role', User.Role.USER),
             password=validated_data['password']
         )
         return user
 
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+class LoginSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        
+        data.update({
+            'user_id': self.user.id,
+            'username': self.user.username,
+            'email': self.user.email,
+            'name': self.user.name,
+            'phone_number': self.user.phone_number,
+            'role': self.user.role,
+        })
+
+        # checks if the user is a driver and add driver-specific info
+        if self.user.role == User.Role.DRIVER:
+            try:
+                driver = Driver.objects.get(user=self.user)
+                data.update({
+                    'license_number': driver.license_number,
+                    'date_hired': driver.date_hired,
+                })
+            except Driver.DoesNotExist:
+                pass  
+        
+        return data
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
-
-    def validate(self, attrs):
-        self.token = attrs['refresh']
-        return attrs
-
-    def save(self, **kwargs):   
-        try:
-            RefreshToken(self.token).blacklist()
-        except TokenError:
-            self.fail('bad_token')
