@@ -1,9 +1,13 @@
 from rest_framework import serializers
-from TN_Api.models import Van
-from TN_Api.serializers import GasSerializer
+from TN_Api.models import Van, Gas
+
+class GasDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gas
+        fields = ['id', 'gas_name', 'gas_price']
 
 class VanSerializer(serializers.ModelSerializer):
-    gas = GasSerializer(read_only=True) 
+    gas = GasDetailSerializer(read_only=True) 
 
     class Meta:
         model = Van
