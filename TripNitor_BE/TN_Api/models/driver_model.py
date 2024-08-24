@@ -1,8 +1,9 @@
 from django.db import models
 from .user_model import User
+from .base_model import CustomPrimaryKeyModel
 
-class Driver(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+class Driver(CustomPrimaryKeyModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     license_number = models.CharField(max_length=20, unique=True)
     date_hired = models.DateField()
 

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from .base_model import CustomPrimaryKeyModel
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, name, phone_number, password=None, **extra_fields):
@@ -19,7 +20,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(username, email, name, phone_number, password, **extra_fields)
 
-class User(AbstractUser):
+class User(AbstractUser, CustomPrimaryKeyModel):
     class Role(models.TextChoices):
         USER = 'USER', 'Regular User'
         DRIVER = 'DRIVER', 'Driver'
