@@ -1,6 +1,7 @@
 from django.db import models
+from .base_model import CustomPrimaryKeyModel
 
-class Gas(models.Model):
+class Gas(CustomPrimaryKeyModel):
     gas_name = models.CharField(max_length=50, unique=True)
     gas_price = models.DecimalField(max_digits=10, decimal_places=2)
 
