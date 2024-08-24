@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tripnitor_mobile_app/sample.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,8 +32,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Text('HELL WOLRD'),
+      home: SampleWidget(), //Text('HELL WOLRD'),
     );
   }
 }
-
