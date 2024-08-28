@@ -3,7 +3,9 @@ from .views import (
     RegisterView, LoginView, LogoutView, 
     DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView,
     VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView,
-    GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView
+    GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
+    BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView,
+    PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView,
 )
 
 urlpatterns = [
@@ -24,8 +26,20 @@ urlpatterns = [
     path('vans/<str:pk>/delete', VanDeleteView.as_view(), name='delete_van'),
 
     path('gas/register/', GasCreateView.as_view(), name='register_gas'),
-    path('gas/', GasListView.as_view(), name='van_gas'),
+    path('gas/', GasListView.as_view(), name='gas_list'),
     path('gas/<str:pk>/', GasDetailView.as_view(), name='get_gas'),
     path('gas/<str:pk>/update/', GasUpdateView.as_view(), name='update_gas'),
     path('gas/<str:pk>/delete', GasDeleteView.as_view(), name='delete_gas'),
+
+    path('bookings/register/', BookingCreateView.as_view(), name='register_booking'),
+    path('bookings/', BookingListView.as_view(), name='booking_list'),
+    path('bookings/<str:pk>/', BookingDetailView.as_view(), name='get_booking'),
+    path('bookings/<str:pk>/update/', BookingUpdateView.as_view(), name='update_booking'),
+    path('bookings/<str:pk>/delete', BookingDeleteView.as_view(), name='delete_booking'),
+
+    path('packages/register/', PackageCreateView.as_view(), name='register_package'),
+    path('packages/', PackageListView.as_view(), name='package_list'),
+    path('packages/<str:pk>/', PackageDetailView.as_view(), name='get_package'),
+    path('packages/<str:pk>/update/', PackageUpdateView.as_view(), name='update_package'),
+    path('packages/<str:pk>/delete', PackageDeleteView.as_view(), name='delete_package'),
 ]
