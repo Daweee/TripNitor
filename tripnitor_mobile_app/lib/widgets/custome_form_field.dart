@@ -6,6 +6,7 @@ class CustomeFormField extends StatelessWidget {
   final double height;
   //final RegExp validationRegEx; // regex
   final bool obscureText;
+  final TextEditingController controller;
 
   const CustomeFormField({
     super.key,
@@ -13,6 +14,7 @@ class CustomeFormField extends StatelessWidget {
     required this.height,
     //required this.validationRegEx,
     this.obscureText = false,
+    required this.controller,
   });
 
   @override
@@ -20,6 +22,7 @@ class CustomeFormField extends StatelessWidget {
     return SizedBox(
       height: height,
       child: TextFormField(
+        controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hintText,

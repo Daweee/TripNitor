@@ -10,6 +10,11 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+//   final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,22 +60,27 @@ class _RegistrationPageState extends State<RegistrationPage> {
       child: Column(
         children: [
           CustomeFormField(
-            hintText: "Full Name",
+            hintText: "Name",
             height: MediaQuery.sizeOf(context).height * .1,
+            controller: _nameController,
           ),
           CustomeFormField(
             hintText: "Email Adress",
             height: MediaQuery.sizeOf(context).height * .1,
+            controller: _emailController,
           ),
           CustomeFormField(
             hintText: "Password",
             obscureText: true,
             height: MediaQuery.sizeOf(context).height * .1,
+            controller: _passwordController,
           ),
-          CustomeFormField(
-            hintText: "Confirm Password",
-            height: MediaQuery.sizeOf(context).height * .1,
-          ),
+        //   CustomeFormField(
+        //     hintText: "Confirm Password",
+        //     height: MediaQuery.sizeOf(context).height * .1,
+        //     obscureText: true,
+        //     controller: _passwordController,
+        //   ),
           _registrationButton(),
           // Text('Testing'),
           _AlreadyHaveAnAccount(),

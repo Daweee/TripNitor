@@ -1,23 +1,39 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
-class LoginPage extends StatefulWidget {
+import '../providers/auth_provider.dart';
+
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   Color backgroundColor = Colors.deepOrange; //0xE5842A 0xFFF2D9
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }  
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _buildUI(context),
+      body: authState.isLoading
+          ? Center(child: CircularProgressIndicator()) 
+          : _buildUI(context),
     );
   }
 
@@ -60,12 +76,15 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisSize: MainAxisSize.max,
           children: [
             CustomeFormField(
-              hintText: "Email",
+              hintText: "Username",
               height: MediaQuery.sizeOf(context).height * .1,
+              controller: _usernameController,
             ),
             CustomeFormField(
               hintText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
+              obscureText: true,
+              controller: _passwordController,
             ),
             Container(
               padding: EdgeInsets.all(10),
@@ -89,7 +108,13 @@ class _LoginPageState extends State<LoginPage> {
             width: MediaQuery.sizeOf(context).width,
             height: MediaQuery.sizeOf(context).height * .05,
             child: MaterialButton(
-              onPressed: () {},
+              onPressed: () async {
+                    final authNotifier = ref.read(authProvider.notifier);
+                    await authNotifier.login(
+                      _usernameController.text,
+                      _passwordController.text,
+                    );
+                  },
               color: Theme.of(context).colorScheme.primary,
               child: Text(
                 'Login',
