@@ -16,7 +16,9 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(tags=['users'])
 class RegisterView(CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -41,11 +43,12 @@ class RegisterView(CreateAPIView):
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
-        
+
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
 
+    @extend_schema(tags=['users'])
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         try:
@@ -83,6 +86,7 @@ class LogoutView(GenericAPIView):
     serializer_class = LogoutSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(tags=['users'])
     def post(self, request):
         serializer = LogoutSerializer(data=request.data)
 

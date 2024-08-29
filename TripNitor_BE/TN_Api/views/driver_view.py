@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -11,7 +12,9 @@ from rest_framework.generics import (
     DestroyAPIView
 )
 from django.db import IntegrityError
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(tags=['drivers'])
 class DriverCreateView(CreateAPIView):
     serializer_class = DriverCreationSerializer
     permission_classes = [IsAuthenticated] 
@@ -39,7 +42,15 @@ class DriverCreateView(CreateAPIView):
                 'message': f'A user with this {field_name} already exists.'
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as e:
+            response_data = {
+                'status': status.HTTP_400_BAD_REQUEST,
+                'data': None,
+                'message': str(e)
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
+@extend_schema(tags=['drivers'])
 class DriverListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
@@ -56,6 +67,7 @@ class DriverListView(ListAPIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
+@extend_schema(tags=['drivers'])
 class DriverDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
@@ -72,24 +84,34 @@ class DriverDetailView(RetrieveAPIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
+@extend_schema(tags=['drivers'])
 class DriverUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
 
     def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        driver = serializer.save()
+        try:
+            driver = serializer.save()
+            response_data = {
+                'status': status.HTTP_200_OK,
+                'data': {'driver': serializer.data},
+                'message': 'Driver details updated successfully'
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            response_data = {
+                'status': status.HTTP_400_BAD_REQUEST,
+                'data': None,
+                'message': str(e)
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'driver': serializer.data},
-            'message': 'Driver details updated successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
-    
+@extend_schema(tags=['drivers'])    
 class DriverDeleteView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()

@@ -11,7 +11,9 @@ from rest_framework.generics import (
 from ..serializers import VanSerializer
 from django.db import IntegrityError
 from TN_Api.models import Van
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(tags=['vans'])
 class VanCreateView(CreateAPIView):
     serializer_class = VanSerializer
     permission = [IsAuthenticated]
@@ -37,7 +39,8 @@ class VanCreateView(CreateAPIView):
                 'message': f'A van with this {field_name} already exists.'
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-        
+
+@extend_schema(tags=['vans'])        
 class VanListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
@@ -53,7 +56,8 @@ class VanListView(ListAPIView):
             'message': 'Van list retrieved successfully'
         }
         return Response(response_data, status=status.HTTP_200_OK)
-    
+
+@extend_schema(tags=['vans'])    
 class VanDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
@@ -69,7 +73,8 @@ class VanDetailView(RetrieveAPIView):
             'message': 'Van details retrieved successfully'
         }
         return Response(response_data, status=status.HTTP_200_OK)
-    
+
+@extend_schema(tags=['vans'])    
 class VanUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
@@ -87,7 +92,8 @@ class VanUpdateView(UpdateAPIView):
             'message': 'Van details updated successfully'
         }
         return Response(response_data, status=status.HTTP_200_OK)
-    
+
+@extend_schema(tags=['vans'])    
 class VanDeleteView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()

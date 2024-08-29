@@ -11,7 +11,9 @@ from rest_framework.generics import (
 from ..serializers import PackageSerializer
 from TN_Api.models import Package
 from django.db import IntegrityError
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(tags=['packages'])
 class PackageCreateView(CreateAPIView):
     queryset = Package.objects.all()
     permission = [IsAuthenticated]
@@ -36,6 +38,7 @@ class PackageCreateView(CreateAPIView):
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
+@extend_schema(tags=['packages'])
 class PackageListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
@@ -51,6 +54,7 @@ class PackageListView(ListAPIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
+@extend_schema(tags=['packages'])
 class PackageDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
@@ -66,7 +70,7 @@ class PackageDetailView(RetrieveAPIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
-
+@extend_schema(tags=['packages'])
 class PackageUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
@@ -84,7 +88,7 @@ class PackageUpdateView(UpdateAPIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
-
+@extend_schema(tags=['packages'])
 class PackageDeleteView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Package.objects.all()
