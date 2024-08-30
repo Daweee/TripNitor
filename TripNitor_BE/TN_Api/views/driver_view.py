@@ -13,9 +13,10 @@ from rest_framework.generics import (
 )
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
+from .mixins import CustomResponseMixin
 
 @extend_schema(tags=['drivers'])
-class DriverCreateView(CreateAPIView):
+class DriverCreateView(CustomResponseMixin, CreateAPIView):
     serializer_class = DriverCreationSerializer
     permission_classes = [IsAuthenticated] 
 
@@ -24,34 +25,31 @@ class DriverCreateView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             driver = serializer.save()
-            response_data = {
-                'status': status.HTTP_201_CREATED,
-                'data': {'driver': serializer.data},
-                'message': 'Driver account created successfully'
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
+            return self.get_custom_response(
+                status.HTTP_201_CREATED,
+                {'driver': serializer.data},
+                'Driver account created successfully'
+            )
         except IntegrityError as e:
             field_name = 'Unknown'
             if 'email' in str(e):
                 field_name = 'Email'
             elif 'username' in str(e):
                 field_name = 'Username'
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST,
-                'data': None,
-                'message': f'A user with this {field_name} already exists.'
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                f'A user with this {field_name} already exists.'
+            )
         except ValidationError as e:
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST,
-                'data': None,
-                'message': str(e)
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                str(e)
+            )
 
 @extend_schema(tags=['drivers'])
-class DriverListView(ListAPIView):
+class DriverListView(CustomResponseMixin, ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
@@ -60,15 +58,14 @@ class DriverListView(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'drivers': serializer.data for driver in queryset},
-            'message': 'Driver list successful'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
-
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'drivers': serializer.data for driver in queryset},
+            'Driver list successful'
+        )
+    
 @extend_schema(tags=['drivers'])
-class DriverDetailView(RetrieveAPIView):
+class DriverDetailView(CustomResponseMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
@@ -77,15 +74,14 @@ class DriverDetailView(RetrieveAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'driver': serializer.data},
-            'message': 'Driver details retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'driver': serializer.data},
+            'Driver details retrieved successfully'
+        )
 
 @extend_schema(tags=['drivers'])
-class DriverUpdateView(UpdateAPIView):
+class DriverUpdateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
@@ -97,22 +93,20 @@ class DriverUpdateView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             driver = serializer.save()
-            response_data = {
-                'status': status.HTTP_200_OK,
-                'data': {'driver': serializer.data},
-                'message': 'Driver details updated successfully'
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                {'driver': serializer.data},
+                'Driver details updated successfully'
+            )
         except ValidationError as e:
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST,
-                'data': None,
-                'message': str(e)
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                str(e)
+            )
 
 @extend_schema(tags=['drivers'])    
-class DriverDeleteView(DestroyAPIView):
+class DriverDeleteView(CustomResponseMixin, DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
     serializer_class = DriverSerializer
@@ -127,9 +121,8 @@ class DriverDeleteView(DestroyAPIView):
         # Then, delete the associated User
         user.delete()
 
-        response_data = {
-            'status': status.HTTP_204_NO_CONTENT,
-            'data': None,
-            'message': 'Driver deleted successfully'
-        }
-        return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+        return self.get_custom_response(
+            status.HTTP_204_NO_CONTENT,
+            None,
+            'Driver deleted successfully'
+        )

@@ -12,9 +12,10 @@ from ..serializers import PackageSerializer
 from TN_Api.models import Package
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
+from .mixins import CustomResponseMixin
 
 @extend_schema(tags=['packages'])
-class PackageCreateView(CreateAPIView):
+class PackageCreateView(CustomResponseMixin, CreateAPIView):
     queryset = Package.objects.all()
     permission = [IsAuthenticated]
     serializer_class = PackageSerializer
@@ -24,22 +25,20 @@ class PackageCreateView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             package = serializer.save()
-            response_data = {
-                'status': status.HTTP_201_CREATED,
-                'data': {'package': serializer.data},
-                'message': 'Package created successfully'
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
+            return self.get_custom_response(
+                status.HTTP_201_CREATED,
+                {'package': serializer.data},
+                'Package created successfully'
+            )
         except IntegrityError as e:
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST,
-                'data': None,
-                'message': f'{e}'
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                f'{e}'
+            )
 
 @extend_schema(tags=['packages'])
-class PackageListView(ListAPIView):
+class PackageListView(CustomResponseMixin, ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
     queryset = Package.objects.all()
@@ -47,15 +46,14 @@ class PackageListView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'packages': serializer.data},
-            'message': 'Package list retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'package': serializer.data},
+            'Package list retrieved successfully'
+        )
 
 @extend_schema(tags=['packages'])
-class PackageDetailView(RetrieveAPIView):
+class PackageDetailView(CustomResponseMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
     queryset = Package.objects.all()
@@ -63,15 +61,14 @@ class PackageDetailView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'package': serializer.data},
-            'message': 'Package details retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'package': serializer.data},
+            'Package details retrieved successfully'
+        )
 
 @extend_schema(tags=['packages'])
-class PackageUpdateView(UpdateAPIView):
+class PackageUpdateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
     queryset = Package.objects.all()
@@ -81,15 +78,14 @@ class PackageUpdateView(UpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         package = serializer.save()
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'package': serializer.data},
-            'message': 'Package details updated successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'package': serializer.data},
+            'Package details updated successfully'
+        )
 
 @extend_schema(tags=['packages'])
-class PackageDeleteView(DestroyAPIView):
+class PackageDeleteView(CustomResponseMixin, DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
@@ -97,9 +93,8 @@ class PackageDeleteView(DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        response_data = {
-            'status': status.HTTP_204_NO_CONTENT,
-            'data': None,
-            'message': 'Package deleted successfully'
-        }
-        return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+        return self.get_custom_response(
+            status.HTTP_204_NO_CONTENT,
+            None,
+            'Package deleted successfully'
+        )

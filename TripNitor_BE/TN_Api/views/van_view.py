@@ -12,9 +12,10 @@ from ..serializers import VanSerializer
 from django.db import IntegrityError
 from TN_Api.models import Van
 from drf_spectacular.utils import extend_schema
+from .mixins import CustomResponseMixin
 
 @extend_schema(tags=['vans'])
-class VanCreateView(CreateAPIView):
+class VanCreateView(CustomResponseMixin,  CreateAPIView):
     serializer_class = VanSerializer
     permission = [IsAuthenticated]
 
@@ -23,25 +24,23 @@ class VanCreateView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             van = serializer.save()
-            response_data = {
-                'status': status.HTTP_201_CREATED,
-                'data': {'van': serializer.data},
-                'message': 'Van created successfully'
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
+            return self.get_custom_response(
+                status.HTTP_201_CREATED,
+                {'van': serializer.data},
+                'Van created successfully'
+            )
         except IntegrityError as e:
             field_name = 'Unknown'
             if 'plate_number' in str(e):
                 field_name = 'Plate Number'
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST,
-                'data': None,
-                'message': f'A van with this {field_name} already exists.'
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                f'A van with this {field_name} already exists.'
+            )
 
 @extend_schema(tags=['vans'])        
-class VanListView(ListAPIView):
+class VanListView(CustomResponseMixin, ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
     serializer_class = VanSerializer
@@ -50,15 +49,14 @@ class VanListView(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'van': serializer.data},
-            'message': 'Van list retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'van': serializer.data},
+            'Van list retrieved successfully'
+        )
 
 @extend_schema(tags=['vans'])    
-class VanDetailView(RetrieveAPIView):
+class VanDetailView(CustomResponseMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
     serializer_class = VanSerializer
@@ -67,15 +65,14 @@ class VanDetailView(RetrieveAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'van': serializer.data},
-            'message': 'Van details retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'van': serializer.data},
+            'Van details retrieved successfully'
+        )
 
 @extend_schema(tags=['vans'])    
-class VanUpdateView(UpdateAPIView):
+class VanUpdateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
     serializer_class = VanSerializer
@@ -86,15 +83,14 @@ class VanUpdateView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         van = serializer.save()
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'van': serializer.data},
-            'message': 'Van details updated successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'van': serializer.data},
+            'Van details updated successfully'
+        )
 
 @extend_schema(tags=['vans'])    
-class VanDeleteView(DestroyAPIView):
+class VanDeleteView(CustomResponseMixin, DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Van.objects.all()
     serializer_class = VanSerializer
@@ -103,9 +99,8 @@ class VanDeleteView(DestroyAPIView):
         instance = self.get_object()
         self.perform_destroy(instance)
 
-        response_data = {
-            'status': status.HTTP_204_NO_CONTENT,
-            'data': None,
-            'message': 'Van deleted successfully'
-        }
-        return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+        return self.get_custom_response(
+            status.HTTP_204_NO_CONTENT,
+            None,
+            'Van deleted successfully'
+        )
