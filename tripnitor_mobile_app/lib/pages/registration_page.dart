@@ -23,7 +23,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       resizeToAvoidBottomInset: false,
       //appBar: AppBar(),
       body: Container(
-        padding: EdgeInsets.only(top: 80),
+        padding: EdgeInsets.only(top: 20),
         child: _buildUI(context),
       ),
     );
@@ -113,7 +113,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Padding(
       padding: EdgeInsets.only(
         top: 10,
-        bottom: 50,
+        bottom: 30,
       ),
       child: SizedBox(
         width: MediaQuery.sizeOf(context).width,
