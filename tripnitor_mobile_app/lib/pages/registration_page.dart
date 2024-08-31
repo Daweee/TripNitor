@@ -64,45 +64,47 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Widget _registrationForm(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          CustomeFormField(
-            hintText: "Username",
-            height: MediaQuery.sizeOf(context).height * .1,
-            controller: _usernameController,
-          ),
-          CustomeFormField(
-            hintText: "Name",
-            height: MediaQuery.sizeOf(context).height * .1,
-            controller: _nameController,
-          ),
-          CustomeFormField(
-            hintText: "Email Adress",
-            height: MediaQuery.sizeOf(context).height * .1,
-            controller: _emailController,
-          ),
-          CustomeFormField(
-            hintText: "Phone Number",
-            height: MediaQuery.sizeOf(context).height * .1,
-            controller: _phoneNumberController,
-          ),
-          CustomeFormField(
-            hintText: "Password",
-            obscureText: true,
-            height: MediaQuery.sizeOf(context).height * .1,
-            controller: _passwordController,
-          ),
-          //   CustomeFormField(
-          //     hintText: "Confirm Password",
-          //     height: MediaQuery.sizeOf(context).height * .1,
-          //     obscureText: true,
-          //     controller: _passwordController,
-          //   ),
-          _registrationButton(),
-          // Text('Testing'),
-          _AlreadyHaveAnAccount(),
-        ],
+    return SingleChildScrollView(
+      child: Container(
+        child: Column(
+          children: [
+            CustomeFormField(
+              hintText: "Username",
+              height: MediaQuery.sizeOf(context).height * .1,
+              controller: _usernameController,
+            ),
+            CustomeFormField(
+              hintText: "Name",
+              height: MediaQuery.sizeOf(context).height * .1,
+              controller: _nameController,
+            ),
+            CustomeFormField(
+              hintText: "Email Adress",
+              height: MediaQuery.sizeOf(context).height * .1,
+              controller: _emailController,
+            ),
+            CustomeFormField(
+              hintText: "Phone Number",
+              height: MediaQuery.sizeOf(context).height * .1,
+              controller: _phoneNumberController,
+            ),
+            CustomeFormField(
+              hintText: "Password",
+              obscureText: true,
+              height: MediaQuery.sizeOf(context).height * .1,
+              controller: _passwordController,
+            ),
+              CustomeFormField(
+                hintText: "Confirm Password",
+                height: MediaQuery.sizeOf(context).height * .1,
+                obscureText: true,
+                controller: _passwordController,
+              ),
+            _registrationButton(),
+            // Text('Testing'),
+            _AlreadyHaveAnAccount(),
+          ],
+        ),
       ),
     );
   }
