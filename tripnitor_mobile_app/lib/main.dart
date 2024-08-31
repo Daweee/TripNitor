@@ -30,11 +30,11 @@ class MyApp extends ConsumerWidget  {
       ),
       // home: LoginPage(),
       // home: RegistrationPage(),
-      home: authState.isAuthenticated ? AuthPage() : LoginPage(),
+      // home: authState.isAuthenticated ? AuthPage() : LoginPage(),
       //home: PackageTrips(),
-      // home: HomePage(),
+      home: HomePage(),
 
-      
+
     );
   }
 }

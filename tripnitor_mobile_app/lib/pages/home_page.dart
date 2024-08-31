@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tripnitor_mobile_app/pages/bottomNav/booking_page.dart';
+import 'package:tripnitor_mobile_app/pages/bottomNav/message_page.dart';
+import 'package:tripnitor_mobile_app/pages/bottomNav/profile_page.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
 
 final bottomNavIndexProvider = StateProvider((ref) => 0); // riverpod
@@ -61,13 +64,13 @@ class _HomePageState extends State<HomePage> {
         //return HomePage();
         return MyHomePage();
       case 1:
-        return bookingPage();
+        return BookingPage();
       case 2:
-        return messagePage();
+        return MessagePage();
       case 3:
-        return profilePage();
+        return ProfilePage();
       default:
-        return bookingPage();
+        return MyHomePage();
     }
   }
 }
@@ -199,50 +202,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// booking
-class bookingPage extends StatefulWidget {
-  const bookingPage({super.key});
 
-  @override
-  State<bookingPage> createState() => _bookingPageState();
-}
 
-class _bookingPageState extends State<bookingPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Booking Page'),
-    );
-  }
-}
 
-// message
-class messagePage extends StatelessWidget {
-  const messagePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Message Page'),
-    );
-  }
-}
 
-// profile
-class profilePage extends StatefulWidget {
-  const profilePage({super.key});
-
-  @override
-  State<profilePage> createState() => _profilePageState();
-}
-
-class _profilePageState extends State<profilePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text('Profile Page'),
-      ),
-    );
-  }
-}

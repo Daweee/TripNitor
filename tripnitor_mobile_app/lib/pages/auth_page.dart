@@ -23,7 +23,7 @@ class AuthPage extends ConsumerWidget {
     //     return AdminPage();
       case 'USER':
         print(authState.user?.role);
-        return MyHomePage(); // previously HomePage()
+        return MyHomePage(); // previously HomePage() for user
       case 'DRIVER':
         print(authState.user?.role);
         return DriverHomepage();
