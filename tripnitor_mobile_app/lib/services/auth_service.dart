@@ -8,6 +8,19 @@ import 'token_service.dart';
 class AuthService {
     final Dio _dio = Dio();
 
+    AuthService() {
+        _dio.interceptors.add(InterceptorsWrapper(
+            onRequest: (options, handler) async {
+                final accessToken = await tokenService.getAccessToken();
+                    if (accessToken != null) {
+                        options.headers['Authorization'] = 'Bearer $accessToken';
+                    }
+                return handler.next(options);
+            },
+        ),
+        );
+    }
+
     Future<Map<String, dynamic>> login(String username, String password) async {
         try {
             final response = await _dio.post('${HTTPConstants.BASE_URL}api/users/login/', 
