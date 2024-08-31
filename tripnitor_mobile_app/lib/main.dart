@@ -29,9 +29,12 @@ class MyApp extends ConsumerWidget  {
         useMaterial3: true,
       ),
       // home: LoginPage(),
-      //home: RegistrationPage(),
+      // home: RegistrationPage(),
       home: authState.isAuthenticated ? AuthPage() : LoginPage(),
       //home: PackageTrips(),
+      // home: HomePage(),
+
+      
     );
   }
 }

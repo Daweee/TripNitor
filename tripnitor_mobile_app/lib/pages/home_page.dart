@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
+
+final bottomNavIndexProvider = StateProvider((ref) => 0); // riverpod
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,34 +13,41 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  int currentPage = 0;
+
   @override
   Widget build(BuildContext context) {
+    //, WidgetRef ref
     return Scaffold(
-      body: _buildUI(),
+      body: _buildPage(currentPage), // pages[currentPage],//_buildUI(),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.shifting, // .fixed
+        currentIndex: currentPage,
+        type: BottomNavigationBarType.fixed, // .fixed; .shifting;
         selectedItemColor: Colors.deepOrange, // backgroundColor: Colors.black,
         unselectedItemColor: Colors.black,
         onTap: (value) {
-          // setState(() {
-
-          // });
+          setState(
+            () {
+              currentPage = value;
+            },
+          );
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home), // 0
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: Icon(Icons.book), // 1
             label: "Bookings",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_rounded),
+            icon: Icon(Icons.chat_rounded), // 2
             label: "Message",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person), // 3
             label: 'Profile',
           ),
         ],
@@ -45,8 +55,42 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildPage(int index) {
+    switch (index) {
+      case 0:
+        //return HomePage();
+        return MyHomePage();
+      case 1:
+        return bookingPage();
+      case 2:
+        return messagePage();
+      case 3:
+        return profilePage();
+      default:
+        return bookingPage();
+    }
+  }
+}
+
+// Home Page
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _buildUI(),
+    );
+  }
+
   Widget _buildUI() {
-    return Column( // SafeArea()
+    return Column(
+      // SafeArea()
       children: [
         _header(),
         _vanCard(),
@@ -101,18 +145,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          // Container(
-          //   // width: MediaQuery.of(context).size.width,
-          //   // height: MediaQuery.of(context).size.height * .40,
-          //   //color: Colors.deepOrange,
-          //   child: Center(
-          //     child: Image(
-          //       image: AssetImage(
-          //         'assets/images/homepage_images.png',
-          //       ),
-          //     ),
-          //   ),
-          // ),
+          
         ],
       ),
     );
@@ -145,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
-                children: [
+                children: const [
                   Expanded(
                     child: Image(
                       image: AssetImage('assets/images/ph_van-fill.png'),
@@ -161,6 +194,54 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// booking
+class bookingPage extends StatefulWidget {
+  const bookingPage({super.key});
+
+  @override
+  State<bookingPage> createState() => _bookingPageState();
+}
+
+class _bookingPageState extends State<bookingPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Booking Page'),
+    );
+  }
+}
+
+// message
+class messagePage extends StatelessWidget {
+  const messagePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Message Page'),
+    );
+  }
+}
+
+// profile
+class profilePage extends StatefulWidget {
+  const profilePage({super.key});
+
+  @override
+  State<profilePage> createState() => _profilePageState();
+}
+
+class _profilePageState extends State<profilePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text('Profile Page'),
       ),
     );
   }

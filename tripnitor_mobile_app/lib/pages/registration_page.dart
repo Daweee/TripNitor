@@ -10,8 +10,10 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 //   final TextEditingController _passwordController = TextEditingController();
 
@@ -19,8 +21,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
-      body: _buildUI(context),
+      //appBar: AppBar(),
+      body: Container(
+        padding: EdgeInsets.only(top: 80),
+        child: _buildUI(context),
+      ),
     );
   }
 
@@ -34,7 +39,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
         // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Container(
-            padding: EdgeInsets.only(top: 30, bottom: 60,),
+            padding: EdgeInsets.only(
+              top: 30,
+              bottom: 60,
+            ),
             child: _headerText(context),
           ),
           _registrationForm(context),
@@ -46,7 +54,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget _headerText(BuildContext context) {
     return Container(
       child: Text(
-        "Geting Started",
+        "Getting Started",
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.bold,
@@ -60,6 +68,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
       child: Column(
         children: [
           CustomeFormField(
+            hintText: "Username",
+            height: MediaQuery.sizeOf(context).height * .1,
+            controller: _usernameController,
+          ),
+          CustomeFormField(
             hintText: "Name",
             height: MediaQuery.sizeOf(context).height * .1,
             controller: _nameController,
@@ -70,17 +83,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
             controller: _emailController,
           ),
           CustomeFormField(
+            hintText: "Phone Number",
+            height: MediaQuery.sizeOf(context).height * .1,
+            controller: _phoneNumberController,
+          ),
+          CustomeFormField(
             hintText: "Password",
             obscureText: true,
             height: MediaQuery.sizeOf(context).height * .1,
             controller: _passwordController,
           ),
-        //   CustomeFormField(
-        //     hintText: "Confirm Password",
-        //     height: MediaQuery.sizeOf(context).height * .1,
-        //     obscureText: true,
-        //     controller: _passwordController,
-        //   ),
+          //   CustomeFormField(
+          //     hintText: "Confirm Password",
+          //     height: MediaQuery.sizeOf(context).height * .1,
+          //     obscureText: true,
+          //     controller: _passwordController,
+          //   ),
           _registrationButton(),
           // Text('Testing'),
           _AlreadyHaveAnAccount(),
