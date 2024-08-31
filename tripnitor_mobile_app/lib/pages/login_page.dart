@@ -5,6 +5,7 @@ import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
 import '../providers/auth_provider.dart';
+import 'auth_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -14,16 +15,16 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  Color backgroundColor = Colors.deepOrange; //0xE5842A 0xFFF2D9
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         children: [
           _header(),
           _loginForm(),
-          //_registerAccountLink(),
         ],
       ),
     );
@@ -53,7 +53,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * .40,
-      //color: Colors.deepOrange,
       child: Center(
         child: Image(
           image: AssetImage(
@@ -65,13 +64,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _loginForm() {
-    return Container(
-      width: MediaQuery.of(context).size.width * .75, // .75
-      margin: EdgeInsets.symmetric(
-        vertical: MediaQuery.sizeOf(context).height * .05, // .05
-      ),
-      height: MediaQuery.of(context).size.height * .35, // .1
-      child: Form(
+    return Form(
+      key: _formKey, 
+      child: Container(
+        width: MediaQuery.of(context).size.width * .75,
+        margin: EdgeInsets.symmetric(
+          vertical: MediaQuery.sizeOf(context).height * .05,
+        ),
+        height: MediaQuery.sizeOf(context).height * .35,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -79,18 +79,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               hintText: "Username",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _usernameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a username';
+                }
+                return null;
+              },
             ),
             CustomeFormField(
               hintText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
               obscureText: true,
               controller: _passwordController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
+                }
+                return null;
+              }
             ),
             Container(
               padding: EdgeInsets.all(10),
               child: _loginButton(),
             ),
-            Container(child: _registerAccountLink()),
+            _registerAccountLink(),
           ],
         ),
       ),
@@ -109,12 +121,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             height: MediaQuery.sizeOf(context).height * .05,
             child: MaterialButton(
               onPressed: () async {
-                    final authNotifier = ref.read(authProvider.notifier);
-                    await authNotifier.login(
-                      _usernameController.text,
-                      _passwordController.text,
-                    );
-                  },
+                if (_formKey.currentState!.validate()) {
+                  final authNotifier = ref.read(authProvider.notifier);
+                  await authNotifier.login(
+                    _usernameController.text.trim(),
+                    _passwordController.text.trim(),
+                  );
+
+                   if (ref.read(authProvider).isAuthenticated) {
+                     Navigator.pushReplacement(
+                       context,
+                       MaterialPageRoute(builder: (context) => const AuthPage()),
+                     );
+                   } else {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(content: Text('Login failed. Please try again.')),
+                     );
+                   }
+                }
+              },
               color: Theme.of(context).colorScheme.primary,
               child: Text(
                 'Login',
@@ -139,9 +164,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           const Text('Don\'t have an account? '),
           GestureDetector(
             onTap: () {
-              // _navigationService
-              //     .pushNamed("/register"); // navigate to register page
-              //print('Button is being clicked');
               Navigator.push(
                 context,
                 MaterialPageRoute(

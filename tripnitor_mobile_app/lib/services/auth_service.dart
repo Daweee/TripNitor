@@ -11,15 +11,16 @@ class AuthService {
     Future<Map<String, dynamic>> login(String username, String password) async {
         try {
             final response = await _dio.post('${HTTPConstants.BASE_URL}api/users/login/', 
-            data: {
+                data: {
                 'username': username,
                 'password': password,
                 });
             await tokenService.saveTokens(
+                response.data['data']['user']['id'],
                 response.data['data']['token']['access'],
                 response.data['data']['token']['refresh']
             );
-                return response.data;
+            return response.data;
         } catch (e) {
             throw Exception('Failed to login: $e');
         }
@@ -38,6 +39,18 @@ class AuthService {
             return response.data;
         } catch (e) {
             throw Exception('Failed to register: $e');
+        }
+    }
+
+    Future<Map<String, dynamic>> logout(String refreshToken) async {
+        try {
+            final response = await _dio.post('${HTTPConstants.BASE_URL}api/users/logout/',
+            data: {
+                'refresh': refreshToken,
+            });
+            return {};
+        } catch (e) {
+            throw Exception('Failed to logout: $e');
         }
     }
 }

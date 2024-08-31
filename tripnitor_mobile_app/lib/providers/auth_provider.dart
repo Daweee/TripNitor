@@ -12,9 +12,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
         final response = await _authService.login(username, password);
         final user = User.fromJson(response);
-        state = AuthState(user: user, isAuthenticated: true, isLoading: false);
+        state = AuthState(user: user, isAuthenticated: true, isLoading: false, error: '');
     } catch (e) {
-        state = AuthState(isAuthenticated: false, isLoading: false);
+        state = AuthState(isAuthenticated: false, isLoading: false, error: e.toString());
     }
   }
 
@@ -28,6 +28,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState(isAuthenticated: false, isLoading: false, error: e.toString());
     }
   }
+    Future<void> logout(String refreshToken) async {
+        state = state.copyWith(isLoading: true);
+        try {
+            final response = await _authService.logout(refreshToken);
+            state = AuthState(isAuthenticated: false, isLoading: false, error: null);
+        } catch (e) {
+            state = AuthState(isAuthenticated: true, isLoading: false, error: e.toString());
+        }
+    }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

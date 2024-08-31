@@ -1,28 +1,39 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
-class RegistrationPage extends StatefulWidget {
+import '../providers/auth_provider.dart';
+import 'auth_page.dart';
+
+class RegistrationPage extends ConsumerStatefulWidget {
   const RegistrationPage({super.key});
 
   @override
-  State<RegistrationPage> createState() => _RegistrationPageState();
+  ConsumerState<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-//   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       //appBar: AppBar(),
-      body: Container(
+      body: authState.isLoading
+          ? Center(child: CircularProgressIndicator()) 
+          : Container(
         padding: EdgeInsets.only(top: 20),
         child: _buildUI(context),
       ),
@@ -65,43 +76,95 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   Widget _registrationForm(BuildContext context) {
     return SingleChildScrollView(
-      child: Container(
+      child: Form(
+        key: _formKey, 
         child: Column(
           children: [
             CustomeFormField(
               hintText: "Username",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _usernameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a username';
+                }
+                return null;
+              },
             ),
             CustomeFormField(
               hintText: "Name",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _nameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                  return 'Please enter a valid name (letters only!)';
+                }
+                return null;
+              },
             ),
             CustomeFormField(
-              hintText: "Email Adress",
+              hintText: "Email Address",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _emailController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                if (!RegExp(r"^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$")
+                    .hasMatch(value)) {
+                  return 'Please enter a valid email address';
+                }
+                return null;
+              },
             ),
             CustomeFormField(
               hintText: "Phone Number",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _phoneNumberController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your phone number';
+                }
+                if (!RegExp(r'^\d{11,}$').hasMatch(value)) {
+                  return 'Please enter a valid phone number';
+                }
+                return null;
+              },
             ),
             CustomeFormField(
               hintText: "Password",
               obscureText: true,
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _passwordController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
             ),
-              CustomeFormField(
-                hintText: "Confirm Password",
-                height: MediaQuery.sizeOf(context).height * .1,
-                obscureText: true,
-                controller: _passwordController,
-              ),
+            CustomeFormField(
+              hintText: "Confirm Password",
+              obscureText: true,
+              height: MediaQuery.sizeOf(context).height * .1,
+              controller: _confirmPasswordController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please confirm your password';
+                }
+                if (value != _passwordController.text) {
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
+            ),
             _registrationButton(),
-            // Text('Testing'),
             _AlreadyHaveAnAccount(),
           ],
         ),
@@ -111,15 +174,36 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   Widget _registrationButton() {
     return Padding(
-      padding: EdgeInsets.only(
-        top: 10,
-        bottom: 30,
-      ),
+      padding: EdgeInsets.only(top: 10, bottom: 30),
       child: SizedBox(
         width: MediaQuery.sizeOf(context).width,
         height: 60,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              final authNotifier = ref.read(authProvider.notifier);
+              await authNotifier.register(
+                _usernameController.text.trim(),
+                _nameController.text.trim(),
+                _emailController.text.trim(),
+                _phoneNumberController.text.trim(),
+                _passwordController.text.trim(),
+              );
+
+              final authState = ref.read(authProvider);
+
+              if (authState.isAuthenticated) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const AuthPage()),
+              );
+            } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Registration failed. Please try again.')),
+                );
+              }
+            }
+          },
           child: Text('Register'),
         ),
       ),
