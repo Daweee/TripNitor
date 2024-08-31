@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 
-class ProfilePage extends StatefulWidget {
+import '../../providers/auth_provider.dart';
+import '../../services/token_service.dart';
+
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    
     return Scaffold(
       appBar: AppBar(
         title: Padding(
@@ -20,7 +26,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      body: _buildUI(),
+      body: authState.isLoading
+          ? Center(child: CircularProgressIndicator()) 
+          : _buildUI(),
     );
   }
 
@@ -38,13 +46,34 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             Expanded(
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LoginPage(), // subject to change
-                    ),
-                  );
+                onTap: () async {
+                  final authNotifier = ref.read(authProvider.notifier);
+                  
+                  try {
+                    final refreshToken = await tokenService.getRefreshToken();
+                    if (refreshToken != null) {
+                        await authNotifier.logout(refreshToken);
+                        await tokenService.deleteTokens();
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginPage()),
+                          );
+                        }
+                    } else {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('No refresh token found.')),
+                        );
+                      }
+                    }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Logout failed: ${e.toString()}')),
+                        );
+                      }
+                    }
                 },
                 child: Text('Log Out'),
               ),

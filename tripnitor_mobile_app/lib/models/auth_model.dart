@@ -39,22 +39,26 @@ class AuthState {
   final User? user;
   final bool isAuthenticated;
   final bool isLoading;
+  final String? error;
 
   AuthState({
-    this.user, 
+    this.user,
     this.isAuthenticated = false,
     this.isLoading = false,
+    this.error,
   });
 
   AuthState copyWith({
     User? user,
     bool? isAuthenticated,
     bool? isLoading,
+    String? error,
   }) {
     return AuthState(
       user: user ?? this.user,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
     );
   }
 }
