@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
+import '../constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
 
@@ -28,29 +29,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: authState.isLoading
-          ? Center(child: CircularProgressIndicator()) 
-          : _buildUI(context),
+      body: _buildUI(context),
     );
   }
 
   Widget _buildUI(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        children: [
-          _header(),
-          _loginForm(),
-        ],
+    return Container(
+        color: Color(ColorConstants.BACKGROUND_COLOR),
+      child: SafeArea(
+        child: Column(
+          children: [
+            _header(),
+            _loginForm(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _header() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * .40,
       child: Center(
@@ -76,7 +77,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           mainAxisSize: MainAxisSize.max,
           children: [
             CustomeFormField(
-              hintText: "Username",
+              labelText: "Username",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _usernameController,
               validator: (value) {
@@ -87,7 +88,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               },
             ),
             CustomeFormField(
-              hintText: "Password",
+              labelText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
               obscureText: true,
               controller: _passwordController,
@@ -110,16 +111,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _loginButton() {
+    final authState = ref.watch(authProvider);
+
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(1),
+                offset: Offset(5, 5),
+                blurRadius: 10,
+              ),
+            ],
             borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
             width: MediaQuery.sizeOf(context).width,
-            height: MediaQuery.sizeOf(context).height * .05,
-            child: MaterialButton(
+            height: MediaQuery.sizeOf(context).height * .06,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+              ),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   final authNotifier = ref.read(authProvider.notifier);
@@ -140,13 +153,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                    }
                 }
               },
-              color: Theme.of(context).colorScheme.primary,
-              child: Text(
-                'Login',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
+              child: authState.isLoading
+                ? Center(
+                        child: SizedBox(
+                            width: 25.0,  
+                            height: 25.0, 
+                            child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3.0,
+                            ),
+                        ),
+                    ) 
+                : Text(
+                        'Login',
+                        style: TextStyle(
+                        color: Colors.white,
+                        ),
+                    ),
             ),
           ),
         ),

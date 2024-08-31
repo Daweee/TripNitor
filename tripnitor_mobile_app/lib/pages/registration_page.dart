@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
+import '../constants/constant.dart';
+import '../constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
 
@@ -30,7 +32,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      //appBar: AppBar(),
+      backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: authState.isLoading
           ? Center(child: CircularProgressIndicator()) 
           : Container(
@@ -81,7 +83,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         child: Column(
           children: [
             CustomeFormField(
-              hintText: "Username",
+              labelText: "Username",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _usernameController,
               validator: (value) {
@@ -92,7 +94,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             CustomeFormField(
-              hintText: "Name",
+              labelText: "Name",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _nameController,
               validator: (value) {
@@ -106,7 +108,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             CustomeFormField(
-              hintText: "Email Address",
+              labelText: "Email Address",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _emailController,
               validator: (value) {
@@ -121,7 +123,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             CustomeFormField(
-              hintText: "Phone Number",
+              labelText: "Phone Number",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _phoneNumberController,
               validator: (value) {
@@ -135,7 +137,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             CustomeFormField(
-              hintText: "Password",
+              labelText: "Password",
               obscureText: true,
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _passwordController,
@@ -150,7 +152,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             CustomeFormField(
-              hintText: "Confirm Password",
+              labelText: "Confirm Password",
               obscureText: true,
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _confirmPasswordController,
@@ -165,6 +167,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             _registrationButton(),
+            SizedBox(height: 30,),
             _AlreadyHaveAnAccount(),
           ],
         ),
@@ -173,13 +176,29 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   }
 
   Widget _registrationButton() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 30),
-      child: SizedBox(
-        width: MediaQuery.sizeOf(context).width,
-        height: 60,
-        child: ElevatedButton(
-          onPressed: () async {
+    final authState = ref.watch(authProvider);
+    
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(1),
+                offset: Offset(5, 5),
+                blurRadius: 10,
+              ),
+            ],
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: SizedBox(
+            width: MediaQuery.sizeOf(context).width ,
+            height: MediaQuery.sizeOf(context).height * .06,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+              onPressed: () async {
             if (_formKey.currentState!.validate()) {
               final authNotifier = ref.read(authProvider.notifier);
               await authNotifier.register(
@@ -189,9 +208,9 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 _phoneNumberController.text.trim(),
                 _passwordController.text.trim(),
               );
-
+    
               final authState = ref.read(authProvider);
-
+    
               if (authState.isAuthenticated) {
               Navigator.pushReplacement(
                 context,
@@ -204,9 +223,27 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               }
             }
           },
-          child: Text('Register'),
+              child: authState.isLoading
+          ? Center(
+                child: SizedBox(
+                    width: 25.0,  
+                    height: 25.0, 
+                    child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3.0,
+                    ),
+                ),
+            ) 
+          : Text(
+                'Register',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
