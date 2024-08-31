@@ -17,6 +17,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState(isAuthenticated: false, isLoading: false);
     }
   }
+
+  Future<void> register(String username, String name, String email, String phoneNumber, String password) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final response = await _authService.register(username, name, email, phoneNumber, password);
+      final user = User.fromJson(response);
+      state = AuthState(user: user, isAuthenticated: true, isLoading: false, error: '');
+    } catch (e) {
+      state = AuthState(isAuthenticated: false, isLoading: false, error: e.toString());
+    }
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
