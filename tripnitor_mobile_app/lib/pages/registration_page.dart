@@ -191,6 +191,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             _AlreadyHaveAnAccount(),
           ],
         ),
+//>>>>>>> 76b73bb0c9fab4cc093c88fa2a171457cc0d0417
       ),
     );
   }
