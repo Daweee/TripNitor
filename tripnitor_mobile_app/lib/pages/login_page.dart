@@ -16,11 +16,9 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-<<<<<<<<< Temporary merge branch 1
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-=========
 
   var _isObscured;
 
@@ -37,22 +35,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _passwordController.dispose();
     super.dispose();
   }
-<<<<<<<<< Temporary merge branch 1
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController _usernameController = TextEditingController();
+    final TextEditingController _passwordController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
 
-=========
-
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  
-
-  @override
-  Widget build(BuildContext context) {
->>>>>>>>> Temporary merge branch 2
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: _buildUI(context),
@@ -61,11 +50,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildUI(BuildContext context) {
     return Container(
-<<<<<<<<< Temporary merge branch 1
-        color: Color(ColorConstants.BACKGROUND_COLOR),
-=========
       color: Color(ColorConstants.BACKGROUND_COLOR),
->>>>>>>>> Temporary merge branch 2
       child: SafeArea(
         child: Column(
           children: [
@@ -93,11 +78,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _loginForm() {
     return Form(
-<<<<<<<<< Temporary merge branch 1
-      key: _formKey, 
-=========
       key: _formKey,
->>>>>>>>> Temporary merge branch 2
       child: Container(
         width: MediaQuery.of(context).size.width * .75,
         margin: EdgeInsets.symmetric(
@@ -118,78 +99,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 return null;
               },
             ),
-<<<<<<<<< Temporary merge branch 1
+
             CustomeFormField(
               labelText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
-              obscureText: true,
+              obscureText: _isObscured,
               controller: _passwordController,
+              isPassword: true,
+              onToggleObscureText: () {
+                setState(() {
+                  _isObscured = !_isObscured;
+                });
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a password';
                 }
                 return null;
-              }
-=========
-            SizedBox(
-              // Login password
-              height: MediaQuery.sizeOf(context).height * .1,
-              child: TextFormField(
-                controller: _passwordController,
-                obscureText: _isObscured, // false
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isObscured = !_isObscured;
-                      });
-                    },
-                    icon: _isObscured
-                        ? const Icon(Icons.visibility)
-                        : const Icon(Icons.visibility_off),
-                  ),
-                  labelText: "Password",
-                  labelStyle: TextStyle(
-                    color: Colors.black
-                        .withOpacity(.5), // Change the label text color here
-                  ),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
->>>>>>>>> Temporary merge branch 2
+              },
             ),
-            // CustomeFormField(
-            //   labelText: "Password",
-            //   height: MediaQuery.sizeOf(context).height * .1,
-            //   obscureText: true,
-            //   controller: _passwordController,
-            //   validator: (value) {
-            //     if (value == null || value.isEmpty) {
-            //       return 'Please enter a password';
-            //     }
-            //     return null;
-            //   }
-            // ),
+
+           
             Container(
               padding: EdgeInsets.all(10),
               child: _loginButton(),
@@ -232,36 +162,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     _passwordController.text.trim(),
                   );
 
-<<<<<<<<< Temporary merge branch 1
-                   if (ref.read(authProvider).isAuthenticated) {
-                     Navigator.pushReplacement(
-                       context,
-                       MaterialPageRoute(builder: (context) => const AuthPage()),
-                     );
-                   } else {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                       SnackBar(content: Text('Login failed. Please try again.')),
-                     );
-                   }
-                }
-              },
-              child: authState.isLoading
-                ? Center(
-                        child: SizedBox(
-                            width: 25.0,  
-                            height: 25.0, 
-                            child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3.0,
-                            ),
-                        ),
-                    ) 
-                : Text(
-                        'Login',
-                        style: TextStyle(
-                        color: Colors.white,
-                        ),
-=========
                   if (ref.read(authProvider).isAuthenticated) {
                     Navigator.pushReplacement(
                       context,
@@ -291,7 +191,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       style: TextStyle(
                         color: Colors.white,
                       ),
->>>>>>>>> Temporary merge branch 2
                     ),
             ),
           ),
