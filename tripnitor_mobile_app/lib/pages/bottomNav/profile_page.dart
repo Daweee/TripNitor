@@ -15,7 +15,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -26,20 +25,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
       ),
-      body: authState.isLoading
-          ? Center(child: CircularProgressIndicator()) 
-          : _buildUI(),
+      body: _buildUI(),
     );
   }
 
   Widget _buildUI() {
+    final authState = ref.watch(authProvider);
+
     return Container(
       padding: EdgeInsets.all(20),
       child: Center(
         child: Column(
           children: [
             CircleAvatar(),
-            Text('Settings'),
+            Text('${authState.user?.name}'),
             Text('Billing Details'),
             SizedBox(
               height: 90,
@@ -75,7 +74,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       }
                     }
                 },
-                child: Text('Log Out'),
+                child: authState.isLoading
+                ? Center(
+                        child: SizedBox(
+                            width: 25.0,  
+                            height: 25.0, 
+                            child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3.0,
+                            ),
+                        ),
+                    )
+                : Text('Log Out'),
               ),
             ),
           ],

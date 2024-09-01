@@ -2,7 +2,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
@@ -10,6 +9,8 @@ import '../constants/constant.dart';
 import '../constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
+import 'home_page.dart';
+import 'login_page.dart';
 
 class RegistrationPage extends ConsumerStatefulWidget {
   const RegistrationPage({super.key});
@@ -19,38 +20,26 @@ class RegistrationPage extends ConsumerStatefulWidget {
 }
 
 class _RegistrationPageState extends ConsumerState<RegistrationPage> {
-  var _isObscure, _isObscured;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _isObscure = true; // password
-    _isObscured = true; // confirm password
-  }
-
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: authState.isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              padding: EdgeInsets.only(top: 20),
-              child: _buildUI(context),
-            ),
+      body: Container(
+        padding: EdgeInsets.only(top: 20),
+        child: _buildUI(context),
+      ),
     );
   }
 
@@ -91,7 +80,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   Widget _registrationForm(BuildContext context) {
     return SingleChildScrollView(
       child: Form(
-        key: _formKey,
+        key: _formKey, 
         child: Column(
           children: [
             CustomeFormField(
@@ -148,102 +137,50 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 return null;
               },
             ),
-            SizedBox(
-              // password
+            CustomeFormField(
+              labelText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
-              child: TextFormField(
-                controller: _passwordController,
-                obscureText: _isObscure, // false
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isObscure = !_isObscure;
-                      });
-                    },
-                    icon: _isObscure
-                        ? const Icon(Icons.visibility)
-                        : const Icon(Icons.visibility_off),
-                  ),
-                  labelText: "Password",
-                  labelStyle: TextStyle(
-                    color: Colors.black
-                        .withOpacity(.5), // Change the label text color here
-                  ),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
+              obscureText: _isPasswordObscured,
+              controller: _passwordController,
+              isPassword: true,
+              onToggleObscureText: () {
+                setState(() {
+                  _isPasswordObscured = !_isPasswordObscured;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
             ),
-            SizedBox(
-              // confirm password
+            CustomeFormField(
+              labelText: "Confirm Password",
               height: MediaQuery.sizeOf(context).height * .1,
-              child: TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _isObscured, // false
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isObscured = !_isObscured;
-                      });
-                    },
-                    icon: _isObscured
-                        ? const Icon(Icons.visibility)
-                        : const Icon(Icons.visibility_off),
-                  ),
-                  labelText: "Confirm Password",
-                  labelStyle: TextStyle(
-                    color: Colors.black
-                        .withOpacity(.5), // Change the label text color here
-                  ),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm your password';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
-              ),
+              controller: _confirmPasswordController,
+              obscureText: _isConfirmPasswordObscured,
+              isPassword: true,
+              onToggleObscureText: () {
+                setState(() {
+                  _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please confirm your password';
+                }
+                if (value != _passwordController.text) {
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
             ),
             _registrationButton(),
-            SizedBox(
-              height: 30,
-            ),
+            SizedBox(height: 30,),
             _AlreadyHaveAnAccount(),
           ],
         ),
@@ -254,7 +191,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   Widget _registrationButton() {
     final authState = ref.watch(authProvider);
-
+    
     return Column(
       children: [
         Container(
@@ -269,14 +206,15 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
-            width: MediaQuery.sizeOf(context).width,
+            width: MediaQuery.sizeOf(context).width ,
             height: MediaQuery.sizeOf(context).height * .06,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
               ),
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
+              if (_formKey.currentState!.validate()) {
+                try {
                   final authNotifier = ref.read(authProvider.notifier);
                   await authNotifier.register(
                     _usernameController.text.trim(),
@@ -286,39 +224,66 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                     _passwordController.text.trim(),
                   );
 
-                  final authState = ref.read(authProvider);
+                  // Check the authentication state after registration
+                  final updatedAuthState = ref.read(authProvider);
+                  print("Registration completed. isAuthenticated: ${updatedAuthState.isAuthenticated}");
 
-                  if (authState.isAuthenticated) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AuthPage()),
+                  if (updatedAuthState.error == null || updatedAuthState.error!.isEmpty) {
+                    // Registration successful, attempt automatic login
+                    await authNotifier.login(
+                      _usernameController.text.trim(),
+                      _passwordController.text.trim(),
                     );
+                    
+                    final loginState = ref.read(authProvider);
+                    if (loginState.isAuthenticated) {
+                      // Login successful, navigate to home page
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomePage()), // Replace with your actual HomePage
+                      );
+                    } else {
+                      // Login failed, show message and navigate to login page
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Registration successful. Please log in.')),
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your actual LoginPage
+                      );
+                    }
                   } else {
+                    // Registration failed
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Registration failed. Please try again.')),
+                      SnackBar(content: Text(updatedAuthState.error ?? 'Registration failed. Please try again.')),
                     );
                   }
+                } catch (e) {
+                  // Handle any exceptions
+                  print("Error during registration or login: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('An error occurred. Please try again.')),
+                  );
                 }
-              },
+              }
+            },
               child: authState.isLoading
-                  ? Center(
-                      child: SizedBox(
-                        width: 25.0,
-                        height: 25.0,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3.0,
-                        ),
-                      ),
-                    )
-                  : Text(
-                      'Register',
-                      style: TextStyle(
+          ? Center(
+                child: SizedBox(
+                    width: 25.0,  
+                    height: 25.0, 
+                    child: CircularProgressIndicator(
                         color: Colors.white,
-                      ),
+                        strokeWidth: 3.0,
                     ),
+                ),
+            ) 
+          : Text(
+                'Register',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ),
