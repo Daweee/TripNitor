@@ -113,18 +113,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 return null;
               },
             ),
-            // CustomeFormField(
-            //   labelText: "Password",
-            //   height: MediaQuery.sizeOf(context).height * .1,
-            //   obscureText: true,
-            //   controller: _passwordController,
-            //   validator: (value) {
-            //     if (value == null || value.isEmpty) {
-            //       return 'Please enter a password';
-            //     }
-            //     return null;
-            //   }
-            // ),
             Container(
               padding: EdgeInsets.all(10),
               child: _loginButton(),
