@@ -8,6 +8,8 @@ class CustomeFormField extends StatelessWidget {
   final bool obscureText;
   final TextEditingController controller;
   final String? Function(String?)? validator; 
+  final VoidCallback? onToggleObscureText;
+  final bool isPassword;
 
   const CustomeFormField({
     super.key,
@@ -16,6 +18,8 @@ class CustomeFormField extends StatelessWidget {
     this.obscureText = false,
     required this.controller,
     this.validator,
+    this.onToggleObscureText,
+    this.isPassword = false,
   });
 
   @override
@@ -28,21 +32,30 @@ class CustomeFormField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: TextStyle(
-                color: Colors.black.withOpacity(.5),// Change the label text color here
-              ),
+            color: Colors.black.withOpacity(.5),
+          ),
           border: OutlineInputBorder(),
           enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Color(ColorConstants.SECONDARY_COLOR),
-                ),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
             ),
-          focusedBorder:  OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Color(ColorConstants.SECONDARY_COLOR),
-                    width: 2.0,    
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 2.0,
             ),
+          ),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.black.withOpacity(.5),
+                  ),
+                  onPressed: onToggleObscureText,
+                )
+              : null,
         ),
-      ),
         validator: validator,
       ),
     );

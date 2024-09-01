@@ -19,6 +19,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  var _isObscured = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _isObscured = true;
+  }
 
   @override
   void dispose() {
@@ -90,14 +98,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             CustomeFormField(
               labelText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
-              obscureText: true,
+              obscureText: _isObscured,
               controller: _passwordController,
+              isPassword: true,
+              onToggleObscureText: () {
+                setState(() {
+                  _isObscured = !_isObscured;
+                });
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a password';
                 }
                 return null;
-              }
+              },
             ),
             Container(
               padding: EdgeInsets.all(10),

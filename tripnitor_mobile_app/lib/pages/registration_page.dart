@@ -25,6 +25,14 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  var _isObscured = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _isObscured = true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +146,15 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             ),
             CustomeFormField(
               labelText: "Password",
-              obscureText: true,
               height: MediaQuery.sizeOf(context).height * .1,
+              obscureText: _isObscured,
               controller: _passwordController,
+              isPassword: true,
+              onToggleObscureText: () {
+                setState(() {
+                  _isObscured = !_isObscured;
+                });
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a password';
@@ -153,9 +167,15 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             ),
             CustomeFormField(
               labelText: "Confirm Password",
-              obscureText: true,
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _confirmPasswordController,
+              obscureText: _isObscured,
+              isPassword: true,
+              onToggleObscureText: () {
+                setState(() {
+                  _isObscured = !_isObscured;
+                });
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please confirm your password';
