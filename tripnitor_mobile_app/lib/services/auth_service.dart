@@ -28,11 +28,7 @@ class AuthService {
                 'username': username,
                 'password': password,
                 });
-            await tokenService.saveTokens(
-                response.data['data']['user']['id'],
-                response.data['data']['token']['access'],
-                response.data['data']['token']['refresh']
-            );
+            await _saveTokens(response.data['data']);
             return response.data;
         } catch (e) {
             throw Exception('Failed to login: $e');
@@ -49,6 +45,11 @@ class AuthService {
                 'phone_number': phoneNumber,
                 'password': password,
             });
+            
+            if (response.statusCode == 201) {
+                return await login(username, password);
+            }
+            
             return response.data;
         } catch (e) {
             throw Exception('Failed to register: $e');
@@ -61,10 +62,19 @@ class AuthService {
             data: {
                 'refresh': refreshToken,
             });
+            await tokenService.deleteTokens();
             return {};
         } catch (e) {
             throw Exception('Failed to logout: $e');
         }
+    }
+
+    Future<void> _saveTokens(Map<String, dynamic> data) async {
+        await tokenService.saveTokens(
+            data['user']['id'],
+            data['token']['access'],
+            data['token']['refresh']
+        );
     }
 }
 

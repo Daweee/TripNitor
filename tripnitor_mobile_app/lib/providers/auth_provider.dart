@@ -37,6 +37,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
             state = AuthState(isAuthenticated: true, isLoading: false, error: e.toString());
         }
     }
+    
+    void clearAuthState() {
+      state = AuthState();
+    }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

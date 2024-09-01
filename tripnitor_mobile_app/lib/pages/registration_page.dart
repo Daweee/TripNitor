@@ -9,6 +9,8 @@ import '../constants/constant.dart';
 import '../constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
+import 'home_page.dart';
+import 'login_page.dart';
 
 class RegistrationPage extends ConsumerStatefulWidget {
   const RegistrationPage({super.key});
@@ -25,25 +27,16 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  var _isObscured = true;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _isObscured = true;
-  }
+  bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: authState.isLoading
-          ? Center(child: CircularProgressIndicator()) 
-          : Container(
+      body: Container(
         padding: EdgeInsets.only(top: 20),
         child: _buildUI(context),
       ),
@@ -147,12 +140,12 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             CustomeFormField(
               labelText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
-              obscureText: _isObscured,
+              obscureText: _isPasswordObscured,
               controller: _passwordController,
               isPassword: true,
               onToggleObscureText: () {
                 setState(() {
-                  _isObscured = !_isObscured;
+                  _isPasswordObscured = !_isPasswordObscured;
                 });
               },
               validator: (value) {
@@ -169,11 +162,11 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               labelText: "Confirm Password",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _confirmPasswordController,
-              obscureText: _isObscured,
+              obscureText: _isConfirmPasswordObscured,
               isPassword: true,
               onToggleObscureText: () {
                 setState(() {
-                  _isObscured = !_isObscured;
+                  _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
                 });
               },
               validator: (value) {
@@ -220,30 +213,60 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
               ),
               onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              final authNotifier = ref.read(authProvider.notifier);
-              await authNotifier.register(
-                _usernameController.text.trim(),
-                _nameController.text.trim(),
-                _emailController.text.trim(),
-                _phoneNumberController.text.trim(),
-                _passwordController.text.trim(),
-              );
-    
-              final authState = ref.read(authProvider);
-    
-              if (authState.isAuthenticated) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const AuthPage()),
-              );
-            } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Registration failed. Please try again.')),
-                );
+              if (_formKey.currentState!.validate()) {
+                try {
+                  final authNotifier = ref.read(authProvider.notifier);
+                  await authNotifier.register(
+                    _usernameController.text.trim(),
+                    _nameController.text.trim(),
+                    _emailController.text.trim(),
+                    _phoneNumberController.text.trim(),
+                    _passwordController.text.trim(),
+                  );
+
+                  // Check the authentication state after registration
+                  final updatedAuthState = ref.read(authProvider);
+                  print("Registration completed. isAuthenticated: ${updatedAuthState.isAuthenticated}");
+
+                  if (updatedAuthState.error == null || updatedAuthState.error!.isEmpty) {
+                    // Registration successful, attempt automatic login
+                    await authNotifier.login(
+                      _usernameController.text.trim(),
+                      _passwordController.text.trim(),
+                    );
+                    
+                    final loginState = ref.read(authProvider);
+                    if (loginState.isAuthenticated) {
+                      // Login successful, navigate to home page
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomePage()), // Replace with your actual HomePage
+                      );
+                    } else {
+                      // Login failed, show message and navigate to login page
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Registration successful. Please log in.')),
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your actual LoginPage
+                      );
+                    }
+                  } else {
+                    // Registration failed
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(updatedAuthState.error ?? 'Registration failed. Please try again.')),
+                    );
+                  }
+                } catch (e) {
+                  // Handle any exceptions
+                  print("Error during registration or login: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('An error occurred. Please try again.')),
+                  );
+                }
               }
-            }
-          },
+            },
               child: authState.isLoading
           ? Center(
                 child: SizedBox(
