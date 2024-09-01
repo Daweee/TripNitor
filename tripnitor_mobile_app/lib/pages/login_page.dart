@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
+import '../constants/constant.dart';
 import '../providers/auth_provider.dart';
+import 'auth_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -14,46 +16,55 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  Color backgroundColor = Colors.deepOrange; //0xE5842A 0xFFF2D9
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+
+  var _isObscured;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _isObscured = true;
+  }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }  
+  }
+
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: authState.isLoading
-          ? Center(child: CircularProgressIndicator()) 
-          : _buildUI(context),
+      body: _buildUI(context),
     );
   }
 
   Widget _buildUI(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        children: [
-          _header(),
-          _loginForm(),
-          //_registerAccountLink(),
-        ],
+    return Container(
+      color: Color(ColorConstants.BACKGROUND_COLOR),
+      child: SafeArea(
+        child: Column(
+          children: [
+            _header(),
+            _loginForm(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _header() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * .40,
-      //color: Colors.deepOrange,
       child: Center(
         child: Image(
           image: AssetImage(
@@ -65,32 +76,91 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _loginForm() {
-    return Container(
-      width: MediaQuery.of(context).size.width * .75, // .75
-      margin: EdgeInsets.symmetric(
-        vertical: MediaQuery.sizeOf(context).height * .05, // .05
-      ),
-      height: MediaQuery.of(context).size.height * .35, // .1
-      child: Form(
+    return Form(
+      key: _formKey,
+      child: Container(
+        width: MediaQuery.of(context).size.width * .75,
+        margin: EdgeInsets.symmetric(
+          vertical: MediaQuery.sizeOf(context).height * .05,
+        ),
+        height: MediaQuery.sizeOf(context).height * .35,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
             CustomeFormField(
-              hintText: "Username",
+              labelText: "Username",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _usernameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a username';
+                }
+                return null;
+              },
             ),
-            CustomeFormField(
-              hintText: "Password",
+            SizedBox(
+              // Login password
               height: MediaQuery.sizeOf(context).height * .1,
-              obscureText: true,
-              controller: _passwordController,
+              child: TextFormField(
+                controller: _passwordController,
+                obscureText: _isObscured, // false
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isObscured = !_isObscured;
+                      });
+                    },
+                    icon: _isObscured
+                        ? const Icon(Icons.visibility)
+                        : const Icon(Icons.visibility_off),
+                  ),
+                  labelText: "Password",
+                  labelStyle: TextStyle(
+                    color: Colors.black
+                        .withOpacity(.5), // Change the label text color here
+                  ),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color(ColorConstants.SECONDARY_COLOR),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color(ColorConstants.SECONDARY_COLOR),
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
             ),
+            // CustomeFormField(
+            //   labelText: "Password",
+            //   height: MediaQuery.sizeOf(context).height * .1,
+            //   obscureText: true,
+            //   controller: _passwordController,
+            //   validator: (value) {
+            //     if (value == null || value.isEmpty) {
+            //       return 'Please enter a password';
+            //     }
+            //     return null;
+            //   }
+            // ),
             Container(
               padding: EdgeInsets.all(10),
               child: _loginButton(),
             ),
-            Container(child: _registerAccountLink()),
+            _registerAccountLink(),
           ],
         ),
       ),
@@ -98,30 +168,66 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _loginButton() {
+    final authState = ref.watch(authProvider);
+
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(1),
+                offset: Offset(5, 5),
+                blurRadius: 10,
+              ),
+            ],
             borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
             width: MediaQuery.sizeOf(context).width,
-            height: MediaQuery.sizeOf(context).height * .05,
-            child: MaterialButton(
-              onPressed: () async {
-                    final authNotifier = ref.read(authProvider.notifier);
-                    await authNotifier.login(
-                      _usernameController.text,
-                      _passwordController.text,
-                    );
-                  },
-              color: Theme.of(context).colorScheme.primary,
-              child: Text(
-                'Login',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+            height: MediaQuery.sizeOf(context).height * .06,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
               ),
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  final authNotifier = ref.read(authProvider.notifier);
+                  await authNotifier.login(
+                    _usernameController.text.trim(),
+                    _passwordController.text.trim(),
+                  );
+
+                  if (ref.read(authProvider).isAuthenticated) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AuthPage()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Login failed. Please try again.')),
+                    );
+                  }
+                }
+              },
+              child: authState.isLoading
+                  ? Center(
+                      child: SizedBox(
+                        width: 25.0,
+                        height: 25.0,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3.0,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -139,9 +245,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           const Text('Don\'t have an account? '),
           GestureDetector(
             onTap: () {
-              // _navigationService
-              //     .pushNamed("/register"); // navigate to register page
-              //print('Button is being clicked');
               Navigator.push(
                 context,
                 MaterialPageRoute(

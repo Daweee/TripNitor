@@ -1,20 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tripnitor_mobile_app/constants/constant.dart';
 
 class CustomeFormField extends StatelessWidget {
-  final String hintText;
+  final String labelText;
   final double height;
-  //final RegExp validationRegEx; // regex
   final bool obscureText;
   final TextEditingController controller;
+  final String? Function(String?)? validator; 
 
   const CustomeFormField({
     super.key,
-    required this.hintText,
+    required this.labelText,
     required this.height,
-    //required this.validationRegEx,
     this.obscureText = false,
     required this.controller,
+    this.validator,
   });
 
   @override
@@ -25,12 +26,25 @@ class CustomeFormField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
-          hintText: hintText,
-          border: OutlineInputBorder()
+          labelText: labelText,
+          labelStyle: TextStyle(
+                color: Colors.black.withOpacity(.5),// Change the label text color here
+              ),
+          border: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: Color(ColorConstants.SECONDARY_COLOR),
+                ),
+            ),
+          focusedBorder:  OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: Color(ColorConstants.SECONDARY_COLOR),
+                    width: 2.0,    
+            ),
         ),
-
       ),
-      
+        validator: validator,
+      ),
     );
   }
 }

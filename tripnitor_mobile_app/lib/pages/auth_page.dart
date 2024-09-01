@@ -12,7 +12,6 @@ class AuthPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    print(authState);
 
     if (authState.user == null) {
       return LoginPage(); // Fallback in case user is null
@@ -23,7 +22,7 @@ class AuthPage extends ConsumerWidget {
     //     return AdminPage();
       case 'USER':
         print(authState.user?.role);
-        return MyHomePage(); // previously HomePage() for user
+        return HomePage(); // previously HomePage() for user
       case 'DRIVER':
         print(authState.user?.role);
         return DriverHomepage();

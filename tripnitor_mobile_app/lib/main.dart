@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import 'pages/auth_page.dart';
 import 'providers/auth_provider.dart';
+import 'constants/constant.dart';
 
 void main() {
   runApp(ProviderScope(
@@ -24,13 +26,14 @@ class MyApp extends ConsumerWidget  {
     return MaterialApp(
       // debugShowCheckedModeBanner: false,
     //   title: 'Login and User Registration',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrangeAccent),
-        useMaterial3: true,
-      ),
+    //   theme: ThemeData(
+    //     primarySwatch: ColorConstants.BACKGROUND_COLOR,
+    //     // colorScheme: ColorScheme.fromSeed(seedColor: Color(ColorConstants.BACKGROUND_COLOR)),
+    //     // useMaterial3: true,
+    //   ),
       // home: LoginPage(),
-      home: RegistrationPage(),
-      // home: authState.isAuthenticated ? AuthPage() : LoginPage(),
+    //   home: RegistrationPage(),
+      home: authState.isAuthenticated ? AuthPage() : LoginPage(),
       //home: PackageTrips(),
       // home: HomePage(),
 

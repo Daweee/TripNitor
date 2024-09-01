@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/bottomNav/booking_page.dart';
 import 'package:tripnitor_mobile_app/pages/bottomNav/message_page.dart';
 import 'package:tripnitor_mobile_app/pages/bottomNav/profile_page.dart';
@@ -24,36 +25,53 @@ class _HomePageState extends State<HomePage> {
     //, WidgetRef ref
     return Scaffold(
       body: _buildPage(currentPage), // pages[currentPage],//_buildUI(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentPage,
-        type: BottomNavigationBarType.fixed, // .fixed; .shifting;
-        selectedItemColor: Colors.deepOrange, // backgroundColor: Colors.black,
-        unselectedItemColor: Colors.black,
-        onTap: (value) {
-          setState(
-            () {
-              currentPage = value;
-            },
-          );
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home), // 0
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book), // 1
-            label: "Bookings",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_rounded), // 2
-            label: "Message",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person), // 3
-            label: 'Profile',
-          ),
-        ],
+      backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+            boxShadow: <BoxShadow>[
+                BoxShadow(
+                color: Colors.grey.withOpacity(1),
+                offset: Offset(0, -4),
+                blurRadius: 5,
+              ),
+            ]
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+          currentIndex: currentPage,
+          type: BottomNavigationBarType.fixed, // .fixed; .shifting;
+          selectedItemColor: Colors.black, // backgroundColor: Colors.black,
+          unselectedItemColor: Colors.black,
+          onTap: (value) {
+            setState(
+              () {
+                currentPage = value;
+              },
+            );
+          },
+          items: const [
+            BottomNavigationBarItem(
+              activeIcon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined), // 0
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              activeIcon: Icon(Icons.book),
+              icon: Icon(Icons.book_outlined), // 1
+              label: "Bookings",
+            ),
+            BottomNavigationBarItem(
+              activeIcon: Icon(Icons.chat_bubble),
+              icon: Icon(Icons.chat_bubble_outline_rounded), // 2
+              label: "Message",
+            ),
+            BottomNavigationBarItem(
+              activeIcon: Icon(Icons.person),
+              icon: Icon(Icons.person_outlined), // 3
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -87,6 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: _buildUI(),
     );
   }
@@ -108,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height * .20,
-            color: Colors.deepOrange,
+            color: Color(ColorConstants.PRIMARY_COLOR),
             child: Row(
               children: [
                 Expanded(
@@ -177,7 +196,14 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 150,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.deepOrange,
+                boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(1),
+                        offset: Offset(0, 4),
+                        blurRadius: 10,
+                    ),
+                ],
+                color: Color(ColorConstants.TERTIARY_COLOR),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(

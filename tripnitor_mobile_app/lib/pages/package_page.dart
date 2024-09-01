@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tripnitor_mobile_app/constants/constant.dart';
 
 class PackageTrips extends StatefulWidget {
   const PackageTrips({super.key});
@@ -12,6 +13,7 @@ class _PackageTripsState extends State<PackageTrips> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
         backgroundColor: Colors.deepOrange,
       ),
