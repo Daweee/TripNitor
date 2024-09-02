@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/pages/bottomNav/booking_page.dart';
-import 'package:tripnitor_mobile_app/pages/bottomNav/message_page.dart';
-import 'package:tripnitor_mobile_app/pages/bottomNav/profile_page.dart';
+import 'package:tripnitor_mobile_app/pages/_user_page/userBottomNav/booking_page.dart';
+import 'package:tripnitor_mobile_app/pages/_user_page/userBottomNav/message_page.dart';
+import 'package:tripnitor_mobile_app/pages/_user_page/userBottomNav/profile_page.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
 
 final bottomNavIndexProvider = StateProvider((ref) => 0); // riverpod
@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _header() {
     return Container(
       child: Row(
-        children: [
+        children: [ 
           Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height * .20,

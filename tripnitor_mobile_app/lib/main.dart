@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/admin_main_page.dart';
 import 'package:tripnitor_mobile_app/pages/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
@@ -10,12 +11,14 @@ import 'providers/auth_provider.dart';
 import 'constants/constant.dart';
 
 void main() {
-  runApp(ProviderScope(
+  runApp(
+    ProviderScope(
       child: MyApp(),
-    ),);
+    ),
+  );
 }
 
-class MyApp extends ConsumerWidget  {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   // This widget is the root of your application.
@@ -25,19 +28,18 @@ class MyApp extends ConsumerWidget  {
 
     return MaterialApp(
       // debugShowCheckedModeBanner: false,
-    //   title: 'Login and User Registration',
-    //   theme: ThemeData(
-    //     primarySwatch: ColorConstants.BACKGROUND_COLOR,
-    //     // colorScheme: ColorScheme.fromSeed(seedColor: Color(ColorConstants.BACKGROUND_COLOR)),
-    //     // useMaterial3: true,
-    //   ),
+      //   title: 'Login and User Registration',
+      //   theme: ThemeData(
+      //     primarySwatch: ColorConstants.BACKGROUND_COLOR,
+      //     // colorScheme: ColorScheme.fromSeed(seedColor: Color(ColorConstants.BACKGROUND_COLOR)),
+      //     // useMaterial3: true,
+      //   ),
       // home: LoginPage(),
-    //   home: RegistrationPage(),
-      home: authState.isAuthenticated ? AuthPage() : LoginPage(),
-      //home: PackageTrips(),
+      //   home: RegistrationPage(),
+      // home: authState.isAuthenticated ? AuthPage() : LoginPage(),
+      // home: PackageTrips(),
       // home: HomePage(),
-
-
+      home: AdminPage(),
     );
   }
 }
