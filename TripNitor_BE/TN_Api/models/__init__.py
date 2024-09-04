@@ -5,5 +5,5 @@ from .gas_model import Gas
 from .package_model import Package
 from .booking_model import Booking
 from .location_model import Location
-from .leg_module import Leg
-from .driver_booking_model import DriverBooking
+from .leg_model import Leg
+from .driver_assignment_model import DriverAssignment
