@@ -4,3 +4,10 @@
 .venv/Scripts/python.exe
 .venv/pyvenv.cfg
 __pycache__/
+tripnitor_mobile_app/windows/flutter/generated_plugins.cmake
+tripnitor_mobile_app/windows/flutter/generated_plugin_registrant.h
+tripnitor_mobile_app/windows/flutter/generated_plugin_registrant.cc
+tripnitor_mobile_app/macos/Flutter/GeneratedPluginRegistrant.swift
+tripnitor_mobile_app/linux/flutter/generated_plugins.cmake
+tripnitor_mobile_app/linux/flutter/generated_plugin_registrant.h
+tripnitor_mobile_app/linux/flutter/generated_plugin_registrant.cc
