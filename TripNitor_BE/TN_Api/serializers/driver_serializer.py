@@ -1,17 +1,16 @@
 from rest_framework import serializers
-from TN_Api.models import Driver, User
-
-class UserDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'name', 'phone_number', 'role']
+from ..models import Driver, User, Van
+from .user_serializer import UserSerializer
+from .van_serializer import VanSerializer
+from django.db import transaction
 
 class DriverSerializer(serializers.ModelSerializer):
-    user = UserDetailSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+    van = VanSerializer(read_only=True)
 
     class Meta:
         model = Driver
-        fields = ['user', 'license_number', 'date_hired']
+        fields = ['user', 'license_number', 'date_hired', 'van']
 
     def update(self, instance, validated_data):
         instance.license_number = validated_data.get('license_number', instance.license_number)
@@ -20,30 +19,38 @@ class DriverSerializer(serializers.ModelSerializer):
         return instance
 
 class DriverCreationSerializer(serializers.ModelSerializer):
-    # nesting user fields inside the driver serializer
     username = serializers.CharField(source='user.username', max_length=255)
     name = serializers.CharField(source='user.name', max_length=255)
     email = serializers.EmailField(source='user.email')
     phone_number = serializers.CharField(source='user.phone_number', max_length=20)
     password = serializers.CharField(write_only=True, source='user.password')
+    van_id = serializers.PrimaryKeyRelatedField(queryset=Van.objects.all(), source='van')
 
     class Meta:
         model = Driver
-        fields = ['username', 'name', 'email', 'phone_number', 'password', 'license_number', 'date_hired']
+        fields = ['username', 'name', 'email', 'phone_number', 'password', 'license_number', 'date_hired', 'van_id']
 
+    def validate_van_id(self, value):
+        if Driver.objects.filter(van=value).exists():
+            raise serializers.ValidationError("This van is already assigned to a driver.")
+        return value
+
+    @transaction.atomic
     def create(self, validated_data):
-        # extract the user data
         user_data = validated_data.pop('user')
         password = user_data.pop('password')
+        van = validated_data.pop('van')
 
-        # create the User with the role of Driver
         user = User.objects.create_user(
             password=password,
             role=User.Role.DRIVER,
             **user_data
         )
 
-        # create the driver profile associated with the user
-        driver = Driver.objects.create(user=user, **validated_data)
+        try:
+            driver = Driver.objects.create(user=user, van=van, **validated_data)
+        except Exception as e:
+            user.delete()
+            raise serializers.ValidationError(str(e))
         
         return driver

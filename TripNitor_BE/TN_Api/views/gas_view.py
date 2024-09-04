@@ -11,8 +11,11 @@ from rest_framework.generics import (
 from ..serializers import GasSerializer
 from TN_Api.models import Gas
 from django.db import IntegrityError
+from drf_spectacular.utils import extend_schema
+from .mixins import CustomResponseMixin
 
-class GasCreateView(CreateAPIView):
+@extend_schema(tags=['gases'])
+class GasCreateView(CustomResponseMixin, CreateAPIView):
     serializer_class = GasSerializer
     permission_classes = [IsAuthenticated]
 
@@ -21,24 +24,23 @@ class GasCreateView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             gas = serializer.save()
-            response_data = {
-                'status': status.HTTP_201_CREATED,
-                'data': {'gas': serializer.data},
-                'message': 'Gas created successfully'
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
+            return self.get_custom_response(
+                status.HTTP_201_CREATED,
+                {'gas': serializer.data},
+                'Gas created successfully'
+            )
         except IntegrityError as e:
             field_name = 'Unknown'
             if 'gas_name' in str(e):
                 field_name = 'Gas Name'
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST,
-                'data': None,
-                'message': f'A gas with this {field_name} already exists.'
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-        
-class GasListView(ListAPIView):
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                f'A gas with this {field_name} already exists.'
+            )
+
+@extend_schema(tags=['gases'])        
+class GasListView(CustomResponseMixin, ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GasSerializer
     queryset = Gas.objects.all()
@@ -47,14 +49,14 @@ class GasListView(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'gases': serializer.data},
-            'message': 'Gas list retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'gases': serializer.data},
+            'Gas list retrieved successfully'
+        )
 
-class GasDetailView(RetrieveAPIView):
+@extend_schema(tags=['gases'])
+class GasDetailView(CustomResponseMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GasSerializer
     queryset = Gas.objects.all()
@@ -63,14 +65,14 @@ class GasDetailView(RetrieveAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'gas': serializer.data},
-            'message': 'Gas details retrieved successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'gas': serializer.data},
+            'Gas details retrieved successfully'
+        )
 
-class GasUpdateView(UpdateAPIView):
+@extend_schema(tags=['gases'])
+class GasUpdateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GasSerializer
     queryset = Gas.objects.all()
@@ -81,14 +83,14 @@ class GasUpdateView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         gas = serializer.save()
 
-        response_data = {
-            'status': status.HTTP_200_OK,
-            'data': {'gas': serializer.data},
-            'message': 'Gas details updated successfully'
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            {'gases': serializer.data},
+            'Gas details updated successfully'
+        )
 
-class GasDeleteView(DestroyAPIView):
+@extend_schema(tags=['gases'])
+class GasDeleteView(CustomResponseMixin, DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Gas.objects.all()
     serializer_class = GasSerializer
@@ -97,9 +99,8 @@ class GasDeleteView(DestroyAPIView):
         instance = self.get_object()
         self.perform_destroy(instance)
 
-        response_data = {
-            'status': status.HTTP_204_NO_CONTENT,
-            'data': None,
-            'message': 'Gas deleted successfully'
-        }
-        return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+        return self.get_custom_response(
+            status.HTTP_204_NO_CONTENT,
+            None,
+            'Gas deleted successfully'
+        )

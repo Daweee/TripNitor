@@ -16,8 +16,11 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from drf_spectacular.utils import extend_schema
+from .mixins import CustomResponseMixin
 
-class RegisterView(CreateAPIView):
+@extend_schema(tags=['users'])
+class RegisterView(CustomResponseMixin, CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
     
@@ -33,19 +36,17 @@ class RegisterView(CreateAPIView):
             "refresh": str(refresh),
             "access": access_token,
         }
+        return self.get_custom_response(
+            status.HTTP_201_CREATED,
+            {'user': serializer.data, 'token': token},
+            'User created successfully'
+        )
 
-        response_data = {
-            'status': status.HTTP_201_CREATED, 
-            'data': {'user': serializer.data, 'token': token}, 
-            'message': 'User created successfully'
-        }
-
-        return Response(response_data, status=status.HTTP_201_CREATED)
-        
-class LoginView(TokenObtainPairView):
+class LoginView(CustomResponseMixin, TokenObtainPairView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
 
+    @extend_schema(tags=['users'])
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         try:
@@ -55,9 +56,9 @@ class LoginView(TokenObtainPairView):
                 'refresh': str(serializer.validated_data.get('refresh'))
             }
 
-            response_data = {
-                'status': status.HTTP_200_OK,
-                'data': {
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                {
                     'user': {
                         'id': serializer.validated_data.get('user_id'),
                         'username': serializer.validated_data.get('username'),
@@ -68,21 +69,20 @@ class LoginView(TokenObtainPairView):
                     },
                     'token': token
                 },
-                'message': 'User login successfully'
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
+                'User login successfully'
+            )
         except Exception as e:
-            response_data = {
-                'status': status.HTTP_400_BAD_REQUEST, 
-                'data': None, 
-                'message': str(e)
-            }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                str(e)
+            )
         
-class LogoutView(GenericAPIView):
+class LogoutView(CustomResponseMixin, GenericAPIView):
     serializer_class = LogoutSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(tags=['users'])
     def post(self, request):
         serializer = LogoutSerializer(data=request.data)
 
@@ -92,23 +92,19 @@ class LogoutView(GenericAPIView):
                 token = RefreshToken(refresh_token)
                 token.blacklist()
 
-                response_data = {
-                    'status': status.HTTP_205_RESET_CONTENT, 
-                    'data': None, 
-                    'message': 'User logged out successfully'
-                }
-
-                return Response(response_data, status=status.HTTP_205_RESET_CONTENT)
+                return self.get_custom_response(
+                    status.HTTP_205_RESET_CONTENT,
+                    None,
+                    'User logged out successfully'
+                )
             except Exception as e:
-                response_data = {
-                    'status': status.HTTP_400_BAD_REQUEST, 
-                    'data': None, 
-                    'message': e
-                }
-                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-        response_data = {
-            'status': status.HTTP_400_BAD_REQUEST, 
-            'data': None, 
-            'message': serializer.errors
-        }
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+                return self.get_custom_response(
+                    status.HTTP_400_BAD_REQUEST, 
+                    None,
+                    e
+                )
+        return self.get_custom_response(
+            status.HTTP_400_BAD_REQUEST, 
+            None,
+            serializer.errors
+        )
