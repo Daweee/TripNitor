@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from jsonschema import ValidationError
 from .base_model import CustomPrimaryKeyModel
 
 class CustomUserManager(BaseUserManager):
@@ -18,13 +19,18 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, username, email, name, phone_number, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', User.Role.ADMIN)
+        
+        if User.objects.filter(role=User.Role.ADMIN).exists():
+            raise ValidationError("A Admin account already exists.")
+        
         return self.create_user(username, email, name, phone_number, password, **extra_fields)
 
 class User(AbstractUser, CustomPrimaryKeyModel):
     class Role(models.TextChoices):
         USER = 'USER', 'Regular User'
         DRIVER = 'DRIVER', 'Driver'
-        MANAGER = 'MANAGER', 'Manager/Admin'
+        ADMIN = 'ADMIN', 'Admin'
 
     username = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
@@ -43,3 +49,8 @@ class User(AbstractUser, CustomPrimaryKeyModel):
 
     def __str__(self):
         return f"{self.username} - {self.get_role_display()}"
+    
+    def save(self, *args, **kwargs):
+        if self.role == self.Role.ADMIN and User.objects.filter(role=self.Role.ADMIN).exclude(pk=self.pk).exists():
+            raise ValidationError("There can only be one Manager/Admin account.")
+        super().save(*args, **kwargs)
