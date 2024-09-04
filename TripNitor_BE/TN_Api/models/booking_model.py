@@ -14,46 +14,59 @@ class Booking(CustomPrimaryKeyModel):
     class PaymentMode(models.TextChoices):
         CASH = 'CASH', 'Cash'
         CREDIT_CARD = 'CREDIT_CARD', 'Credit Card'
-        BANK_TRANSFER = 'BANK_TRANSFER', 'Bank Transfer'
-        ONLINE_PAYMENT = 'ONLINE_PAYMENT', 'Online Payment'
 
-    user = models.ForeignKey(User, related_name='bookings', on_delete=models.CASCADE)
+    drivers = models.ManyToManyField('Driver', through='DriverAssignment', related_name='bookings')  # Use string reference
     package = models.ForeignKey(Package, related_name='bookings', on_delete=models.CASCADE)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Confirmed', 'Confirmed'), ('Cancelled', 'Cancelled')])
+    user = models.ForeignKey('User', related_name='bookings', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=BookingStatus.choices, default=BookingStatus.PENDING)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    number_of_passengers = models.IntegerField()
+    number_of_passengers = models.PositiveIntegerField()
     mode_of_payment = models.CharField(max_length=20, choices=PaymentMode.choices, default=PaymentMode.CASH)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.package.package_name}"
-    
+
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError("End date must be after start date.")
+        
+        available_capacity = self.calculate_available_capacity()
+        if self.number_of_passengers > available_capacity:
+            raise ValidationError(f"Booking exceeds the available capacity and can't accommodate {self.number_of_passengers} passengers for the selected dates.")
+
     def save(self, *args, **kwargs):
-        if not self.pk:  # Only run this logic when creating a new booking
-            self.assign_drivers()
+        self.clean()
+        self.total_price = self.package.base_price * 2
+        
         super().save(*args, **kwargs)
+        if self.status == self.BookingStatus.PENDING:
+            self.assign_drivers()
 
     def assign_drivers(self):
-        from .driver_model import Driver
-        from .driver_booking_model import DriverBooking
+        from .driver_assignment_model import DriverAssignment
+        required_vans = (self.number_of_passengers + 14) // 15 
+        available_drivers = self.get_available_drivers()
 
-        num_vans_needed = (self.number_of_passengers - 1) // 15 + 1
-        available_drivers = [
-            driver for driver in Driver.objects.all()
-            if driver.is_available(self.start_date, self.end_date)
-        ]
+        for driver in available_drivers[:required_vans]:
+            DriverAssignment.objects.create(driver=driver, booking=self)
+        return True
 
-        if len(available_drivers) < num_vans_needed:
-            raise ValidationError("Not enough available drivers for this booking.")
-
-        for i in range(num_vans_needed):
-            DriverBooking.objects.create(
-                booking=self,
-                driver=available_drivers[i],
-                passengers=(15 if i < num_vans_needed - 1 
-                            else self.number_of_passengers - (num_vans_needed - 1) * 15)
-            )
+    def get_available_drivers(self):
+        from .driver_model import Driver 
+        all_drivers = Driver.objects.all()
+        available_drivers = []
+        
+        for driver in all_drivers:
+            if driver.is_available(self.start_date, self.end_date):
+                available_drivers.append(driver)
+        
+        return available_drivers
     
+    def calculate_available_capacity(self):
+        available_drivers = self.get_available_drivers()
+        total_capacity = sum(driver.van.max_passengers for driver in available_drivers)
+        return total_capacity
