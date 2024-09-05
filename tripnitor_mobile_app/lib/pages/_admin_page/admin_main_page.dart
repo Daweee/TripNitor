@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_bookAdmin/_booking_list.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/_driver_list.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_add.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/messageAdmin/_message_admin.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_packageAdmin/_package_admin.dart';
-import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/_van_list.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/models/_van_list.dart';
+
+final drawerProvider = Provider<GlobalKey<ScaffoldState>>((ref) {
+  return GlobalKey<ScaffoldState>();
+});
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -15,22 +20,36 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   int currentPage = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: _buildPage(currentPage), //_buildUI(),
-      floatingActionButton: FloatingActionButton(
-        //backgroundColor: Color(Colors.white),
-        onPressed: () {
-          // Navigator.of(context).pushNamed(AddDriver());
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => AddDriver()));
-        },
-        child: const Icon(Icons.add, color: Color(ColorConstants.ACCENT_COLOR)),
-      ),
+      
+      key: _scaffoldKey, // Assign GlobalKey to Scaffold
+      drawer: _drawerHeader(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _header(),
+            Expanded(
+              child: _buildPage(currentPage),
+            ),
+          ],
+        ),
+      ), //_buildUI(),
+      // floatingActionButton: FloatingActionButton(
+      //   //backgroundColor: Color(Colors.white),
+      //   onPressed: () {
+      //     // Navigator.of(context).pushNamed(AddDriver());
+      //     Navigator.push(
+      //         context, MaterialPageRoute(builder: (context) => AddDriver()));
+      //   },
+      //   child: const Icon(Icons.add, color: Color(ColorConstants.ACCENT_COLOR)),
+      // ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(boxShadow: <BoxShadow>[
           BoxShadow(
@@ -99,5 +118,64 @@ class _AdminPageState extends State<AdminPage> {
       default:
         return DriverList();
     }
+  }
+
+
+  Widget _drawerHeader() {
+    return Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text(
+                'Drawer Header',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Home'),
+              onTap: () {
+                // Handle navigation or functionality
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {
+                // Handle navigation or functionality
+              },
+            ),
+          ],
+        ),
+      );
+  }
+
+  Widget _header() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height * .065,
+      color: Color(ColorConstants.PRIMARY_COLOR),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              _scaffoldKey.currentState!.openDrawer();
+            },
+            icon: Icon(Icons.menu),
+          ),
+          Center(
+            child: Text(
+              'Tripnitor Admin',
+              style:
+                  TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
