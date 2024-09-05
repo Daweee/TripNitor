@@ -23,4 +23,9 @@ class DriverSaveTask extends ChangeNotifier {
   // edit driver
   // void editDriverTask() {}
 
+  void checkDriverTask(int index) {
+    fromDriverTask[index].isDone();
+    notifyListeners();
+  }
+
 }

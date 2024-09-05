@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_bookAdmin/_booking_list.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/_driver_list.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_add.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/messageAdmin/_message_admin.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_packageAdmin/_package_admin.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/_van_list.dart';
@@ -14,7 +15,6 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
-
   int currentPage = 0;
 
   @override
@@ -22,16 +22,23 @@ class _AdminPageState extends State<AdminPage> {
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: _buildPage(currentPage), //_buildUI(),
+      floatingActionButton: FloatingActionButton(
+        //backgroundColor: Color(Colors.white),
+        onPressed: () {
+          // Navigator.of(context).pushNamed(AddDriver());
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => AddDriver()));
+        },
+        child: const Icon(Icons.add, color: Color(ColorConstants.ACCENT_COLOR)),
+      ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-            boxShadow: <BoxShadow>[
-                BoxShadow(
-                color: Colors.grey.withOpacity(1),
-                offset: Offset(0, -4),
-                blurRadius: 5,
-              ),
-            ]
-        ),
+        decoration: BoxDecoration(boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.grey.withOpacity(1),
+            offset: Offset(0, -4),
+            blurRadius: 5,
+          ),
+        ]),
         child: BottomNavigationBar(
           backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
           currentIndex: currentPage,
@@ -66,32 +73,31 @@ class _AdminPageState extends State<AdminPage> {
               icon: Icon(Icons.chat_bubble_outline_rounded), // 2
               label: "Message",
             ),
-            BottomNavigationBarItem(
-              activeIcon: Icon(Icons.book_rounded), // subject to change
-              icon: Icon(Icons.book_outlined), // 3
-              label: 'Package',
-            ),
+            // BottomNavigationBarItem(
+            //   activeIcon: Icon(Icons.book_rounded), // subject to change
+            //   icon: Icon(Icons.book_outlined), // 3
+            //   label: 'Package',
+            // ),
           ],
         ),
       ),
     );
   }
 
-   Widget _buildPage(int index) {
+  Widget _buildPage(int index) {
     switch (index) {
       case 0:
         return DriverList(); // 0
       case 1:
-        return VanList();  // 1
+        return VanList(); // 1
       case 2:
         return BookingList(); // 2
       case 3:
         return MessageAdmin(); // 3
-      case 4: 
-        return PackageAdmin(); // 4
+      // case 4:
+      //   return PackageAdmin(); // 4
       default:
         return DriverList();
     }
   }
-
 }
