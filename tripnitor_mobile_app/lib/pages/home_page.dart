@@ -179,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PackageTrips(),
+            builder: (context) => PackagePage(),
           ),
         );
       },
