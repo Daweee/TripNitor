@@ -6,19 +6,21 @@
     "configurations": [
         {
             "name": "DRF Backend",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/TripNitor_BE/manage.py",
             "args": [
-              "runserver",
-              "--noreload"
+                "runserver",
+                "--noreload"
             ],
             "django": true,
             "console": "integratedTerminal",
             "env": {
-              "DJANGO_SETTINGS_MODULE": "TripNitor_BE.settings"
+                "DJANGO_SETTINGS_MODULE": "TripNitor_BE.settings"
             },
-            "justMyCode": true
+            "python": "${workspaceFolder}/TripNitor_BE/venv/Scripts/python.exe",
+            "cwd": "${workspaceFolder}/TripNitor_BE",
+            "justMyCode": false
         },
         {
             "name": "tripnitor_mobile_app",
