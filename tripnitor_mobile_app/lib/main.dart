@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/pages/_admin_page/admin_main_page.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/_driver_admin_mainPage.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/admin_homepage.dart';
 import 'package:tripnitor_mobile_app/pages/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
@@ -29,17 +30,20 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       // debugShowCheckedModeBanner: false,
       //   title: 'Login and User Registration',
-      //   theme: ThemeData(
-      //     primarySwatch: ColorConstants.BACKGROUND_COLOR,
-      //     // colorScheme: ColorScheme.fromSeed(seedColor: Color(ColorConstants.BACKGROUND_COLOR)),
-      //     // useMaterial3: true,
-      //   ),
+        theme: ThemeData(
+          //primarySwatch: ColorConstants.BACKGROUND_COLOR,
+          colorScheme: ColorScheme.fromSeed(seedColor: Color(ColorConstants.BACKGROUND_COLOR)),
+          useMaterial3: true,
+        ),
       // home: LoginPage(),
       //   home: RegistrationPage(),
       // home: authState.isAuthenticated ? AuthPage() : LoginPage(),
       // home: PackageTrips(),
       // home: HomePage(),
       home: AdminPage(),
+      // home: DriverAdmin(),
+      initialRoute: '/',
+      
     );
   }
 }

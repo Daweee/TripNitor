@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/pages/_admin_page/admin_main_page.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/admin_homepage.dart';
 import 'package:tripnitor_mobile_app/pages/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import '../providers/auth_provider.dart';

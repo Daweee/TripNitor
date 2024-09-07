@@ -17,7 +17,6 @@ class DriverList extends StatefulWidget {
 }
 
 class _DriverListState extends State<DriverList> {
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,9 +37,7 @@ class _DriverListState extends State<DriverList> {
     return SafeArea(
       child: Column(
         children: [
-          //_header(),
           _subHeader(),
-          //_DriverListBody(),
           Expanded(
             child: Container(
               margin: EdgeInsets.all(15),
@@ -52,30 +49,6 @@ class _DriverListState extends State<DriverList> {
     );
   }
 
-  // Widget _header() {
-  //   return Container(
-  //     width: MediaQuery.of(context).size.width,
-  //     height: MediaQuery.of(context).size.height * .065,
-  //     color: Color(ColorConstants.PRIMARY_COLOR),
-  //     child: Row(
-  //       children: [
-  //         IconButton(
-  //           onPressed: () {
-               
-  //           },
-  //           icon: Icon(Icons.menu),
-  //         ),
-  //         Center(
-  //           child: Text(
-  //             'Tripnitor Admin',
-  //             style:
-  //                 TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _subHeader() {
     return Container(
@@ -85,16 +58,8 @@ class _DriverListState extends State<DriverList> {
         children: const [
           Text(
             'Driver List:',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 18),
           ),
-          // GestureDetector(
-          //   onTap: () {},
-          //   child: Image(
-          //     image: AssetImage(
-          //       'assets/icons/carbon_add-filled.png',
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
