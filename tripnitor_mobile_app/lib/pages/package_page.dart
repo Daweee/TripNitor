@@ -1,108 +1,171 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/widgets/package_card.dart';
+import '../providers/package_provider.dart';
 
-class PackageTrips extends StatefulWidget {
-  const PackageTrips({super.key});
+class PackagePage extends ConsumerStatefulWidget {
+  const PackagePage({Key? key}) : super(key: key);
 
   @override
-  State<PackageTrips> createState() => _PackageTripsState();
+  ConsumerState<PackagePage> createState() => _PackagePageState();
 }
 
-class _PackageTripsState extends State<PackageTrips> {
+class _PackagePageState extends ConsumerState<PackagePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+        print('Fetching packages in initState...');
+      ref.read(packageProvider.notifier).getAllPackages();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
-        backgroundColor: Colors.deepOrange,
+        leading: IconButton(
+            icon: FaIcon(
+                FontAwesomeIcons.angleLeft, 
+                color: Colors.black,
+                size: 20.0,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+        ),
+        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        title: Text('Package Trips', 
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            ),
+          ),
+        centerTitle: true,
+        scrolledUnderElevation: 0,
       ),
-      body: _buildUI(),
-    );
-  }
-
-  Widget _buildUI() {
-    return SafeArea(
-      child: Column(
+      body: Column(
         children: [
-          _header(),
-          _packageBody(),
+          Container(
+            height: screenHeight * 0.15,
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                ),
+                color: Color(ColorConstants.BACKGROUND_COLOR),
+                boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        color: Color(0xFF000000).withOpacity(.1),
+                        offset: Offset(0, 4),
+                        blurRadius: 4,
+                    ),
+                ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        style: TextStyle(
+                            color: Colors.black87,
+                            ),
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: 'Package Type',
+                          labelStyle: TextStyle(color: Colors.black.withOpacity(.5)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Color(ColorConstants.PRIMARY_COLOR),
+                                ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Color(ColorConstants.SECONDARY_COLOR), 
+                                width: 2,
+                                ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Color(ColorConstants.PRIMARY_COLOR), 
+                                width: 2,
+                                ),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        value: ref.watch(packageTypeFilterProvider),
+                        onChanged: (value) => ref.read(packageTypeFilterProvider.notifier).state = value,
+                        items: ['SOUTH', 'NORTH', 'CITY', null]
+                            .map((type) => DropdownMenuItem(value: type, child: Text(type ?? 'All Types', style: TextStyle(color: Colors.black.withOpacity(.5)),)))
+                            .toList(),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        style: TextStyle(color: Colors.black87),
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: 'Visibility',
+                          labelStyle: TextStyle(
+                            color: Colors.black.withOpacity(.5),
+                            ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Color(ColorConstants.PRIMARY_COLOR),
+                                ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Color(ColorConstants.SECONDARY_COLOR), 
+                                width: 2,
+                                ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Color(ColorConstants.PRIMARY_COLOR), 
+                                width: 2,
+                                ),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        value: ref.watch(visibilityFilterProvider),
+                        onChanged: (value) => ref.read(visibilityFilterProvider.notifier).state = value,
+                        items: ['PRIVATE', 'PUBLIC', null]
+                            .map((visibility) => DropdownMenuItem(value: visibility, child: Text(visibility ?? 'All Visibilities', style: TextStyle(color: Colors.black.withOpacity(.5)),)))
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              triggerMode: RefreshIndicatorTriggerMode.onEdge,
+              color: Color(ColorConstants.BACKGROUND_COLOR),
+              backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+              onRefresh: () async {
+                await ref.read(packageProvider.notifier).getAllPackages();
+              },
+              child: PackageCard(),
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  Widget _header() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 175,
-      decoration: BoxDecoration(
-          color: Colors.yellow, // deepOrange
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(25),
-            bottomRight: Radius.circular(25),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3),
-            )
-          ]),
-      child: Container(
-        margin: EdgeInsets.all(20),
-        child: Column(
-          children: const [
-            Text(
-              'Let\'s Travel',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              'It\’s time to create a memories together with Tripnitor',
-              style: TextStyle(
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _packageBody() {
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.all(15),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Packages',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text('north'),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  Widget _presetPackage() {
-    return Container();
   }
 }

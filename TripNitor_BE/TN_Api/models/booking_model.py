@@ -40,28 +40,35 @@ class Booking(CustomPrimaryKeyModel):
 
     def save(self, *args, **kwargs):
         self.clean()
-        self.total_price = self.package.base_price * 2
+        self.calculate_final_fare()
         
         super().save(*args, **kwargs)
         if self.status == self.BookingStatus.PENDING:
             self.assign_drivers()
+
+    def calculate_final_fare(self):
+        self.total_price = self.package.base_price * 2
 
     def assign_drivers(self):
         from .driver_assignment_model import DriverAssignment
         required_vans = (self.number_of_passengers + 14) // 15 
         available_drivers = self.get_available_drivers()
 
+        assigned_drivers = []
         for driver in available_drivers[:required_vans]:
             DriverAssignment.objects.create(driver=driver, booking=self)
-        return True
-
+            assigned_drivers.append(driver)
+        
+        return assigned_drivers
+    
     def get_available_drivers(self):
         from .driver_model import Driver 
         all_drivers = Driver.objects.all()
         available_drivers = []
         
         for driver in all_drivers:
-            if driver.is_available(self.start_date, self.end_date):
+            is_available = driver.is_available(self.start_date, self.end_date)
+            if is_available:
                 available_drivers.append(driver)
         
         return available_drivers

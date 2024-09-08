@@ -1,9 +1,12 @@
+from django.conf import settings
 from django.forms import ValidationError
 from rest_framework import serializers
 from ..models import Booking, Package, User   
 from .package_serializer import PackageSerializer
 from .user_serializer import UserSerializer
 from .driver_serializer import DriverSerializer
+from dateutil.parser import parse
+from django.utils.timezone import is_aware, make_aware
 
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -37,3 +40,32 @@ class BookingCreationSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['drivers'] = DriverSerializer(instance.drivers.all(), many=True).data
         return representation
+    
+class BookingPreviewSerializer(serializers.Serializer):
+    package = serializers.CharField() 
+    start_date = serializers.DateTimeField()
+    end_date = serializers.DateTimeField()
+    number_of_passengers = serializers.IntegerField(min_value=1)
+
+    def validate_package(self, value):
+        try:
+            return Package.objects.get(id=value)
+        except Package.DoesNotExist:
+            raise serializers.ValidationError(f"Package with ID {value} does not exist.")
+
+    def validate(self, data):
+        if data['start_date'] >= data['end_date']:
+            raise serializers.ValidationError("End date must be after start date.")
+        return data
+
+    def to_internal_value(self, data):
+        for field in ['start_date', 'end_date']:
+            if isinstance(data.get(field), str):
+                try:
+                    parsed_date = parse(data[field])
+                    if not is_aware(parsed_date):
+                        parsed_date = make_aware(parsed_date, timezone=settings.TIME_ZONE)
+                    data[field] = parsed_date
+                except ValueError as e:
+                    raise serializers.ValidationError({field: f"Invalid date format: {str(e)}"})
+        return super().to_internal_value(data)

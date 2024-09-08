@@ -37,16 +37,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController _usernameController = TextEditingController();
-    final TextEditingController _passwordController = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
-
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: _buildUI(context),
-    );
-  }
+    Widget build(BuildContext context) {
+        return Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: _buildUI(context),
+        );
+    }
 
   Widget _buildUI(BuildContext context) {
     return Container(
@@ -156,25 +152,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  final authNotifier = ref.read(authProvider.notifier);
-                  await authNotifier.login(
+                    final authNotifier = ref.read(authProvider.notifier);
+                    await authNotifier.login(
                     _usernameController.text.trim(),
                     _passwordController.text.trim(),
-                  );
+                    );
 
-                  if (ref.read(authProvider).isAuthenticated) {
+                    if (ref.read(authProvider).isAuthenticated) {
                     Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AuthPage()),
+                        context,
+                        MaterialPageRoute(builder: (context) => const AuthPage()),
                     );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Login failed. Please try again.')),
-                    );
+                    } else {
+                    if (mounted) {  
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Login failed. Please try again.')),
+                        );
+                    }
+                    }
                   }
-                }
-              },
+                },
               child: authState.isLoading
                   ? Center(
                       child: SizedBox(

@@ -3,4 +3,4 @@ from .driver_view import DriverCreateView, DriverListView, DriverDetailView, Dri
 from .van_view import VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView
 from .gas_view import GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView
 from .package_view import PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView
-from .booking_view import BookingListView, BookingCreateView, BookingDetailView, BookingUpdateView, BookingDeleteView
+from .booking_view import BookingListView, BookingCreateView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView

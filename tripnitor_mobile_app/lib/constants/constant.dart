@@ -9,5 +9,6 @@ class ColorConstants {
     static const int PRIMARY_COLOR=0xFFC9963E;
     static const int SECONDARY_COLOR=0xFFE7C17E;
     static const int TERTIARY_COLOR=0xFFFFFBE8;
+    static const int BOTTOM_PACKAGE_CARD_COLOR=0xFFE5842A;
     static const int ACCENT_COLOR=0xFFEEB85C;
 }
