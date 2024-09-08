@@ -17,6 +17,7 @@ class _PackagePageState extends ConsumerState<PackagePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+        print('Fetching packages in initState...');
       ref.read(packageProvider.notifier).getAllPackages();
     });
   }
@@ -32,6 +33,7 @@ class _PackagePageState extends ConsumerState<PackagePage> {
             icon: FaIcon(
                 FontAwesomeIcons.angleLeft, 
                 color: Colors.black,
+                size: 20.0,
             ),
             onPressed: () => Navigator.of(context).pop(),
         ),
@@ -42,6 +44,7 @@ class _PackagePageState extends ConsumerState<PackagePage> {
             ),
           ),
         centerTitle: true,
+        scrolledUnderElevation: 0,
       ),
       body: Column(
         children: [

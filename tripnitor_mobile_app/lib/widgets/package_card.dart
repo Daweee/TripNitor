@@ -106,7 +106,7 @@ class PackageCard extends ConsumerWidget {
                         children: [
                           FaIcon(
                             FontAwesomeIcons.locationDot,
-                            size: 16.0,
+                            size: 19.0,
                             color: Colors.black,
                           ),
                           SizedBox(width: 10),
