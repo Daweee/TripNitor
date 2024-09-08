@@ -21,10 +21,13 @@ class Driver(CustomPrimaryKeyModel):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
-
+        
     def is_available(self, start_date, end_date):
         from .booking_model import Booking
-        return not self.driverassignment_set.filter(
-            models.Q(booking__start_date__lte=end_date, booking__end_date__gte=start_date),
-            booking__status__in=[Booking.BookingStatus.CONFIRMED, Booking.BookingStatus.PENDING]
+        
+        return not self.bookings.filter(
+            models.Q(start_date__lt=end_date, end_date__gt=start_date) |
+            models.Q(start_date__range=(start_date, end_date)) |
+            models.Q(end_date__range=(start_date, end_date)),
+            status__in=[Booking.BookingStatus.CONFIRMED, Booking.BookingStatus.PENDING]
         ).exists()

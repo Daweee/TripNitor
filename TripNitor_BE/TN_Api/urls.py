@@ -4,7 +4,7 @@ from .views import (
     DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView,
     VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView,
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
-    BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView,
+    BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView
 )
 
@@ -32,6 +32,7 @@ urlpatterns = [
     path('gas/<str:pk>/delete', GasDeleteView.as_view(), name='delete_gas'),
 
     path('bookings/', BookingListView.as_view(), name='booking-list'),
+    path('bookings/preview-booking/', BookingPreviewView.as_view(), name='preview-bookin'),
     path('bookings/create/', BookingCreateView.as_view(), name='booking-create'),
     path('bookings/<str:pk>/', BookingDetailView.as_view(), name='booking-detail'),
     path('bookings/<str:pk>/update/', BookingUpdateView.as_view(), name='booking-update'),
