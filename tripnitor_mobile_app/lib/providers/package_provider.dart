@@ -14,12 +14,12 @@ class PackageNotifier extends StateNotifier<PackageState> {
             state = state.copyWith(
                 packages: response,
                 isLoading: false,
-                error: null
+                error: null,
             );
-        } catch (e) {
-            state = state.copyWith(isLoading: false, error: e.toString());
+    } catch (e) {
+        state = state.copyWith(isLoading: false, error: e.toString());
         }
-    }
+    }   
 
     Future<void> getPackageDetails(String packageId) async {
         state = state.copyWith(isLoading: true);
@@ -51,9 +51,11 @@ final filteredPackagesProvider = Provider<List<Package>>((ref) {
   final typeFilter = ref.watch(packageTypeFilterProvider);
   final visibilityFilter = ref.watch(visibilityFilterProvider);
 
-  return packageState.packages.where((package) {
+  final filteredPackages = packageState.packages.where((package) {
     final matchesType = typeFilter == null || package.packageType == typeFilter;
     final matchesVisibility = visibilityFilter == null || package.visibility == visibilityFilter;
     return matchesType && matchesVisibility;
   }).toList();
+  
+  return filteredPackages;
 });

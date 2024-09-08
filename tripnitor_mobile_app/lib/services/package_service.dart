@@ -30,10 +30,17 @@ class PackageService {
             final response = await _dio.get('${HTTPConstants.BASE_URL}api/packages/');
 
             if (response.statusCode == 200) {
-                final Map<String, dynamic> responseData = response.data;
-                final Map<String, dynamic> data = responseData['data'];
-                final List<dynamic> packagesJson = data['packages'] as List<dynamic>;
-                return packagesJson.map((json) => Package.fromJson(json)).toList();
+                final Map<String, dynamic> responseData = response.data as Map<String, dynamic>;
+                final Map<String, dynamic> data = responseData['data'] as Map<String, dynamic>? ?? {};
+                final List<dynamic> packagesJson = data['packages'] as List<dynamic>? ?? [];
+                
+                return packagesJson.map((json) {
+                    try {
+                        return Package.fromJson(json as Map<String, dynamic>);
+                    } catch (e) {
+                        return null;
+                    }
+                }).whereType<Package>().toList();
             } else {
                 throw DioException(
                     requestOptions: response.requestOptions,
