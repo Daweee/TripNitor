@@ -7,7 +7,10 @@ class AddDriver extends ConsumerWidget {
   // stateless
   AddDriver({super.key});
 
-  final controller = TextEditingController();
+  final titleController = TextEditingController();
+  final nameController = TextEditingController();
+  final ageController = TextEditingController();
+  final genderController = TextEditingController();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,11 +23,26 @@ class AddDriver extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            
             TextField(
-              controller: controller,
+              controller: nameController,
               autofocus: true,
               decoration: const InputDecoration(
-                hintText: 'Add Driver',
+                hintText: 'Add Driver\'s Name',
+              ),
+            ),
+            TextField(
+              controller: ageController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Add Driver\'s Age',
+              ),
+            ),
+            TextField(
+              controller: genderController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Add Driver\'s Gender',
               ),
             ),
             SizedBox(
@@ -32,16 +50,35 @@ class AddDriver extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () {
+                int age; //= int.tryParse(ageController.text);
+                try {
+                  age = int.parse(ageController.text);
+                } catch (e) {
+                  // Show an error message if age is not a valid integer
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please enter a valid age')),
+                  );
+                  return; // Exit the onPressed callback early
+                }
                 ref.read(driverSaveTaskProvider.notifier).addDriverTask(
                       DriverTask(
-                        title: controller.text,
+                        title: titleController.text,
+                        name: nameController.text,
+                        age: age,
+                        gender: genderController.text,
                         isCompleted: false,
                       ),
                     );
-                controller.clear();
+                titleController.clear();
+                nameController.clear();
+                ageController.clear();
+                genderController.clear();
                 Navigator.of(context).pop();
               },
-              child: Text('Add'),
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //       SnackBar(content: Text('Please enter a valid Driver\'s credentials')),
+              //     );
+              child: Text('Add Driver'),
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_add.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_details.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_save_task.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_task.dart';
 import 'package:tripnitor_mobile_app/pages/driver_homepage.dart';
@@ -48,7 +49,6 @@ class _DriverListState extends State<DriverList> {
       ),
     );
   }
-
 
   Widget _subHeader() {
     return Container(
@@ -128,35 +128,80 @@ class _DriverListState extends State<DriverList> {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Card(
-                child: Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              driverTask.fromDriverTask[index].title,
-                              style: TextStyle(
-                                decoration:
-                                    driverTask.fromDriverTask[index].isCompleted
-                                        ? TextDecoration.lineThrough
-                                        : TextDecoration.none,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => DriverDetails(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    // decoration: BoxDecoration(boxShadow: ),
+                    padding: EdgeInsets.all(15.0),
+                    child: Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Name: ${driverTask.fromDriverTask[index].name}',
+                                      // style: TextStyle(
+                                      //   decoration: driverTask
+                                      //           .fromDriverTask[index]
+                                      //           .isCompleted
+                                      //       ? TextDecoration.lineThrough
+                                      //       : TextDecoration.none,
+                                      // ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Age: ${driverTask.fromDriverTask[index].age}',
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        'Gender: ${driverTask.fromDriverTask[index].gender}',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
+                        ),
+                        // SizedBox(
+                        //   height: 30,
+                        // ),
+                        Expanded(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.edit, color: Colors.green),
+                                onPressed: () {
+                                  // ...
+                                },
+                                icon: Icon(
+                                  Icons.edit_square,
+                                  color: Colors.green,
+                                ),
                               ),
-                              IconButton(
+                              IconButton( 
                                 onPressed: () {
                                   ref
                                       .read(driverSaveTaskProvider.notifier)
@@ -169,9 +214,9 @@ class _DriverListState extends State<DriverList> {
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 // trailing: Wrap(

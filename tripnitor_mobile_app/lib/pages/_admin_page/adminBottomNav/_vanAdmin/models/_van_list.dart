@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/_van_details.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/models/_van_add.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/models/_van_save_task.dart';
 
@@ -73,25 +74,32 @@ class _VanListState extends State<VanList> {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Card(
-                child: Container(
-                  child: Column(
-                    
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => VanDetail(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(15.0),
+                    child: Column(
+                      children: [
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                          children:[
                             Expanded(
-                              child: Text(
-                                vanTask.fromVanTask[index].title,
-                                style: TextStyle(
-                                  decoration: vanTask.fromVanTask[index].isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none,
-                                ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Model: ${vanTask.fromVanTask[index].title}',
+                                  ),
+                                  Text('Plate No: '),
+                                ],
                               ),
                             ),
+                            
                             SizedBox(
                               height: 10,
                             ),
@@ -117,8 +125,8 @@ class _VanListState extends State<VanList> {
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

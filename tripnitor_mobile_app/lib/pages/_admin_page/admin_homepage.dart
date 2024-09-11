@@ -29,13 +29,7 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: PreferredSize(
-      //   preferredSize: Size.fromHeight(50), // here the desired height
-      //   child: AppBar(
-      //     backgroundColor: Colors.orange,
-      //     title: Text('Tripnitor'),
-      //   ),
-      // ),
+      // appbar
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       key: _scaffoldKey, // Assign GlobalKey to Scaffold
       drawer: NavigationDrawerPage(), // _drawerHeader(),
@@ -173,14 +167,36 @@ class NavigationDrawerPage extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text('Settings'),
-                  onTap: () {},
+                  leading: Icon(Icons.shopping_bag_rounded),
+                  title: Text('Booking'),
+                  onTap: () {
+                    
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.message_sharp),
+                  title: Text('Message'),
+                  onTap: () {
+                    
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.book_online_rounded),
+                  title: Text('Package'),
+                  onTap: () {
+                    
+                  },
                 ),
                 Divider(
                   indent: 20,
                   endIndent: 20,
                 ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {},
+                ),
+                
                 ListTile(
                   leading: Icon(Icons.logout),
                   title: Text('Log out'),

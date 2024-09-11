@@ -15,19 +15,13 @@ class _DriverAdminState extends State<DriverAdmin> {
     return Scaffold(
       drawer: NavigationDrawerPage(),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(90), // here the desired height
+        preferredSize: Size.fromHeight(50), // here the desired height
         child: AppBar(
           backgroundColor: Colors.orange,
-          title: Text('APP BAR FROM DRIVER ADMIN PAGE'),
+          title: Text('DRIVER PAGE'),
         ),
-        
       ),
       body: DriverList(),
-      
-      
     );
   }
-
-
-  
 }
