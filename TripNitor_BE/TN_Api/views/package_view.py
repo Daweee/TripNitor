@@ -26,7 +26,7 @@ class PackageCreateView(CustomResponseMixin, CreateAPIView):
             package = serializer.save()
             return self.get_custom_response(
                 status.HTTP_201_CREATED,
-                {'package': serializer.data},
+                serializer.data,
                 'Package created successfully'
             )
         except IntegrityError as e:
@@ -46,7 +46,7 @@ class PackageListView(CustomResponseMixin, ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return self.get_custom_response(
             status.HTTP_200_OK, 
-            {'packages': serializer.data}, 
+            serializer.data, 
             'Package list retrieved successfully.'
         )
 
@@ -60,7 +60,7 @@ class PackageDetailView(CustomResponseMixin, RetrieveAPIView):
         serializer = self.get_serializer(instance)
         return self.get_custom_response(
              status.HTTP_200_OK, 
-             {'package': serializer.data}, 
+             serializer.data, 
              'Package details retrieved successfully.'
         )
 

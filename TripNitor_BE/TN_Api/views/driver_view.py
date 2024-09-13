@@ -27,7 +27,7 @@ class DriverCreateView(CustomResponseMixin, CreateAPIView):
             driver = serializer.save()
             return self.get_custom_response(
                 status.HTTP_201_CREATED,
-                {'driver': serializer.data},
+                serializer.data,
                 'Driver account created successfully'
             )
         except IntegrityError as e:
@@ -60,7 +60,7 @@ class DriverListView(CustomResponseMixin, ListAPIView):
         
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'drivers': serializer.data for driver in queryset},
+            serializer.data,
             'Driver list successful'
         )
     
@@ -76,7 +76,7 @@ class DriverDetailView(CustomResponseMixin, RetrieveAPIView):
 
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'driver': serializer.data},
+            serializer.data,
             'Driver details retrieved successfully'
         )
 
@@ -95,7 +95,7 @@ class DriverUpdateView(CustomResponseMixin, UpdateAPIView):
             driver = serializer.save()
             return self.get_custom_response(
                 status.HTTP_200_OK,
-                {'driver': serializer.data},
+                serializer.data,
                 'Driver details updated successfully'
             )
         except ValidationError as e:
@@ -113,12 +113,9 @@ class DriverDeleteView(CustomResponseMixin, DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        user = instance.user  # Get the associated User object
+        user = instance.user  
 
-        # First, delete the Driver instance
         super().destroy(request, *args, **kwargs)
-        
-        # Then, delete the associated User
         user.delete()
 
         return self.get_custom_response(

@@ -24,10 +24,54 @@ class BookingListView(CustomResponseMixin, ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return self.get_custom_response(
             status.HTTP_200_OK, 
-            {'bookings': serializer.data}, 
+            serializer.data, 
             'Bookings retrieved successfully.'
         )
+    
+@extend_schema(tags=['bookings'])
+class UserBookingListView(CustomResponseMixin, ListAPIView):
+    serializer_class = BookingSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Booking.objects.filter(user=user)
+
+        status = self.request.query_params.get('status', None)
+        if status:
+            queryset = queryset.filter(status=status)
+        else:
+            statuses = self.request.query_params.getlist('status[]')
+            if statuses:
+                queryset = queryset.filter(status__in=statuses)
+        
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_custom_response(
+            status.HTTP_200_OK, 
+            serializer.data, 
+            'User bookings retrieved successfully.'
+        )
+
+@extend_schema(tags=['bookings'])
+class GetBookingStatusListView(ListAPIView):
+    serializer_class = BookingSerializer
+
+    def get_queryset(self):
+        booking_status = self.kwargs['bookingstatus']
+        return Booking.objects.filter(status=booking_status)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'status': status.HTTP_200_OK,
+            'data': serializer.data,
+            'message': f'All bookings with status {self.kwargs["bookingstatus"]} retrieved successfully.'
+        })
+    
 @extend_schema(tags=['bookings'])
 class BookingCreateView(CustomResponseMixin, CreateAPIView):
     queryset = Booking.objects.all()
@@ -41,7 +85,7 @@ class BookingCreateView(CustomResponseMixin, CreateAPIView):
             booking = serializer.save()
             return self.get_custom_response(
                 status.HTTP_201_CREATED,
-                {'booking': serializer.data},
+                serializer.data,
                 'Booking created successfully'
             )
         except IntegrityError as e:
@@ -61,7 +105,7 @@ class BookingDetailView(CustomResponseMixin, RetrieveAPIView):
         serializer = self.get_serializer(instance)
         return self.get_custom_response(
              status.HTTP_200_OK, 
-             {'booking': serializer.data}, 
+             serializer.data, 
              'Booking details retrieved successfully.'
         )
 
@@ -119,6 +163,7 @@ class BookingPreviewView(APIView):
                 'assigned_drivers': [
                     {
                         'name': driver.user.name,
+                        'phone_number': driver.user.phone_number,
                         'van_model': driver.van.model,
                         'van_plate_number': driver.van.plate_number,
                     } for driver in assigned_drivers
