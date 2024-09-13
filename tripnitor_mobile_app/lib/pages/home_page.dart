@@ -17,7 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   int currentPage = 0;
 
   @override
@@ -27,15 +26,13 @@ class _HomePageState extends State<HomePage> {
       body: _buildPage(currentPage), // pages[currentPage],//_buildUI(),
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-            boxShadow: <BoxShadow>[
-                BoxShadow(
-                color: Colors.grey.withOpacity(1),
-                offset: Offset(0, -4),
-                blurRadius: 5,
-              ),
-            ]
-        ),
+        decoration: BoxDecoration(boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.grey.withOpacity(1),
+            offset: Offset(0, -4),
+            blurRadius: 5,
+          ),
+        ]),
         child: BottomNavigationBar(
           backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
           currentIndex: currentPage,
@@ -167,7 +164,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          
         ],
       ),
     );
@@ -197,11 +193,11 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 80,
               decoration: BoxDecoration(
                 boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(1),
-                        offset: Offset(0, 4),
-                        blurRadius: 10,
-                    ),
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(1),
+                    offset: Offset(0, 4),
+                    blurRadius: 10,
+                  ),
                 ],
                 color: Color(ColorConstants.TERTIARY_COLOR),
                 borderRadius: BorderRadius.circular(20),
@@ -227,9 +223,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-
-
-
-
-

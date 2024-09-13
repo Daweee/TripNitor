@@ -8,6 +8,7 @@ import '../providers/package_provider.dart';
 import '../models/package_model.dart';
 import '../models/leg_model.dart';
 import '../models/location_model.dart';
+import '../widgets/booking_bottom_sheet.dart';
 import '../widgets/shimmer_package_detail_page.dart';
 
 class PackageDetailPage extends ConsumerStatefulWidget {
@@ -104,12 +105,6 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
                 _buildPackageInfo(package.visibility),
                 ],
             ),
-        //   _buildSection('', [
-        //     _buildInfoRow('Name', package.packageName),
-        //     _buildInfoRow('Type', package.packageType),
-        //     _buildInfoRow('Visibility', package.visibility),
-        //     _buildInfoRow('Base Price', '₱${package.basePrice}'),
-        //   ]),
           SizedBox(height: 20),
           _buildSection('Description', [
             Text(package.description),
@@ -181,18 +176,6 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
     ],
   );
 }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text('$label: ', style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
 
   Widget _buildLocationStartInfo(Location location) {
     return Column(
@@ -332,7 +315,9 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
                 borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-            onPressed: () {}, 
+            onPressed: () {
+                _showBookingBottomSheet(context, packageState.selectedPackage);
+            }, 
             child: Text(
               'Book now',
               style: TextStyle(
@@ -343,6 +328,19 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showBookingBottomSheet(BuildContext context, Package? package) {
+    if (package == null) return;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return BookingBottomSheet(package: package);
+      },
     );
   }
 }
