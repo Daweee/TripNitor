@@ -7,7 +7,7 @@ class CustomeFormField extends StatelessWidget {
   final double height;
   final bool obscureText;
   final TextEditingController controller;
-  final String? Function(String?)? validator; 
+  final String? Function(String?)? validator;
   final VoidCallback? onToggleObscureText;
   final bool isPassword;
 
