@@ -4,69 +4,63 @@ import '../models/package_model.dart';
 import 'token_service.dart';
 
 class PackageService {
-    final Dio _dio = Dio();
-    final TokenService _tokenService = TokenService();
+  final Dio _dio = Dio();
+  final TokenService _tokenService = TokenService();
 
-    PackageService() { 
-        _setupInterceptors();
-    }
+  PackageService() {
+    _setupInterceptors();
+  }
 
-    void _setupInterceptors() {
-        _dio.interceptors.add(
-            InterceptorsWrapper(
-                onRequest: (options, handler) async {
-                    final accessToken = await _tokenService.getAccessToken();
-                    if (accessToken != null) {
-                        options.headers['Authorization'] = 'Bearer $accessToken';
-                    }
-                return handler.next(options);
-                },
-            ),
+  void _setupInterceptors() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final accessToken = await _tokenService.getAccessToken();
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+  }
+
+  Future<List<Package>> getAllPackages() async {
+    try {
+      final response = await _dio.get('${HTTPConstants.BASE_URL}api/packages/');
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data['data'];
+        return data.map((json) => Package.fromJson(json)).toList();
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error: 'Failed to load package list. Status: ${response.statusCode}',
         );
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to load package list: ${e.message}');
     }
+  }
 
-    Future<List<Package>> getAllPackages() async {
-        try {
-            final response = await _dio.get('${HTTPConstants.BASE_URL}api/packages/');
-
-            if (response.statusCode == 200) {
-                final Map<String, dynamic> responseData = response.data as Map<String, dynamic>;
-                final Map<String, dynamic> data = responseData['data'] as Map<String, dynamic>? ?? {};
-                final List<dynamic> packagesJson = data['packages'] as List<dynamic>? ?? [];
-                
-                return packagesJson.map((json) {
-                    try {
-                        return Package.fromJson(json as Map<String, dynamic>);
-                    } catch (e) {
-                        return null;
-                    }
-                }).whereType<Package>().toList();
-            } else {
-                throw DioException(
-                    requestOptions: response.requestOptions,
-                    response: response,
-                    error: 'Failed to load package list. Status: ${response.statusCode}',
-                );
-            }
-        } on DioException catch (e) {
-            throw Exception('Failed to load package list: ${e.message}');
-        }
+  Future<Package> fetchPackageDetails(String packageId) async {
+    try {
+      final response =
+          await _dio.get('${HTTPConstants.BASE_URL}api/packages/$packageId/');
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = response.data['data'];
+        return Package.fromJson(data);
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error:
+              'Failed to load package details. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to load package details: ${e.message}');
     }
-
-    Future<Map<String, dynamic>> fetchPackageDetails(String packageId) async {
-        try {
-            final response = await _dio.get('${HTTPConstants.BASE_URL}api/packages/$packageId/');
-            if (response.statusCode == 200) {
-                return response.data['data']['package'];
-            } else {
-                throw DioException(
-                    requestOptions: response.requestOptions,
-                    response: response,
-                    error: 'Failed to load package details. Status: ${response.statusCode}',
-                );
-            }
-        } on DioException catch (e) {
-            throw Exception('Failed to load package details: ${e.message}');
-        }
-    }
+  }
 }
