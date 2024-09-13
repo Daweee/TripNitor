@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_vanAdmin/models/_van_task.dart';
+import 'package:tripnitor_mobile_app/models/van_model.dart';
 
 class VanSaveTask extends ChangeNotifier {
   List<VanTask> _vanTaskList = [];

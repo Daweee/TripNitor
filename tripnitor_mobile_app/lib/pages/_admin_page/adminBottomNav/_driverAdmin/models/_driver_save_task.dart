@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_task.dart';
+import 'package:tripnitor_mobile_app/models/driver_model.dart';
+
 
 class DriverSaveTask extends ChangeNotifier {
   List<DriverTask> _driverTaskList = [];

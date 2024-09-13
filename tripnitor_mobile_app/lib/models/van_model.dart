@@ -32,12 +32,12 @@ class Van {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'model': model,
-    'plate_number': plateNumber,
-    'date_bought': dateBought.toIso8601String(),
-    'registration_expiry_date': registrationExpiryDate.toIso8601String(),
-    'max_passengers': maxPassengers,
-    'gas': gas.toJson(),
-  };
+        'id': id,
+        'model': model,
+        'plate_number': plateNumber,
+        'date_bought': dateBought.toIso8601String(),
+        'registration_expiry_date': registrationExpiryDate.toIso8601String(),
+        'max_passengers': maxPassengers,
+        'gas': gas.toJson(),
+      };
 }

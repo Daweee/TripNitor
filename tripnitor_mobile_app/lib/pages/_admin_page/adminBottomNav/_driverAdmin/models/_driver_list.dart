@@ -4,7 +4,7 @@ import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_add.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_details.dart';
 import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_save_task.dart';
-import 'package:tripnitor_mobile_app/pages/_admin_page/adminBottomNav/_driverAdmin/models/_driver_task.dart';
+
 import 'package:tripnitor_mobile_app/pages/driver_homepage.dart';
 
 final driverSaveTaskProvider = ChangeNotifierProvider(
@@ -29,7 +29,7 @@ class _DriverListState extends State<DriverList> {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => AddDriver()));
         },
-        child: const Icon(Icons.add, color: Color(ColorConstants.ACCENT_COLOR)),
+        child: const Icon(Icons.add, color: Color(ColorConstants.ACCENT_COLOR),),
       ),
     );
   }

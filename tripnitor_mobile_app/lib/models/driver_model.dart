@@ -24,16 +24,16 @@ class Driver {
   }
 
   Map<String, dynamic> toJson() => {
-    'user': {
-      'id': user.id,
-      'username': user.username,
-      'email': user.email,
-      'name': user.name,
-      'phone_number': user.phoneNumber,
-      'role': user.role,
-    },
-    'license_number': licenseNumber,
-    'date_hired': dateHired.toIso8601String(),
-    'van': van.toJson(),
-  };
+        'user': {
+          'id': user.id,
+          'username': user.username,
+          'email': user.email,
+          'name': user.name,
+          'phone_number': user.phoneNumber,
+          'role': user.role,
+        },
+        'license_number': licenseNumber,
+        'date_hired': dateHired.toIso8601String(),
+        'van': van.toJson(),
+      };
 }
