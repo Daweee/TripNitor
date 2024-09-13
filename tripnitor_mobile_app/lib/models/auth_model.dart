@@ -1,3 +1,5 @@
+import 'token_model.dart';
+
 class User {
   final String id;
   final String username;
@@ -5,8 +7,7 @@ class User {
   final String name;
   final String phoneNumber;
   final String role;
-  final String accessToken;
-  final String refreshToken;
+  final Token? token;
 
   User({
     required this.id,
@@ -15,24 +16,18 @@ class User {
     required this.name,
     required this.phoneNumber,
     required this.role,
-    required this.accessToken,
-    required this.refreshToken,
+    this.token,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    final userData = json['data']['user'];
-    final tokenData = json['data']['token'];
-    return User(
-      id: userData['id'],
-      username: userData['username'],
-      email: userData['email'],
-      name: userData['name'],
-      phoneNumber: userData['phone_number'],
-      role: userData['role'],
-      accessToken: tokenData['access'],
-      refreshToken: tokenData['refresh'],
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => User(
+        id: json["id"],
+        username: json["username"],
+        email: json["email"],
+        name: json["name"],
+        phoneNumber: json["phone_number"],
+        role: json["role"],
+        token: json["token"] != null ? Token.fromJson(json["token"]) : null,
+      );
 }
 
 class AuthState {
