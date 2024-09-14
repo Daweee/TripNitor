@@ -1,9 +1,10 @@
 from django.forms import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..serializers import DriverCreationSerializer, DriverSerializer
-from TN_Api.models import Driver
+from TN_Api.models import Driver, User
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
@@ -69,16 +70,43 @@ class DriverDetailView(CustomResponseMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
+    lookup_field = 'user__id'
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                serializer.data,
+                'Driver details retrieved successfully'
+            )
+        except Driver.DoesNotExist:
+            return self.get_custom_response(
+                status.HTTP_404_NOT_FOUND,
+                None,
+                "No Driver matches the given query."
+            , status=status.HTTP_404_NOT_FOUND)
 
-        return self.get_custom_response(
-            status.HTTP_200_OK,
-            serializer.data,
-            'Driver details retrieved successfully'
-        )
+    def get_object(self):
+        user_id = self.kwargs.get(self.lookup_field)
+        try:
+            user = User.objects.get(id=user_id)
+            driver = get_object_or_404(Driver, user=user)
+            self.check_object_permissions(self.request, driver)
+            return driver
+        except User.DoesNotExist:
+            raise Driver.DoesNotExist
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance)
+
+    #     return self.get_custom_response(
+    #         status.HTTP_200_OK,
+    #         serializer.data,
+    #         'Driver details retrieved successfully'
+    #     )
 
 @extend_schema(tags=['drivers'])
 class DriverUpdateView(CustomResponseMixin, UpdateAPIView):
