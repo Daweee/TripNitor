@@ -11,6 +11,7 @@ class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = ['user', 'license_number', 'date_hired', 'van']
+        depth = 1
 
     def update(self, instance, validated_data):
         instance.license_number = validated_data.get('license_number', instance.license_number)

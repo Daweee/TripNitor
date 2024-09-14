@@ -30,13 +30,13 @@ class PackageCard extends ConsumerWidget {
           SizedBox(
             height: MediaQuery.of(context).size.height / 2,
             child: Center(
-            child: Text('No packages available'),
+              child: Text('No packages available'),
             ),
           ),
         ],
       );
     }
-    
+
     return ListView.builder(
       itemCount: filteredPackages.length,
       itemBuilder: (context, index) {
@@ -146,7 +146,8 @@ class PackageCard extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "| ${package.packageType}",
@@ -191,7 +192,8 @@ class PackageCard extends ConsumerWidget {
                           child: Container(
                             height: 35.0,
                             decoration: BoxDecoration(
-                              color: Color(ColorConstants.BOTTOM_PACKAGE_CARD_COLOR),
+                              color: Color(
+                                  ColorConstants.BOTTOM_PACKAGE_CARD_COLOR),
                             ),
                             child: Padding(
                               padding: EdgeInsets.only(right: 15.0),
@@ -200,10 +202,12 @@ class PackageCard extends ConsumerWidget {
                                 children: [
                                   InkWell(
                                     onTap: () {
-                                        Navigator.push(
+                                      Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => PackageDetailPage(packageId: package.id),
+                                          builder: (context) =>
+                                              PackageDetailPage(
+                                                  packageId: package.id),
                                         ),
                                       );
                                     },
@@ -238,4 +242,4 @@ class PackageCard extends ConsumerWidget {
       },
     );
   }
-}   
+}

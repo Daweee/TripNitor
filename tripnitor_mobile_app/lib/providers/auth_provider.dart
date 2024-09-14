@@ -10,37 +10,57 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login(String username, String password) async {
     state = state.copyWith(isLoading: true);
     try {
-        final response = await _authService.login(username, password);
-        final user = User.fromJson(response);
-        state = AuthState(user: user, isAuthenticated: true, isLoading: false, error: '');
+      final response = await _authService.login(username, password);
+      final user = User.fromJson(response);
+      state = AuthState(
+          user: user, isAuthenticated: true, isLoading: false, error: '');
     } catch (e) {
-        state = AuthState(isAuthenticated: false, isLoading: false, error: e.toString());
+      state = AuthState(
+          isAuthenticated: false, isLoading: false, error: e.toString());
     }
   }
 
-  Future<void> register(String username, String name, String email, String phoneNumber, String password) async {
+  Future<void> register(String username, String name, String email,
+      String phoneNumber, String password) async {
     state = state.copyWith(isLoading: true);
     try {
-      final response = await _authService.register(username, name, email, phoneNumber, password);
+      final response = await _authService.register(
+          username, name, email, phoneNumber, password);
       final user = User.fromJson(response);
-      state = AuthState(user: user, isAuthenticated: true, isLoading: false, error: '');
+      state = AuthState(
+          user: user, isAuthenticated: true, isLoading: false, error: '');
     } catch (e) {
-      state = AuthState(isAuthenticated: false, isLoading: false, error: e.toString());
+      state = AuthState(
+          isAuthenticated: false, isLoading: false, error: e.toString());
     }
   }
-    Future<void> logout(String refreshToken) async {
-        state = state.copyWith(isLoading: true);
-        try {
-            final response = await _authService.logout(refreshToken);
-            state = AuthState(isAuthenticated: false, isLoading: false, error: null);
-        } catch (e) {
-            state = AuthState(isAuthenticated: true, isLoading: false, error: e.toString());
-        }
+
+  Future<void> logout(String refreshToken) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final response = await _authService.logout(refreshToken);
+      state = AuthState(isAuthenticated: false, isLoading: false, error: null);
+    } catch (e) {
+      state = AuthState(
+          isAuthenticated: true, isLoading: false, error: e.toString());
     }
-    
-    void clearAuthState() {
-      state = AuthState();
+  }
+
+  Future<void> getUserDetails(String userId) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final response = await _authService.fetchUserDetails(userId);
+      final user = User.fromJson(response);
+      state = AuthState(
+          user: user, isAuthenticated: true, isLoading: false, error: null);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  void clearAuthState() {
+    state = AuthState();
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

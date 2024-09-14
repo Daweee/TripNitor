@@ -17,7 +17,6 @@ class _PackagePageState extends ConsumerState<PackagePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-        print('Fetching packages in initState...');
       ref.read(packageProvider.notifier).getAllPackages();
     });
   }
@@ -30,19 +29,20 @@ class _PackagePageState extends ConsumerState<PackagePage> {
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
         leading: IconButton(
-            icon: FaIcon(
-                FontAwesomeIcons.angleLeft, 
-                color: Colors.black,
-                size: 20.0,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
+          icon: FaIcon(
+            FontAwesomeIcons.angleLeft,
+            color: Colors.black,
+            size: 20.0,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-        title: Text('Package Trips', 
+        title: Text(
+          'Package Trips',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            ),
           ),
+        ),
         centerTitle: true,
         scrolledUnderElevation: 0,
       ),
@@ -52,18 +52,18 @@ class _PackagePageState extends ConsumerState<PackagePage> {
             height: screenHeight * 0.15,
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(30.0),
-                    bottomLeft: Radius.circular(30.0),
+              borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
+              ),
+              color: Color(ColorConstants.BACKGROUND_COLOR),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Color(0xFF000000).withOpacity(.1),
+                  offset: Offset(0, 4),
+                  blurRadius: 4,
                 ),
-                color: Color(ColorConstants.BACKGROUND_COLOR),
-                boxShadow: <BoxShadow>[
-                    BoxShadow(
-                        color: Color(0xFF000000).withOpacity(.1),
-                        offset: Offset(0, 4),
-                        blurRadius: 4,
-                    ),
-                ],
+              ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -74,38 +74,48 @@ class _PackagePageState extends ConsumerState<PackagePage> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         style: TextStyle(
-                            color: Colors.black87,
-                            ),
+                          color: Colors.black87,
+                        ),
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Package Type',
-                          labelStyle: TextStyle(color: Colors.black.withOpacity(.5)),
+                          labelStyle:
+                              TextStyle(color: Colors.black.withOpacity(.5)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
-                                color: Color(ColorConstants.PRIMARY_COLOR),
-                                ),
+                              color: Color(ColorConstants.PRIMARY_COLOR),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
-                                color: Color(ColorConstants.SECONDARY_COLOR), 
-                                width: 2,
-                                ),
+                              color: Color(ColorConstants.SECONDARY_COLOR),
+                              width: 2,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
-                                color: Color(ColorConstants.PRIMARY_COLOR), 
-                                width: 2,
-                                ),
+                              color: Color(ColorConstants.PRIMARY_COLOR),
+                              width: 2,
+                            ),
                           ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                         value: ref.watch(packageTypeFilterProvider),
-                        onChanged: (value) => ref.read(packageTypeFilterProvider.notifier).state = value,
+                        onChanged: (value) => ref
+                            .read(packageTypeFilterProvider.notifier)
+                            .state = value,
                         items: ['SOUTH', 'NORTH', 'CITY', null]
-                            .map((type) => DropdownMenuItem(value: type, child: Text(type ?? 'All Types', style: TextStyle(color: Colors.black.withOpacity(.5)),)))
+                            .map((type) => DropdownMenuItem(
+                                value: type,
+                                child: Text(
+                                  type ?? 'All Types',
+                                  style: TextStyle(
+                                      color: Colors.black.withOpacity(.5)),
+                                )))
                             .toList(),
                       ),
                     ),
@@ -118,33 +128,42 @@ class _PackagePageState extends ConsumerState<PackagePage> {
                           labelText: 'Visibility',
                           labelStyle: TextStyle(
                             color: Colors.black.withOpacity(.5),
-                            ),
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
-                                color: Color(ColorConstants.PRIMARY_COLOR),
-                                ),
+                              color: Color(ColorConstants.PRIMARY_COLOR),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
-                                color: Color(ColorConstants.SECONDARY_COLOR), 
-                                width: 2,
-                                ),
+                              color: Color(ColorConstants.SECONDARY_COLOR),
+                              width: 2,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
-                                color: Color(ColorConstants.PRIMARY_COLOR), 
-                                width: 2,
-                                ),
+                              color: Color(ColorConstants.PRIMARY_COLOR),
+                              width: 2,
+                            ),
                           ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                         value: ref.watch(visibilityFilterProvider),
-                        onChanged: (value) => ref.read(visibilityFilterProvider.notifier).state = value,
+                        onChanged: (value) => ref
+                            .read(visibilityFilterProvider.notifier)
+                            .state = value,
                         items: ['PRIVATE', 'PUBLIC', null]
-                            .map((visibility) => DropdownMenuItem(value: visibility, child: Text(visibility ?? 'All Visibilities', style: TextStyle(color: Colors.black.withOpacity(.5)),)))
+                            .map((visibility) => DropdownMenuItem(
+                                value: visibility,
+                                child: Text(
+                                  visibility ?? 'All Visibilities',
+                                  style: TextStyle(
+                                      color: Colors.black.withOpacity(.5)),
+                                )))
                             .toList(),
                       ),
                     ),

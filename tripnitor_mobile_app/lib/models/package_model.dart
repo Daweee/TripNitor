@@ -42,11 +42,14 @@ class Package {
       visibility: json['visibility'],
       startLocation: Location.fromJson(json['start_location']),
       finalDestination: Location.fromJson(json['final_destination']),
-      legs: (json['legs'] as List).map((leg) => Leg.fromJson(leg)).toList(),
+      legs: List<Leg>.from(json["legs"].map((x) => Leg.fromJson(x))),
       maxParticipants: json['max_participants'],
       currentParticipants: json['current_participants'],
-      startDate: json['start_date'] != null ? DateTime.parse(json['start_date']) : null,
-      endDate: json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
+      startDate: json['start_date'] != null
+          ? DateTime.parse(json['start_date'])
+          : null,
+      endDate:
+          json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
     );
   }
 }
@@ -90,7 +93,9 @@ class PackageState {
     return PackageState(
       status: json['status'],
       message: json['message'],
-      packages: (json['data']['packages'] as List).map((packageJson) => Package.fromJson(packageJson)).toList(),
+      packages: (json['data']['packages'] as List)
+          .map((packageJson) => Package.fromJson(packageJson))
+          .toList(),
       isLoading: false,
       error: null,
     );

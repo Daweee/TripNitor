@@ -8,6 +8,7 @@ class Booking(CustomPrimaryKeyModel):
     class BookingStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending'
         CONFIRMED = 'CONFIRMED', 'Confirmed'
+        ONGOING = 'ONGOING', 'Ongoing'
         CANCELLED = 'CANCELLED', 'Cancelled'
         COMPLETED = 'COMPLETED', 'Completed'
 

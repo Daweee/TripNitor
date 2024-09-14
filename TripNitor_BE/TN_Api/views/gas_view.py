@@ -26,7 +26,7 @@ class GasCreateView(CustomResponseMixin, CreateAPIView):
             gas = serializer.save()
             return self.get_custom_response(
                 status.HTTP_201_CREATED,
-                {'gas': serializer.data},
+                serializer.data,
                 'Gas created successfully'
             )
         except IntegrityError as e:
@@ -51,7 +51,7 @@ class GasListView(CustomResponseMixin, ListAPIView):
         
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'gases': serializer.data},
+            serializer.data,
             'Gas list retrieved successfully'
         )
 
@@ -67,7 +67,7 @@ class GasDetailView(CustomResponseMixin, RetrieveAPIView):
 
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'gas': serializer.data},
+            serializer.data,
             'Gas details retrieved successfully'
         )
 
@@ -85,7 +85,7 @@ class GasUpdateView(CustomResponseMixin, UpdateAPIView):
 
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'gases': serializer.data},
+            serializer.data,
             'Gas details updated successfully'
         )
 

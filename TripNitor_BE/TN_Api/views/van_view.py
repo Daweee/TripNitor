@@ -26,7 +26,7 @@ class VanCreateView(CustomResponseMixin,  CreateAPIView):
             van = serializer.save()
             return self.get_custom_response(
                 status.HTTP_201_CREATED,
-                {'van': serializer.data},
+                serializer.data,
                 'Van created successfully'
             )
         except IntegrityError as e:
@@ -51,7 +51,7 @@ class VanListView(CustomResponseMixin, ListAPIView):
 
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'van': serializer.data},
+            serializer.data,
             'Van list retrieved successfully'
         )
 
@@ -67,7 +67,7 @@ class VanDetailView(CustomResponseMixin, RetrieveAPIView):
 
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'van': serializer.data},
+            serializer.data,
             'Van details retrieved successfully'
         )
 
@@ -85,7 +85,7 @@ class VanUpdateView(CustomResponseMixin, UpdateAPIView):
 
         return self.get_custom_response(
             status.HTTP_200_OK,
-            {'van': serializer.data},
+            serializer.data,
             'Van details updated successfully'
         )
 

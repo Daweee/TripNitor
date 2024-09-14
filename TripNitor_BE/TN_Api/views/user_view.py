@@ -6,7 +6,7 @@ from ..serializers import (
 from rest_framework.generics import (
     GenericAPIView,
     # ListApiView,
-    # RetrieveAPIView,
+    RetrieveAPIView,
     CreateAPIView,
     # UpdateAPIView,
     # DestroyAPIView
@@ -18,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
+from TN_Api.models import User
 
 @extend_schema(tags=['users'])
 class RegisterView(CustomResponseMixin, CreateAPIView):
@@ -51,24 +52,22 @@ class LoginView(CustomResponseMixin, TokenObtainPairView):
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
-            token = {
-                'access': str(serializer.validated_data.get('access')),
-                'refresh': str(serializer.validated_data.get('refresh'))
+            user_data = {
+                'id': serializer.validated_data.get('user_id'),
+                'username': serializer.validated_data.get('username'),
+                'email': serializer.validated_data.get('email'),
+                'name': serializer.validated_data.get('name'),
+                'phone_number': serializer.validated_data.get('phone_number'),
+                'role': serializer.validated_data.get('role'),
+                'token': {
+                    'access': str(serializer.validated_data.get('access')),
+                    'refresh': str(serializer.validated_data.get('refresh'))
+                }
             }
 
             return self.get_custom_response(
                 status.HTTP_200_OK,
-                {
-                    'user': {
-                        'id': serializer.validated_data.get('user_id'),
-                        'username': serializer.validated_data.get('username'),
-                        'email': serializer.validated_data.get('email'),
-                        'name': serializer.validated_data.get('name'),
-                        'phone_number': serializer.validated_data.get('phone_number'),
-                        'role': serializer.validated_data.get('role'),
-                    },
-                    'token': token
-                },
+                user_data,
                 'User login successfully'
             )
         except Exception as e:
@@ -107,4 +106,20 @@ class LogoutView(CustomResponseMixin, GenericAPIView):
             status.HTTP_400_BAD_REQUEST, 
             None,
             serializer.errors
+        )
+
+@extend_schema(tags=['users'])
+class UserDetailView(CustomResponseMixin, RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'User details retrieved successfully'
         )

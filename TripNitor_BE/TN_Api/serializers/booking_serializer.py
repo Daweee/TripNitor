@@ -7,6 +7,7 @@ from .user_serializer import UserSerializer
 from .driver_serializer import DriverSerializer
 from dateutil.parser import parse
 from django.utils.timezone import is_aware, make_aware
+from pytz import timezone
 
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -38,6 +39,8 @@ class BookingCreationSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        representation['user'] = UserSerializer(instance.user).data
+        representation['package'] = PackageSerializer(instance.package).data
         representation['drivers'] = DriverSerializer(instance.drivers.all(), many=True).data
         return representation
     
@@ -64,7 +67,8 @@ class BookingPreviewSerializer(serializers.Serializer):
                 try:
                     parsed_date = parse(data[field])
                     if not is_aware(parsed_date):
-                        parsed_date = make_aware(parsed_date, timezone=settings.TIME_ZONE)
+                        tz = timezone(settings.TIME_ZONE)
+                        parsed_date = make_aware(parsed_date, tz)
                     data[field] = parsed_date
                 except ValueError as e:
                     raise serializers.ValidationError({field: f"Invalid date format: {str(e)}"})
