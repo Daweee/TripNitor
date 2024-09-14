@@ -25,14 +25,14 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -80,7 +80,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   Widget _registrationForm(BuildContext context) {
     return SingleChildScrollView(
       child: Form(
-        key: _formKey, 
+        key: _formKey,
         child: Column(
           children: [
             CustomeFormField(
@@ -102,8 +102,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your name';
                 }
-                if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                  return 'Please enter a valid name (letters only!)';
+                if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
+                  return 'Please enter a valid name (letters and spaces only!)';
                 }
                 return null;
               },
@@ -180,7 +180,9 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               },
             ),
             _registrationButton(),
-            SizedBox(height: 30,),
+            SizedBox(
+              height: 30,
+            ),
             _AlreadyHaveAnAccount(),
           ],
         ),
@@ -190,7 +192,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   Widget _registrationButton() {
     final authState = ref.watch(authProvider);
-    
+
     return Column(
       children: [
         Container(
@@ -205,84 +207,96 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
-            width: MediaQuery.sizeOf(context).width ,
+            width: MediaQuery.sizeOf(context).width,
             height: MediaQuery.sizeOf(context).height * .06,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
               ),
               onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                try {
-                  final authNotifier = ref.read(authProvider.notifier);
-                  await authNotifier.register(
-                    _usernameController.text.trim(),
-                    _nameController.text.trim(),
-                    _emailController.text.trim(),
-                    _phoneNumberController.text.trim(),
-                    _passwordController.text.trim(),
-                  );
-
-                  // Check the authentication state after registration
-                  final updatedAuthState = ref.read(authProvider);
-                  print("Registration completed. isAuthenticated: ${updatedAuthState.isAuthenticated}");
-
-                  if (updatedAuthState.error == null || updatedAuthState.error!.isEmpty) {
-                    // Registration successful, attempt automatic login
-                    await authNotifier.login(
+                if (_formKey.currentState!.validate()) {
+                  try {
+                    final authNotifier = ref.read(authProvider.notifier);
+                    await authNotifier.register(
                       _usernameController.text.trim(),
+                      _nameController.text.trim(),
+                      _emailController.text.trim(),
+                      _phoneNumberController.text.trim(),
                       _passwordController.text.trim(),
                     );
-                    
-                    final loginState = ref.read(authProvider);
-                    if (loginState.isAuthenticated) {
-                      // Login successful, navigate to home page
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomePage()), // Replace with your actual HomePage
+
+                    // Check the authentication state after registration
+                    final updatedAuthState = ref.read(authProvider);
+                    print(
+                        "Registration completed. isAuthenticated: ${updatedAuthState.isAuthenticated}");
+
+                    if (updatedAuthState.error == null ||
+                        updatedAuthState.error!.isEmpty) {
+                      // Registration successful, attempt automatic login
+                      await authNotifier.login(
+                        _usernameController.text.trim(),
+                        _passwordController.text.trim(),
                       );
+
+                      final loginState = ref.read(authProvider);
+                      if (loginState.isAuthenticated) {
+                        // Login successful, navigate to home page
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  HomePage()), // Replace with your actual HomePage
+                        );
+                      } else {
+                        // Login failed, show message and navigate to login page
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Registration successful. Please log in.')),
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  LoginPage()), // Replace with your actual LoginPage
+                        );
+                      }
                     } else {
-                      // Login failed, show message and navigate to login page
+                      // Registration failed
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Registration successful. Please log in.')),
-                      );
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your actual LoginPage
+                        SnackBar(
+                            content: Text(updatedAuthState.error ??
+                                'Registration failed. Please try again.')),
                       );
                     }
-                  } else {
-                    // Registration failed
+                  } catch (e) {
+                    // Handle any exceptions
+                    print("Error during registration or login: $e");
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(updatedAuthState.error ?? 'Registration failed. Please try again.')),
+                      SnackBar(
+                          content:
+                              Text('An error occurred. Please try again.')),
                     );
                   }
-                } catch (e) {
-                  // Handle any exceptions
-                  print("Error during registration or login: $e");
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('An error occurred. Please try again.')),
-                  );
                 }
-              }
-            },
+              },
               child: authState.isLoading
-          ? Center(
-                child: SizedBox(
-                    width: 25.0,  
-                    height: 25.0, 
-                    child: CircularProgressIndicator(
+                  ? Center(
+                      child: SizedBox(
+                        width: 25.0,
+                        height: 25.0,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3.0,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'Register',
+                      style: TextStyle(
                         color: Colors.white,
-                        strokeWidth: 3.0,
+                      ),
                     ),
-                ),
-            ) 
-          : Text(
-                'Register',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
             ),
           ),
         ),
