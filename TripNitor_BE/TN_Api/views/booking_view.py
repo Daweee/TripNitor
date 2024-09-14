@@ -52,8 +52,9 @@ class UserBookingListView(CustomResponseMixin, ListAPIView):
                     )
                 ).order_by('custom_order', '-created_at')
             else:
-                return queryset.filter(status=status_param.upper())
-        return queryset
+                return queryset.filter(status=status_param.upper()).order_by('-created_at')
+    
+        return queryset.order_by('-created_at')
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
