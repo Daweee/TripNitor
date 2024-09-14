@@ -14,7 +14,7 @@ class BookingPage extends ConsumerStatefulWidget {
 }
 
 class _BookingPageState extends ConsumerState<BookingPage> {
-  String _selectedFilter = 'ONGOING';
+  String _selectedFilter = 'ALL';
 
   @override
   void initState() {
@@ -28,8 +28,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
 
-    final sortedBookings = List.from(bookingState.bookingList)
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final bookings = bookingState.bookingList;
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -66,11 +65,10 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                         .getUserBookings(_selectedFilter);
                   },
                   items: const <String>[
+                    'ALL',
                     'PENDING',
                     'CONFIRMED',
                     'ONGOING',
-                    'CANCELLED',
-                    'COMPLETED'
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -85,12 +83,12 @@ class _BookingPageState extends ConsumerState<BookingPage> {
       ),
       body: bookingState.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : sortedBookings.isEmpty
+          : bookings.isEmpty
               ? const Center(child: Text('No bookings found.'))
               : ListView.builder(
-                  itemCount: sortedBookings.length,
+                  itemCount: bookings.length,
                   itemBuilder: (context, index) {
-                    final booking = sortedBookings[index];
+                    final booking = bookings[index];
                     try {
                       return InkWell(
                         onTap: () {

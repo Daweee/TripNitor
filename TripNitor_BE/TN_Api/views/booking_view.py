@@ -13,6 +13,7 @@ from ..models import Booking
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
+from django.db.models import Case, When, IntegerField
 
 @extend_schema(tags=['bookings'])
 class BookingListView(CustomResponseMixin, ListAPIView):
@@ -36,14 +37,22 @@ class UserBookingListView(CustomResponseMixin, ListAPIView):
         user = self.request.user
         queryset = Booking.objects.filter(user=user)
 
-        status = self.request.query_params.get('status', None)
-        if status:
-            queryset = queryset.filter(status=status)
-        else:
-            statuses = self.request.query_params.getlist('status[]')
-            if statuses:
-                queryset = queryset.filter(status__in=statuses)
-        
+        status_param = self.request.query_params.get('status', None)
+        if status_param:
+            if status_param.upper() == 'ALL':
+                return queryset.annotate(
+                    custom_order=Case(
+                        When(status='PENDING', then=0),
+                        When(status='CONFIRMED', then=1),
+                        When(status='ONGOING', then=2),
+                        When(status='COMPLETED', then=3),
+                        When(status='CANCELLED', then=4),
+                        default=5,
+                        output_field=IntegerField(),
+                    )
+                ).order_by('custom_order', '-created_at')
+            else:
+                return queryset.filter(status=status_param.upper())
         return queryset
 
     def get(self, request, *args, **kwargs):
