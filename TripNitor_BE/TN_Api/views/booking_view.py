@@ -36,26 +36,14 @@ class UserBookingListView(CustomResponseMixin, ListAPIView):
     def get_queryset(self):
         user = self.request.user
         queryset = Booking.objects.filter(user=user)
-
-        status_param = self.request.query_params.get('status', None)
-        if status_param:
-            if status_param.upper() == 'ALL':
-                return queryset.annotate(
-                    custom_order=Case(
-                        When(status='PENDING', then=0),
-                        When(status='CONFIRMED', then=1),
-                        When(status='ONGOING', then=2),
-                        When(status='COMPLETED', then=3),
-                        When(status='CANCELLED', then=4),
-                        default=5,
-                        output_field=IntegerField(),
-                    )
-                ).order_by('custom_order', '-created_at')
-            else:
-                return queryset.filter(status=status_param.upper()).order_by('-created_at')
-    
+        
+        status_param = self.request.query_params.get('status', 'ALL').upper()
+        
+        if status_param != 'ALL':
+            queryset = queryset.filter(status=status_param)
+        
         return queryset.order_by('-created_at')
-
+    
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
