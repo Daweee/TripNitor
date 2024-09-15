@@ -56,6 +56,23 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
     }
   }
 
+  Future<void> getAllBookings() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final bookingList = await _bookingService.getAllBookings();
+      state = state.copyWith(
+        isLoading: false,
+        bookingList: bookingList,
+        status: 200,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load list of bookings: $e',
+      );
+    }
+  }
+
   Future<void> getBookingDetails(String bookingId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {

@@ -130,4 +130,28 @@ class BookingService {
       throw Exception('Failed to load booking details: ${e.message}');
     }
   }
+
+  Future<List<Booking>> getAllBookings() async {
+    try {
+      final response = await _dio.get('${HTTPConstants.BASE_URL}api/bookings/');
+
+      if (response.statusCode == 200) {
+        final responseData = response.data as Map<String, dynamic>?;
+        final dynamicData = responseData?['data'] as List<dynamic>;
+
+        final List<Map<String, dynamic>> data =
+            dynamicData.whereType<Map<String, dynamic>>().toList();
+        return data.map((json) => Booking.fromJson(json)).toList();
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error:
+              'Failed to load list of bookings. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to load user bookings: ${e.message}');
+    }
+  }
 }
