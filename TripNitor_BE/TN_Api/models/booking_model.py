@@ -1,8 +1,10 @@
+from random import shuffle
 from django.db import models
 from django.forms import ValidationError
 from .base_model import CustomPrimaryKeyModel
 from .package_model import Package
 from .user_model import User
+from django.db.models import Q
 
 class Booking(CustomPrimaryKeyModel):
     class BookingStatus(models.TextChoices):
@@ -20,6 +22,8 @@ class Booking(CustomPrimaryKeyModel):
     package = models.ForeignKey(Package, related_name='bookings', on_delete=models.CASCADE)
     user = models.ForeignKey('User', related_name='bookings', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=BookingStatus.choices, default=BookingStatus.PENDING)
+    base_fare = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    number_of_nights = models.PositiveIntegerField(null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_passengers = models.PositiveIntegerField()
     mode_of_payment = models.CharField(max_length=20, choices=PaymentMode.choices, default=PaymentMode.CASH)
@@ -44,23 +48,28 @@ class Booking(CustomPrimaryKeyModel):
         self.calculate_final_fare()
         
         super().save(*args, **kwargs)
-        if self.status == self.BookingStatus.PENDING:
-            self.assign_drivers()
+
+    def get_nights(self):
+        return max((self.end_date - self.start_date).days - 1, 0)
 
     def calculate_final_fare(self):
-        self.total_price = self.package.base_price * 2
+        self.base_fare = 3000
+        number_of_nights = self.get_nights()
+        self.number_of_nights = number_of_nights
+        self.total_price = self.package.base_price + self.base_fare + (number_of_nights * 1000)
 
-    def assign_drivers(self):
-        from .driver_assignment_model import DriverAssignment
-        required_vans = (self.number_of_passengers + 14) // 15 
-        available_drivers = self.get_available_drivers()
+    # def assign_drivers(self):
+    #     from .driver_assignment_model import DriverAssignment
+    #     required_vans = (self.number_of_passengers + 14) // 15 
+    #     available_drivers = list(self.get_available_drivers())
+    #     shuffle(available_drivers)  # Randomize the order of available drivers
 
-        assigned_drivers = []
-        for driver in available_drivers[:required_vans]:
-            DriverAssignment.objects.create(driver=driver, booking=self)
-            assigned_drivers.append(driver)
+    #     assigned_drivers = []
+    #     for driver in available_drivers[:required_vans]:
+    #         DriverAssignment.objects.create(driver=driver, booking=self)
+    #         assigned_drivers.append(driver)
         
-        return assigned_drivers
+    #     return assigned_drivers
     
     def get_available_drivers(self):
         from .driver_model import Driver 
@@ -78,3 +87,10 @@ class Booking(CustomPrimaryKeyModel):
         available_drivers = self.get_available_drivers()
         total_capacity = sum(driver.van.max_passengers for driver in available_drivers)
         return total_capacity
+
+    def preview_driver_assignment(self):
+        required_vans = (self.number_of_passengers + 14) // 15 
+        available_drivers = list(self.get_available_drivers())
+        shuffle(available_drivers)  # Randomize the order of available drivers
+
+        return available_drivers[:required_vans]
