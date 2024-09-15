@@ -145,21 +145,32 @@ class BookingPreviewView(APIView):
                 number_of_passengers=number_of_passengers
             )
 
-            available_drivers = temp_booking.get_available_drivers()
-            required_vans = (number_of_passengers + 14) // 15
-            assigned_drivers = available_drivers[:required_vans]
+            temp_booking.clean()  # Ensure validation is applied
             temp_booking.calculate_final_fare()
+
+            # Calculate total price
             total_price = temp_booking.total_price
+            base_fare = temp_booking.base_fare
+            number_of_nights = temp_booking.number_of_nights
+
+            assigned_drivers = temp_booking.preview_driver_assignment()
+            # available_drivers = temp_booking.get_available_drivers()
+            # required_vans = (number_of_passengers + 14) // 15
+            # assigned_drivers = available_drivers[:required_vans]
 
             preview_data = {
                 'package': package.package_name,
                 'start_date': start_date,
                 'end_date': end_date,
                 'number_of_passengers': number_of_passengers,
-                'base_fare': package.base_price,
+                'base_fare': base_fare,
+                'number_of_nights': number_of_nights,
+                'base_package_price': package.base_price,
                 'total_price': total_price,
+                
                 'assigned_drivers': [
                     {
+                        'id': driver.id,
                         'name': driver.user.name,
                         'phone_number': driver.user.phone_number,
                         'van_model': driver.van.model,
