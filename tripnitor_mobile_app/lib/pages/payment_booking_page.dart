@@ -331,6 +331,10 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                       children: [
                         _buildPaymentInfoRow("Base Fare",
                             "₱${bookingState.previewBooking!.baseFare.toStringAsFixed(2)}"),
+                        _buildPaymentInfoRow("Package Fare",
+                            "₱${bookingState.previewBooking!.basePackagePrice.toStringAsFixed(2)}"),
+                        _buildPaymentInfoRow("Booking Duration",
+                            "${bookingState.previewBooking!.numberOfNights} nights x ₱1000.00"),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 7.0),
                           child: Divider(
@@ -340,7 +344,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             thickness: 1,
                           ),
                         ),
-                        _buildPaymentInfoRow("Total Fare",
+                        _buildPaymentInfoRow("Total Price",
                             "₱${bookingState.previewBooking!.totalPrice.toStringAsFixed(2)}",
                             isBold: true),
                       ],

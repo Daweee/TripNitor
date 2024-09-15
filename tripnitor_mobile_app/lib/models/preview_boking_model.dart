@@ -3,7 +3,9 @@ class BookingPreview {
   final DateTime startDate;
   final DateTime endDate;
   final int numberOfPassengers;
-  final double baseFare;
+  final int baseFare;
+  final int numberOfNights;
+  final double basePackagePrice;
   final double totalPrice;
   final List<AssignedDriver> assignedDrivers;
 
@@ -13,33 +15,36 @@ class BookingPreview {
     required this.endDate,
     required this.numberOfPassengers,
     required this.baseFare,
+    required this.numberOfNights,
+    required this.basePackagePrice,
     required this.totalPrice,
     required this.assignedDrivers,
   });
 
-  factory BookingPreview.fromJson(Map<String, dynamic> json) {
-    return BookingPreview(
-      package: json['package'],
-      startDate: DateTime.parse(json['start_date']),
-      endDate: DateTime.parse(json['end_date']),
-      numberOfPassengers: json['number_of_passengers'],
-      baseFare: json['base_fare'].toDouble(),
-      totalPrice: json['total_price'].toDouble(),
-      assignedDrivers: (json['assigned_drivers'] as List)
-          .map((driver) => AssignedDriver.fromJson(driver))
-          .toList(),
-    );
-  }
+  factory BookingPreview.fromJson(Map<String, dynamic> json) => BookingPreview(
+        package: json["package"],
+        startDate: DateTime.parse(json["start_date"]),
+        endDate: DateTime.parse(json["end_date"]),
+        numberOfPassengers: json["number_of_passengers"],
+        baseFare: json["base_fare"],
+        numberOfNights: json["number_of_nights"],
+        basePackagePrice: json["base_package_price"],
+        totalPrice: json["total_price"],
+        assignedDrivers: List<AssignedDriver>.from(
+            json["assigned_drivers"].map((x) => AssignedDriver.fromJson(x))),
+      );
 
   Map<String, dynamic> toJson() => {
-        'package': package,
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'number_of_passengers': numberOfPassengers,
-        'base_fare': baseFare,
-        'total_price': totalPrice,
-        'assigned_drivers':
-            assignedDrivers.map((driver) => driver.toJson()).toList(),
+        "package": package,
+        "start_date": startDate.toIso8601String(),
+        "end_date": endDate.toIso8601String(),
+        "number_of_passengers": numberOfPassengers,
+        "base_fare": baseFare,
+        "number_of_nights": numberOfNights,
+        "base_package_price": basePackagePrice,
+        "total_price": totalPrice,
+        "assigned_drivers":
+            List<dynamic>.from(assignedDrivers.map((x) => x.toJson())),
       };
 }
 
@@ -100,12 +105,14 @@ class PreviewBookingResponse {
 }
 
 class AssignedDriver {
+  final String id;
   final String name;
   final String phoneNumber;
   final String vanModel;
   final String vanPlateNumber;
 
   AssignedDriver({
+    required this.id,
     required this.name,
     required this.phoneNumber,
     required this.vanModel,
@@ -114,6 +121,7 @@ class AssignedDriver {
 
   factory AssignedDriver.fromJson(Map<String, dynamic> json) {
     return AssignedDriver(
+      id: json['id'],
       name: json['name'],
       phoneNumber: json['phone_number'],
       vanModel: json['van_model'],
@@ -122,6 +130,7 @@ class AssignedDriver {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'name': name,
         'phone_number': phoneNumber,
         'van_model': vanModel,
