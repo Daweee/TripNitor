@@ -86,7 +86,11 @@ class BookingDetailsContent extends StatelessWidget {
           ]),
           _buildDriverSection(),
           _buildSection("Payment Summary", [
-            _buildPaymentInfoRow("Base Fare", "₱${booking.package.basePrice}"),
+            _buildPaymentInfoRow("Base Fare", "₱${booking.baseFare}"),
+            _buildPaymentInfoRow(
+                "Package Fare", "₱${booking.package.basePrice}"),
+            _buildPaymentInfoRow("Booking Duration",
+                "${booking.numberOfNights} nights x ₱1000.00"),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 7.0),
               child: Divider(
