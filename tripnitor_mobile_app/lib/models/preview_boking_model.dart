@@ -92,7 +92,7 @@ class PreviewBookingResponse {
   factory PreviewBookingResponse.fromJson(Map<String, dynamic> json) {
     return PreviewBookingResponse(
       status: json['status'],
-      bookingPreview: BookingPreview.fromJson(json['data']['booking_preview']),
+      bookingPreview: BookingPreview.fromJson(json['data']),
       message: json['message'],
     );
   }

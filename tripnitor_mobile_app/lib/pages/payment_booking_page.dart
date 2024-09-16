@@ -403,9 +403,15 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
+                          final driverIds = bookingState
+                              .previewBooking!.assignedDrivers
+                              .map((driver) => driver.id)
+                              .toList();
+
                           final booking = BookingCreationRequest(
                             user: authState.user!.id,
                             package: widget.packageId,
+                            assigned_drivers: driverIds,
                             numberOfPassengers:
                                 bookingState.previewBooking!.numberOfPassengers,
                             modeOfPayment: _selectedPaymentMethod,

@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/foundation.dart';
 import 'package:tripnitor_mobile_app/models/preview_boking_model.dart';
 
@@ -94,6 +96,7 @@ class BookingState {
 class BookingCreationRequest {
   final String user;
   final String package;
+  final List<String> assigned_drivers;
   final int numberOfPassengers;
   final String modeOfPayment;
   final DateTime startDate;
@@ -102,6 +105,7 @@ class BookingCreationRequest {
   BookingCreationRequest({
     required this.user,
     required this.package,
+    required this.assigned_drivers,
     required this.numberOfPassengers,
     required this.modeOfPayment,
     required this.startDate,
@@ -109,11 +113,12 @@ class BookingCreationRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'user': user,
-        'package': package,
-        'number_of_passengers': numberOfPassengers,
-        'mode_of_payment': modeOfPayment,
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
+        "user": user,
+        "package": package,
+        "drivers": List<dynamic>.from(assigned_drivers.map((x) => x)),
+        "number_of_passengers": numberOfPassengers,
+        "mode_of_payment": modeOfPayment,
+        "start_date": startDate.toIso8601String(),
+        "end_date": endDate.toIso8601String(),
       };
 }
