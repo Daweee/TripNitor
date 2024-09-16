@@ -180,7 +180,7 @@ class BookingPreviewView(APIView):
             }
             return Response({
                 'status': status.HTTP_200_OK,
-                'data': {'booking_preview': preview_data},
+                'data': preview_data,
                 'message': 'Booking preview generated successfully.'
             })
         else:
