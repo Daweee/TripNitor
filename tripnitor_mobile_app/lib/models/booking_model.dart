@@ -13,6 +13,8 @@ class Booking {
   final Package package;
   final List<Driver> drivers;
   final String status;
+  final String baseFare;
+  final int numberOfNights;
   final String totalPrice;
   final int numberOfPassengers;
   final String modeOfPayment;
@@ -27,6 +29,8 @@ class Booking {
     required this.package,
     required this.drivers,
     required this.status,
+    required this.baseFare,
+    required this.numberOfNights,
     required this.totalPrice,
     required this.numberOfPassengers,
     required this.modeOfPayment,
@@ -40,9 +44,9 @@ class Booking {
         id: json["id"],
         user: User.fromJson(json["user"]),
         package: Package.fromJson(json["package"]),
-        drivers:
-            List<Driver>.from(json["drivers"].map((x) => Driver.fromJson(x))),
         status: json["status"],
+        baseFare: json["base_fare"],
+        numberOfNights: json["number_of_nights"],
         totalPrice: json["total_price"],
         numberOfPassengers: json["number_of_passengers"],
         modeOfPayment: json["mode_of_payment"],
@@ -50,6 +54,8 @@ class Booking {
         updatedAt: DateTime.parse(json["updated_at"]),
         startDate: DateTime.parse(json["start_date"]),
         endDate: DateTime.parse(json["end_date"]),
+        drivers:
+            List<Driver>.from(json["drivers"].map((x) => Driver.fromJson(x))),
       );
 }
 
