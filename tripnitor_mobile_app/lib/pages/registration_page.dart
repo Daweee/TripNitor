@@ -257,8 +257,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  LoginPage()), // Replace with your actual LoginPage
+                            builder: (context) => LoginPage(),
+                          ), // Replace with your actual LoginPage
                         );
                       }
                     } else {

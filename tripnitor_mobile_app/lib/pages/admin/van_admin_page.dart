@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tripnitor_mobile_app/pages/admin/forms/van_form.dart';
 
 import '../../constants/constant.dart';
 import 'admin_drawer.dart';
@@ -40,6 +41,18 @@ class _VanAdminPageState extends State<VanAdminPage> {
       drawer: const AdminDrawer(),
       body: Center(
         child: Text('Admin Homepage Content'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VanForm(),
+            ),
+          );
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       ),
     );
   }
