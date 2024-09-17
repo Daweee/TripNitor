@@ -28,6 +28,15 @@ class User {
         role: json["role"],
         token: json["token"] != null ? Token.fromJson(json["token"]) : null,
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "username": username,
+        "name": name,
+        "email": email,
+        "phone_number": phoneNumber,
+        "role": role,
+      };
 }
 
 class AuthState {
