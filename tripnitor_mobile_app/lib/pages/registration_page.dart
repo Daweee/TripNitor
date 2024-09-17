@@ -127,6 +127,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               labelText: "Phone Number",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _phoneNumberController,
+              keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your phone number';
@@ -225,14 +226,10 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                       _passwordController.text.trim(),
                     );
 
-                    // Check the authentication state after registration
                     final updatedAuthState = ref.read(authProvider);
-                    print(
-                        "Registration completed. isAuthenticated: ${updatedAuthState.isAuthenticated}");
 
                     if (updatedAuthState.error == null ||
                         updatedAuthState.error!.isEmpty) {
-                      // Registration successful, attempt automatic login
                       await authNotifier.login(
                         _usernameController.text.trim(),
                         _passwordController.text.trim(),
@@ -240,15 +237,11 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
                       final loginState = ref.read(authProvider);
                       if (loginState.isAuthenticated) {
-                        // Login successful, navigate to home page
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  HomePage()), // Replace with your actual HomePage
+                          MaterialPageRoute(builder: (context) => HomePage()),
                         );
                       } else {
-                        // Login failed, show message and navigate to login page
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
@@ -258,11 +251,10 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => LoginPage(),
-                          ), // Replace with your actual LoginPage
+                          ),
                         );
                       }
                     } else {
-                      // Registration failed
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                             content: Text(updatedAuthState.error ??
@@ -270,8 +262,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                       );
                     }
                   } catch (e) {
-                    // Handle any exceptions
-                    print("Error during registration or login: $e");
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                           content:

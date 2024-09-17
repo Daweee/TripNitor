@@ -10,6 +10,7 @@ class CustomeFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final VoidCallback? onToggleObscureText;
   final bool isPassword;
+  final TextInputType? keyboardType;
 
   const CustomeFormField({
     super.key,
@@ -20,6 +21,7 @@ class CustomeFormField extends StatelessWidget {
     this.validator,
     this.onToggleObscureText,
     this.isPassword = false,
+    this.keyboardType,
   });
 
   @override
@@ -29,6 +31,7 @@ class CustomeFormField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: TextStyle(
