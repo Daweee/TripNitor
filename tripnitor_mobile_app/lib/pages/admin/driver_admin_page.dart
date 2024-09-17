@@ -3,7 +3,7 @@ import 'package:tripnitor_mobile_app/models/auth_model.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/models/gas_model.dart';
 import 'package:tripnitor_mobile_app/models/van_model.dart';
-import 'package:tripnitor_mobile_app/pages/admin/driver/driver_admin_profile.dart';
+import 'package:tripnitor_mobile_app/pages/admin/profile/driver_admin_profile.dart';
 import 'package:tripnitor_mobile_app/pages/admin/forms/drivers_form.dart';
 
 import '../../constants/constant.dart';
