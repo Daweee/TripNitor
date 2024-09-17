@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 
@@ -12,6 +13,7 @@ class DriverAdminProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
@@ -69,7 +71,7 @@ class DriverAdminProfile extends StatelessWidget {
                     SizedBox(
                       height: 8,
                     ),
-                    Text('Driver\'s ID: ${driver.user.id}'),
+                    Text('Driver\'s ID: ${driver.id}'),
                     SizedBox(
                       height: 8,
                     ),
@@ -80,7 +82,7 @@ class DriverAdminProfile extends StatelessWidget {
                       height: 8,
                     ),
                     Text(
-                        'Date Hired: ${driver.dateHired}'), // ${driver.user.email}
+                        'Date Hired: ${dateFormat.format(driver.dateHired)}'), // ${driver.user.email}
                   ],
                 ),
               ),
