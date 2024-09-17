@@ -116,6 +116,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
               labelText: "Phone Number",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _phoneNumberController,
+              keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a username';
