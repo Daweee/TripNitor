@@ -1,5 +1,3 @@
-import 'dart:ui_web';
-
 import 'package:flutter/material.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
@@ -29,7 +27,8 @@ class DriverAdminProfile extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(
-                      right: 16.0,
+                      left: 32.0,
+                      right: 16,
                     ),
                     child: CircleAvatar(
                       radius: 50,
@@ -38,28 +37,53 @@ class DriverAdminProfile extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Name: ${driver.user.name} ', // ${driver.user.name}
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                          'Email: ${driver.user.email}'), // ${driver.user.email}
-                      Text(
-                          'Username: ${driver.user.username}'), // ${driver.user.username}
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            'Name: ${driver.user.name} ', // ${driver.user.name}
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                            'Email: ${driver.user.email}'), // ${driver.user.email}
+                        Text(
+                            'Phone Number: ${driver.user.phoneNumber}'), // ${driver.user.username}
+                      ],
+                    ),
                   ),
                 ],
               ),
-
-              Text('Name: sdasd', // ${driver.user.name}
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Age: asdasdds'), // ${driver.user.email}
-              Text('Gender: asdasdasd'), // ${driver.user.username}
-              Text('Name: sdasd', // ${driver.user.name}
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Age: asdasdds'), // ${driver.user.email}
-              Text('Gender: asdasdasd'), // ${driver.user.username}
+              Container(
+                padding: EdgeInsets.only(left: 48, top: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Username: ${driver.user.username}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text('Role: ${driver.user.role}'),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text('Driver\'s ID: ${driver.user.id}'),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text(
+                        'Driver\'s License: ${driver.licenseNumber}', // ${driver.user.name}
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text(
+                        'Date Hired: ${driver.dateHired}'), // ${driver.user.email}
+                  ],
+                ),
+              ),
             ],
           ),
         ),
