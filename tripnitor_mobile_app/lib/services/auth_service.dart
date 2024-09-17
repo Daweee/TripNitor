@@ -31,8 +31,18 @@ class AuthService {
       });
       await _saveTokens(response.data['data']);
       return response.data['data'];
-    } catch (e) {
-      throw Exception('Failed to login: $e');
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final statusCode = e.response?.statusCode;
+        final errorMessage = e.response?.data['message'] ?? 'An error occurred';
+        if (statusCode == 400) {
+          throw Exception(errorMessage);
+        } else {
+          throw Exception('An unexpected error occurred');
+        }
+      } else {
+        throw Exception('No response from server');
+      }
     }
   }
 

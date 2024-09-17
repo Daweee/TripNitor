@@ -8,15 +8,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this._authService) : super(AuthState());
 
   Future<void> login(String username, String password) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final response = await _authService.login(username, password);
+
       final user = User.fromJson(response);
       state = AuthState(
-          user: user, isAuthenticated: true, isLoading: false, error: '');
+        user: user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: '',
+      );
     } catch (e) {
+      String errorMessage = 'Failed to login';
+      if (e is Exception) {
+        final message = e.toString();
+
+        if (message.startsWith('Exception: ')) {
+          errorMessage = message.substring('Exception: '.length);
+        } else {
+          errorMessage = message;
+        }
+      } else {
+        errorMessage = 'An unexpected error occurred';
+      }
+
       state = AuthState(
-          isAuthenticated: false, isLoading: false, error: e.toString());
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: errorMessage,
+      );
     }
   }
 
