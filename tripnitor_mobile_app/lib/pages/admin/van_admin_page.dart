@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/models/gas_model.dart';
 import 'package:tripnitor_mobile_app/models/van_model.dart';
 import 'package:tripnitor_mobile_app/pages/admin/forms/van_form.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/gas_admin_profile.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/van_admin_profile.dart';
+import 'package:tripnitor_mobile_app/providers/van_provider.dart';
 
 import '../../constants/constant.dart';
 import 'admin_drawer.dart';
 
-class VanAdminPage extends StatefulWidget {
+class VanAdminPage extends ConsumerStatefulWidget {
   const VanAdminPage({super.key});
 
   @override
-  State<VanAdminPage> createState() => _VanAdminPageState();
+  ConsumerState<VanAdminPage> createState() => _VanAdminPageState();
 }
 
-class _VanAdminPageState extends State<VanAdminPage> {
+class _VanAdminPageState extends ConsumerState<VanAdminPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(vanStateProvider.notifier).getAllVans();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final vanState = ref.watch(vanStateProvider);
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: PreferredSize(
@@ -43,7 +54,7 @@ class _VanAdminPageState extends State<VanAdminPage> {
         ),
       ),
       drawer: const AdminDrawer(),
-      body: _vanAdminList(context),
+      body: _vanAdminList(vanState),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -59,23 +70,7 @@ class _VanAdminPageState extends State<VanAdminPage> {
     );
   }
 
-  Widget _vanAdminList(BuildContext context) {
-    final List<Van> VanList = [
-      Van(
-        id: '0001',
-        model: 'Toyota',
-        plateNumber: 'AB-1234',
-        dateBought: DateTime(2024 - 1 - 2),
-        registrationExpiryDate: DateTime(2024 - 1 - 25),
-        maxPassengers: 15,
-        gas: Gas(
-          id: '0001',
-          gasName: 'Unleaded',
-          gasPrice: '\$1.5',
-        ),
-      )
-    ];
-
+  Widget _vanAdminList(vanState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -94,9 +89,9 @@ class _VanAdminPageState extends State<VanAdminPage> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListView.builder(
-              itemCount: VanList.length,
+              itemCount: vanState.vanList?.length ?? 0,
               itemBuilder: (context, index) {
-                return _vanBuildCard(context, VanList[index]);
+                return _vanBuildCard(context, vanState.vanList![index]);
               },
             ),
           ),

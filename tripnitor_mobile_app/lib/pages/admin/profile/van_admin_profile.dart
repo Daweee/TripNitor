@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/van_model.dart';
 
@@ -12,6 +13,7 @@ class VanAdminProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
@@ -64,11 +66,13 @@ class VanAdminProfile extends StatelessWidget {
                     SizedBox(
                       height: 8,
                     ),
-                    Text('Date of Purchase: ${van.dateBought}'),
+                    Text(
+                        'Date of Purchase: ${dateFormat.format(van.dateBought)}'),
                     SizedBox(
                       height: 8,
                     ),
-                    Text('Data of Expiration: ${van.registrationExpiryDate}'),
+                    Text(
+                        'Data of Expiration: ${dateFormat.format(van.registrationExpiryDate)}'),
                     SizedBox(
                       height: 8,
                     ),
@@ -79,7 +83,7 @@ class VanAdminProfile extends StatelessWidget {
                       height: 8,
                     ),
                     Text(
-                        'Price of Gas: ${van.gas.gasPrice}'), // ${driver.user.email}
+                        'Price of Gas: ₱${van.gas.gasPrice}/liter'), // ${driver.user.email}
                   ],
                 ),
               ),
