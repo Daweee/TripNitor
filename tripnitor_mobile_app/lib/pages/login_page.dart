@@ -164,7 +164,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text('Login failed. Please try again.')),
+                            content: Text('${ref.read(authProvider).error}')),
                       );
                     }
                   }
