@@ -17,10 +17,12 @@ from django.db.models import Case, When, IntegerField
 
 @extend_schema(tags=['bookings'])
 class BookingListView(CustomResponseMixin, ListAPIView):
-    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
+        return Booking.objects.all().order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return self.get_custom_response(
