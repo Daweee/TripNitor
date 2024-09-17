@@ -15,6 +15,7 @@ from rest_framework.generics import (
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
+from rest_framework.exceptions import NotFound
 
 @extend_schema(tags=['drivers'])
 class DriverCreateView(CustomResponseMixin, CreateAPIView):
@@ -70,33 +71,40 @@ class DriverDetailView(CustomResponseMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
-    lookup_field = 'user__id'
+    lookup_field = 'id'
 
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
             return self.get_custom_response(
-                status.HTTP_200_OK,
-                serializer.data,
+                status.HTTP_200_OK, 
+                serializer.data, 
                 'Driver details retrieved successfully'
             )
-        except Driver.DoesNotExist:
+        except NotFound:
             return self.get_custom_response(
                 status.HTTP_404_NOT_FOUND,
                 None,
                 "No Driver matches the given query."
-            , status=status.HTTP_404_NOT_FOUND)
-
+            )
+        
     def get_object(self):
-        user_id = self.kwargs.get(self.lookup_field)
+        driver_id = self.kwargs.get('id')
         try:
-            user = User.objects.get(id=user_id)
-            driver = get_object_or_404(Driver, user=user)
-            self.check_object_permissions(self.request, driver)
-            return driver
-        except User.DoesNotExist:
-            raise Driver.DoesNotExist
+            return Driver.objects.get(id=driver_id)
+        except Driver.DoesNotExist:
+            raise NotFound("No Driver matches the given query.")
+
+    # def get_object(self):
+    #     user_id = self.kwargs.get(self.lookup_field)
+    #     try:
+    #         user = User.objects.get(id=user_id)
+    #         driver = get_object_or_404(Driver, user=user)
+    #         self.check_object_permissions(self.request, driver)
+    #         return driver
+    #     except User.DoesNotExist:
+    #         raise Driver.DoesNotExist
 
     # def retrieve(self, request, *args, **kwargs):
     #     instance = self.get_object()
@@ -113,6 +121,7 @@ class DriverUpdateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
+    lookup_field = 'id'
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -138,6 +147,7 @@ class DriverDeleteView(CustomResponseMixin, DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
     serializer_class = DriverSerializer
+    lookup_field = 'id'
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
