@@ -25,7 +25,7 @@ urlpatterns = [
     path('vans/unassigned/', UnassignedVanListView.as_view(), name='unassigned_van_list'),
     path('vans/<str:pk>/', VanDetailView.as_view(), name='get_van'),
     path('vans/<str:pk>/update/', VanUpdateView.as_view(), name='update_van'),
-    path('vans/<str:pk>/delete', VanDeleteView.as_view(), name='delete_van'),
+    path('vans/<str:pk>/delete/', VanDeleteView.as_view(), name='delete_van'),
 
     path('gas/register/', GasCreateView.as_view(), name='register_gas'),
     path('gas/', GasListView.as_view(), name='gas_list'),
