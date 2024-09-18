@@ -31,7 +31,7 @@ urlpatterns = [
     path('gas/', GasListView.as_view(), name='gas_list'),
     path('gas/<str:pk>/', GasDetailView.as_view(), name='get_gas'),
     path('gas/<str:pk>/update/', GasUpdateView.as_view(), name='update_gas'),
-    path('gas/<str:pk>/delete', GasDeleteView.as_view(), name='delete_gas'),
+    path('gas/<str:pk>/delete/', GasDeleteView.as_view(), name='delete_gas'),
 
     path('bookings/user-bookings/', UserBookingListView.as_view(), name='user-bookings'),
     path('bookings/status/<str:bookingstatus>/', GetBookingStatusListView.as_view(), name='booking-status'),
