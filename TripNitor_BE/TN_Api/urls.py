@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     RegisterView, LoginView, LogoutView, UserDetailView, 
     DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView,
-    VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView,
+    VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView, UnassignedVanListView,
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
     BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView
@@ -22,6 +22,7 @@ urlpatterns = [
 
     path('vans/register/', VanCreateView.as_view(), name='register_van'),
     path('vans/', VanListView.as_view(), name='van_list'),
+    path('vans/unassigned/', UnassignedVanListView.as_view(), name='unassigned_van_list'),
     path('vans/<str:pk>/', VanDetailView.as_view(), name='get_van'),
     path('vans/<str:pk>/update/', VanUpdateView.as_view(), name='update_van'),
     path('vans/<str:pk>/delete', VanDeleteView.as_view(), name='delete_van'),
