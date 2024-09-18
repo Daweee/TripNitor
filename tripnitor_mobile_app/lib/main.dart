@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/admin/admin_homepage.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_homepage.dart';
 import 'package:tripnitor_mobile_app/pages/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 import 'package:tripnitor_mobile_app/pages/package_page.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
+import 'package:tripnitor_mobile_app/widgets/package_card.dart';
+import 'package:tripnitor_mobile_app/widgets/shimmer_package_card.dart';
 import 'pages/auth_page.dart';
 import 'providers/auth_provider.dart';
 import 'constants/constant.dart';
@@ -36,10 +39,13 @@ class MyApp extends ConsumerWidget {
       //   ),
       // home: LoginPage(),
       //   home: RegistrationPage(),
-      home: authState.isAuthenticated ? AuthPage() : LoginPage(),
-      //home: PackageTrips(),
+      // home: authState.isAuthenticated ? AuthPage() : LoginPage(),
+      // home: PackageTrips(),
+      // home: ShimmerPackageCard(),
+      // home: PackagePage(),
       // home: HomePage(),
-      //   home: AdminDashboard(),
+      // home: AdminDashboard(),
+      home: DriverHomePage(),
     );
   }
 }

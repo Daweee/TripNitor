@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
-class DriversForm extends ConsumerStatefulWidget {
-  const DriversForm({super.key});
+final selectedDateProvider = StateProvider<DateTime?>((ref) => null);
 
+class DriversForm extends ConsumerStatefulWidget {
+  DriversForm({Key? key})
+      : super(key: key); // ({Key? key}) : super(key: key); / ({super.key});
   @override
   ConsumerState<DriversForm> createState() => _DriversFormState();
 }
@@ -20,11 +23,14 @@ class _DriversFormState extends ConsumerState<DriversForm> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _licenseNumberController =
       TextEditingController();
-  final TextEditingController _dateHiredController = TextEditingController();
-  //final TextEditingController _vanIDController = TextEditingController();
+  // final TextEditingController _dateHiredController = TextEditingController();
+  // final TextEditingController _vanIDController = TextEditingController();
+
+  String selectedDate = "";
 
   @override
   Widget build(BuildContext context) {
+    // WidgetRef ref
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -33,12 +39,12 @@ class _DriversFormState extends ConsumerState<DriversForm> {
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: Container(
         padding: EdgeInsets.only(top: 20),
-        child: _buildUI(context),
+        child: _buildUI(context, ref),
       ),
     );
   }
 
-  Widget _buildUI(BuildContext context) {
+  Widget _buildUI(BuildContext context, WidgetRef ref) {
     return Container(
       width: MediaQuery.sizeOf(context).width,
       padding: EdgeInsets.symmetric(
@@ -74,6 +80,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
   }
 
   Widget _DriversFormBody(BuildContext context) {
+    final selectedDate = ref.watch(selectedDateProvider);
     return SingleChildScrollView(
       child: Form(
         child: Column(
@@ -146,19 +153,36 @@ class _DriversFormState extends ConsumerState<DriversForm> {
                 return null;
               },
             ),
-            CustomeFormField(
-              labelText: "Date Hired",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _dateHiredController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter when did the driver is hired';
-                }
-                return null;
-              },
+            // Date of purchase
+            InkWell(
+              onTap: () => _selectDate(context),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Date Hired',
+                  fillColor: Color(ColorConstants.SECONDARY_COLOR),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Color(ColorConstants.SECONDARY_COLOR),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      selectedDate == null
+                          ? 'Select Date'
+                          : DateFormat('yyyy-MM-dd').format(selectedDate),
+                    ),
+                    Icon(Icons.calendar_today),
+                  ],
+                ),
+              ),
             ),
+            SizedBox(height: 12),
             // CustomeFormField(
-            //   labelText: "Van ID",
+            //   labelText: "Date Hired",
             //   height: MediaQuery.sizeOf(context).height * .1,
             //   controller: _dateHiredController,
             //   validator: (value) {
@@ -168,14 +192,27 @@ class _DriversFormState extends ConsumerState<DriversForm> {
             //     return null;
             //   },
             // ),
-            _addDriverButton(),
+
+            _addDriverButton(context, ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _addDriverButton() {
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: ref.read(selectedDateProvider) ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      ref.read(selectedDateProvider.notifier).state = picked;
+    }
+  }
+
+  Widget _addDriverButton(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [

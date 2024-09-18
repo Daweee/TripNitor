@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
+final selectedDateProvider = StateProvider<DateTime?>((ref) => null);
+
 class VanForm extends ConsumerStatefulWidget {
-  const VanForm({super.key});
+  const VanForm({Key? key}) : super(key: key);
 
   @override
   ConsumerState<VanForm> createState() => _VanFormState();
@@ -15,11 +18,13 @@ class VanForm extends ConsumerStatefulWidget {
 class _VanFormState extends ConsumerState<VanForm> {
   final TextEditingController _vanModelController = TextEditingController();
   final TextEditingController _plateNumberController = TextEditingController();
-  final TextEditingController _dateBoughtController = TextEditingController();
+  // final TextEditingController _dateBoughtController = TextEditingController();
   final TextEditingController _registryExpiryDateController =
       TextEditingController();
   final TextEditingController _maxPassengerController = TextEditingController();
   final TextEditingController _gasIDController = TextEditingController();
+
+  String selectedDate = "";
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +36,12 @@ class _VanFormState extends ConsumerState<VanForm> {
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: Container(
         padding: EdgeInsets.only(top: 20),
-        child: _buildUI(context),
+        child: _buildUI(context, ref),
       ),
     );
   }
 
-  Widget _buildUI(BuildContext context) {
+  Widget _buildUI(BuildContext context, WidgetRef ref) {
     return Container(
       width: MediaQuery.sizeOf(context).width,
       padding: EdgeInsets.symmetric(
@@ -73,6 +78,7 @@ class _VanFormState extends ConsumerState<VanForm> {
   }
 
   Widget _VanFormBody(BuildContext context) {
+    final selectedDate = ref.watch(selectedDateProvider);
     return SingleChildScrollView(
       child: Form(
         child: Column(
@@ -101,29 +107,63 @@ class _VanFormState extends ConsumerState<VanForm> {
               },
             ),
 
-            CustomeFormField(
-              labelText: "Date of Purchase",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _dateBoughtController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a Date of Purchase';
-                }
-                return null;
-              },
+            // Date of Purchase
+            InkWell(
+              onTap: () => _selectDate(context),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Date Hired',
+                  fillColor: Color(ColorConstants.SECONDARY_COLOR),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Color(ColorConstants.SECONDARY_COLOR),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      selectedDate == null
+                          ? 'Select Date Hired'
+                          : DateFormat('yyyy-MM-dd').format(selectedDate),
+                    ),
+                    Icon(Icons.calendar_today),
+                  ],
+                ),
+              ),
             ),
+            SizedBox(height: 12),
 
-            CustomeFormField(
-              labelText: "Registration Expiry Date",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _registryExpiryDateController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a Registration Expiration Date';
-                }
-                return null;
-              },
+            // Date of Purchase
+            InkWell(
+              onTap: () => _selectDate(context),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Registration Expiration Date',
+                  fillColor: Color(ColorConstants.SECONDARY_COLOR),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Color(ColorConstants.SECONDARY_COLOR),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      selectedDate == null
+                          ? 'Registration expiry date'
+                          : DateFormat('yyyy-MM-dd').format(selectedDate),
+                    ),
+                    Icon(Icons.calendar_today),
+                  ],
+                ),
+              ),
             ),
+            SizedBox(height: 12),
 
             CustomeFormField(
               labelText: "Max Passenger",
@@ -161,14 +201,27 @@ class _VanFormState extends ConsumerState<VanForm> {
             //   },
             // ),
 
-            _addVanButton(),
+            _addVanButton(context, ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _addVanButton() {
+  // calendar
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: ref.read(selectedDateProvider) ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      ref.read(selectedDateProvider.notifier).state = picked;
+    }
+  }
+
+  Widget _addVanButton(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [

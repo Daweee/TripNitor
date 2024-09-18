@@ -13,7 +13,7 @@ import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
 import 'package:tripnitor_mobile_app/services/token_service.dart';
 
 class AdminDrawer extends ConsumerWidget {
-  const AdminDrawer({Key? key}) : super(key: key);
+  const AdminDrawer({Key? key}) : super(key: key);  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
