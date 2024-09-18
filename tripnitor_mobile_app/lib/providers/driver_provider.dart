@@ -41,10 +41,28 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
     }
   }
 
-  Future<void> createDriver(Driver driver) async {
+  Future<void> createDriver(
+    String username,
+    String name,
+    String email,
+    String phone_number,
+    String password,
+    String license_number,
+    String? date_hired,
+    String? van_id,
+  ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final createdDriver = await _driverService.createDriver(driver);
+      final createdDriver = await _driverService.createDriver(
+        username,
+        name,
+        email,
+        phone_number,
+        password,
+        license_number,
+        date_hired,
+        van_id,
+      );
       state = state.copyWith(
           isLoading: false,
           driver: createdDriver,
@@ -62,9 +80,13 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _driverService.deleteDriver(driverId);
+      final updatedDriverList =
+          state.driverList?.where((driver) => driver.id != driverId).toList();
+
       state = state.copyWith(
         isLoading: false,
         error: null,
+        driverList: updatedDriverList,
         message: 'Driver account deleted successfully.',
       );
     } catch (e) {

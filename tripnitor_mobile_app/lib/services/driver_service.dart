@@ -69,11 +69,31 @@ class DriverService {
     }
   }
 
-  Future<Driver> createDriver(Driver driver) async {
+  Future<Driver> createDriver(
+    String username,
+    String name,
+    String email,
+    String phone_number,
+    String password,
+    String license_number,
+    String? date_hired,
+    String? van_id,
+  ) async {
     try {
+      final data = {
+        'username': username,
+        'name': name,
+        'email': email,
+        'phone_number': phone_number,
+        'password': password,
+        'license_number': license_number,
+        'date_hired': date_hired,
+        'van_id': van_id,
+      };
+
       final response = await _dio.post(
         '${HTTPConstants.BASE_URL}api/drivers/register/',
-        data: driver.toJson(),
+        data: data,
       );
 
       if (response.statusCode == 201) {

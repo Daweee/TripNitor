@@ -116,10 +116,8 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Name: ${driver.user.name}',
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text('Name: ${driver.user.name}',
+                  overflow: TextOverflow.ellipsis),
               SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,18 +140,51 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          // Edit action
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DriversForm(
+                                  driver: driver), // Pass the driver object
+                            ),
+                          );
                         },
                         icon: Icon(Icons.edit, color: Colors.green),
                       ),
                       IconButton(
-                        onPressed: () {
-                          // Delete action
+                        onPressed: () async {
+                          final result = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Delete Driver"),
+                                content: Text(
+                                    "Are you sure you want to delete this driver?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: Text("Delete"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          if (result == true) {
+                            await ref
+                                .read(driverStateProvider.notifier)
+                                .deleteDriver(driver.id);
+                          }
                         },
                         icon: Icon(Icons.delete, color: Colors.red),
-                      )
+                      ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ],
