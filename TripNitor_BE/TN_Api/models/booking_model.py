@@ -50,7 +50,7 @@ class Booking(CustomPrimaryKeyModel):
         super().save(*args, **kwargs)
 
     def get_nights(self):
-        return max((self.end_date - self.start_date).days - 1, 0)
+        return (self.end_date - self.start_date).days
 
     def calculate_final_fare(self):
         self.base_fare = 3000
