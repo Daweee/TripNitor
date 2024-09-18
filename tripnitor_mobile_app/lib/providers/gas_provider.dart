@@ -61,7 +61,7 @@ class GasStateNotifier extends StateNotifier<GasState> {
     }
   }
 
-  Future<void> deleteGas(String gasId) async {
+  Future<void> deleteGas(String? gasId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _gasService.deleteGas(gasId);

@@ -5,6 +5,10 @@ import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
+import '../../../models/gas_model.dart';
+import '../../../providers/gas_provider.dart';
+import '../gas_admin_page.dart';
+
 class GasForm extends ConsumerStatefulWidget {
   const GasForm({super.key});
 
@@ -13,6 +17,7 @@ class GasForm extends ConsumerStatefulWidget {
 }
 
 class _GasFormState extends ConsumerState<GasForm> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _gasNameController = TextEditingController();
   final TextEditingController _gasPriceController = TextEditingController();
 
@@ -70,6 +75,7 @@ class _GasFormState extends ConsumerState<GasForm> {
   Widget _GasFormBody(BuildContext context) {
     return SingleChildScrollView(
       child: Form(
+        key: _formKey,
         child: Column(
           children: [
             CustomeFormField(
@@ -86,6 +92,7 @@ class _GasFormState extends ConsumerState<GasForm> {
             CustomeFormField(
               labelText: "Gas Price ",
               height: MediaQuery.sizeOf(context).height * .1,
+              keyboardType: TextInputType.number,
               controller: _gasPriceController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -120,7 +127,27 @@ class _GasFormState extends ConsumerState<GasForm> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
           ),
-          onPressed: () {},
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              try {
+                final gasNotifier = ref.read(gasStateProvider.notifier);
+
+                await gasNotifier.createGas(Gas(
+                  gasName: _gasNameController.text.trim(),
+                  gasPrice: _gasPriceController.text.trim(),
+                ));
+
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => GasAdminPage()),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('An error occurred. Please try again.')),
+                );
+              }
+            }
+          },
           child: Text(
             'Add Gas Details',
             style: TextStyle(

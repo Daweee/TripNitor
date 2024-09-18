@@ -13,7 +13,7 @@ import 'pages/auth_page.dart';
 import 'providers/auth_provider.dart';
 import 'constants/constant.dart';
 
-void main() {
+void main() async {
   runApp(
     ProviderScope(
       child: MyApp(),
@@ -39,13 +39,13 @@ class MyApp extends ConsumerWidget {
       //   ),
       // home: LoginPage(),
       //   home: RegistrationPage(),
-      // home: authState.isAuthenticated ? AuthPage() : LoginPage(),
+      home: authState.isAuthenticated ? AuthPage() : LoginPage(),
       // home: PackageTrips(),
       // home: ShimmerPackageCard(),
       // home: PackagePage(),
       // home: HomePage(),
       // home: AdminDashboard(),
-      home: DriverHomePage(),
+      //   home: DriverHomePage(),
     );
   }
 }

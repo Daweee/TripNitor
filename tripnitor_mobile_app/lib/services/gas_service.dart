@@ -89,7 +89,7 @@ class GasService {
     }
   }
 
-  Future<void> deleteGas(String gasId) async {
+  Future<void> deleteGas(String? gasId) async {
     try {
       final response =
           await _dio.delete('${HTTPConstants.BASE_URL}api/gas/$gasId/delete/');

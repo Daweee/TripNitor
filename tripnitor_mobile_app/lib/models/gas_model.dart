@@ -1,10 +1,10 @@
 class Gas {
-  final String id;
+  final String? id;
   final String gasName;
   final String gasPrice;
 
   Gas({
-    required this.id,
+    this.id,
     required this.gasName,
     required this.gasPrice,
   });
