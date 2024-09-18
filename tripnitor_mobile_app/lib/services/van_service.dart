@@ -49,6 +49,31 @@ class VanService {
     }
   }
 
+  Future<List<Van>> getUnassignedVanList() async {
+    try {
+      final response =
+          await _dio.get('${HTTPConstants.BASE_URL}api/vans/unassigned/');
+      if (response.statusCode == 200) {
+        final responseData = response.data as Map<String, dynamic>?;
+        final dynamicData = responseData?['data'] as List<dynamic>;
+
+        final List<Map<String, dynamic>> data =
+            dynamicData.whereType<Map<String, dynamic>>().toList();
+
+        return data.map((json) => Van.fromJson(json)).toList();
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error:
+              'Failed to load list of drivers. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to load driver list: ${e.message}');
+    }
+  }
+
   Future<Van> getVanDetail(String vanId) async {
     try {
       final response =
@@ -70,11 +95,25 @@ class VanService {
     }
   }
 
-  Future<Van> createVan(Van van) async {
+  Future<Van> createVan(
+      String model,
+      String plate_number,
+      String date_bought,
+      String registration_expiry_date,
+      int max_passengers,
+      String? gas_id) async {
     try {
+      final data = {
+        'model': model,
+        'plate_number': plate_number,
+        'date_bought': date_bought,
+        'registration_expiry_date': registration_expiry_date,
+        'max_passengers': max_passengers,
+        'gas_id': gas_id,
+      };
       final response = await _dio.post(
         '${HTTPConstants.BASE_URL}api/vans/register/',
-        data: van.toJson(),
+        data: data,
       );
 
       if (response.statusCode == 201) {

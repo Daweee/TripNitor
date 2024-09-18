@@ -25,6 +25,23 @@ class VanStateNotifier extends StateNotifier<VanState> {
     }
   }
 
+  Future<void> getAllUnassignedVans() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final vanList = await _vanService.getUnassignedVanList();
+      state = state.copyWith(
+        isLoading: false,
+        vanList: vanList,
+        message: 'Unassigned vans list retrieved successfully',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load unassigned vans list: $e',
+      );
+    }
+  }
+
   Future<void> getVanDetail(String vanId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -43,10 +60,17 @@ class VanStateNotifier extends StateNotifier<VanState> {
     }
   }
 
-  Future<void> createVan(Van van) async {
+  Future<void> createVan(
+      String model,
+      String plate_number,
+      String date_bought,
+      String registration_expiry_date,
+      int max_passengers,
+      String? gas_id) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final createdVan = await _vanService.createVan(van);
+      final createdVan = await _vanService.createVan(model, plate_number,
+          date_bought, registration_expiry_date, max_passengers, gas_id);
       state = state.copyWith(
         isLoading: false,
         van: createdVan,

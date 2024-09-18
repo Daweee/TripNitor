@@ -6,7 +6,6 @@ import 'package:tripnitor_mobile_app/pages/admin/forms/van_form.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/gas_admin_profile.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/van_admin_profile.dart';
 import 'package:tripnitor_mobile_app/providers/van_provider.dart';
-
 import '../../constants/constant.dart';
 import 'admin_drawer.dart';
 
@@ -154,9 +153,38 @@ class _VanAdminPageState extends ConsumerState<VanAdminPage> {
                         icon: Icon(Icons.edit, color: Colors.green),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final result = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Delete Van"),
+                                content: Text(
+                                    "Are you sure you want to delete this van?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: Text("Delete"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          if (result == true) {
+                            await ref
+                                .read(vanStateProvider.notifier)
+                                .deleteVan(van.id);
+                          }
+                        },
                         icon: Icon(Icons.delete, color: Colors.red),
-                      )
+                      ),
                     ],
                   )
                 ],

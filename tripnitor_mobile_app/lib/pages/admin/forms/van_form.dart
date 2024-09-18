@@ -4,9 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
+import 'package:tripnitor_mobile_app/providers/gas_provider.dart';
+import 'package:tripnitor_mobile_app/providers/van_provider.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
-final selectedDateProvider = StateProvider<DateTime?>((ref) => null);
+import '../../../models/gas_model.dart';
+import '../van_admin_page.dart';
+
+final dateBoughtProvider = StateProvider<DateTime?>((ref) => null);
+final expiryDateProvider = StateProvider<DateTime?>((ref) => null);
 
 class VanForm extends ConsumerStatefulWidget {
   const VanForm({Key? key}) : super(key: key);
@@ -16,18 +22,34 @@ class VanForm extends ConsumerStatefulWidget {
 }
 
 class _VanFormState extends ConsumerState<VanForm> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _vanModelController = TextEditingController();
   final TextEditingController _plateNumberController = TextEditingController();
-  // final TextEditingController _dateBoughtController = TextEditingController();
+  final TextEditingController _dateBoughtController = TextEditingController();
   final TextEditingController _registryExpiryDateController =
       TextEditingController();
   final TextEditingController _maxPassengerController = TextEditingController();
   final TextEditingController _gasIDController = TextEditingController();
+  String? _selectedGasId;
+  int _maxPassengers = 1;
 
   String selectedDate = "";
 
   @override
+  void initState() {
+    super.initState();
+    _maxPassengerController.text =
+        _maxPassengers.toString(); // Set default value
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gasStateProvider.notifier).getAllGas();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final gasState = ref.watch(gasStateProvider);
+    final List<Gas>? _gas = gasState.gasList;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -36,12 +58,12 @@ class _VanFormState extends ConsumerState<VanForm> {
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: Container(
         padding: EdgeInsets.only(top: 20),
-        child: _buildUI(context, ref),
+        child: _buildUI(_gas),
       ),
     );
   }
 
-  Widget _buildUI(BuildContext context, WidgetRef ref) {
+  Widget _buildUI(_gas) {
     return Container(
       width: MediaQuery.sizeOf(context).width,
       padding: EdgeInsets.symmetric(
@@ -58,7 +80,7 @@ class _VanFormState extends ConsumerState<VanForm> {
               ),
               child: _headerText(context),
             ),
-            _VanFormBody(context),
+            _VanFormBody(_gas),
           ],
         ),
       ),
@@ -77,10 +99,12 @@ class _VanFormState extends ConsumerState<VanForm> {
     );
   }
 
-  Widget _VanFormBody(BuildContext context) {
-    final selectedDate = ref.watch(selectedDateProvider);
+  Widget _VanFormBody(_gas) {
+    final dateBought = ref.watch(dateBoughtProvider);
+    final expiryDate = ref.watch(expiryDateProvider);
     return SingleChildScrollView(
       child: Form(
+        key: _formKey,
         child: Column(
           children: [
             CustomeFormField(
@@ -109,10 +133,10 @@ class _VanFormState extends ConsumerState<VanForm> {
 
             // Date of Purchase
             InkWell(
-              onTap: () => _selectDate(context),
+              onTap: () => _selectDate(context, dateBoughtProvider),
               child: InputDecorator(
                 decoration: InputDecoration(
-                  labelText: 'Date Hired',
+                  labelText: 'Date Bought',
                   fillColor: Color(ColorConstants.SECONDARY_COLOR),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -125,9 +149,9 @@ class _VanFormState extends ConsumerState<VanForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      selectedDate == null
-                          ? 'Select Date Hired'
-                          : DateFormat('yyyy-MM-dd').format(selectedDate),
+                      dateBought == null
+                          ? 'Select Date Bought'
+                          : DateFormat('yyyy-MM-dd').format(dateBought),
                     ),
                     Icon(Icons.calendar_today),
                   ],
@@ -136,9 +160,9 @@ class _VanFormState extends ConsumerState<VanForm> {
             ),
             SizedBox(height: 12),
 
-            // Date of Purchase
+            // Date of Expiration
             InkWell(
-              onTap: () => _selectDate(context),
+              onTap: () => _selectDate(context, expiryDateProvider),
               child: InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'Registration Expiration Date',
@@ -154,9 +178,9 @@ class _VanFormState extends ConsumerState<VanForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      selectedDate == null
+                      expiryDate == null
                           ? 'Registration expiry date'
-                          : DateFormat('yyyy-MM-dd').format(selectedDate),
+                          : DateFormat('yyyy-MM-dd').format(expiryDate),
                     ),
                     Icon(Icons.calendar_today),
                   ],
@@ -165,41 +189,82 @@ class _VanFormState extends ConsumerState<VanForm> {
             ),
             SizedBox(height: 12),
 
-            CustomeFormField(
-              labelText: "Max Passenger",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _maxPassengerController,
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey), // Set border color
+                borderRadius: BorderRadius.circular(10), // Rounded corners
+              ),
+              padding: EdgeInsets.all(12), // Padding inside the container
+              margin: EdgeInsets.symmetric(
+                  vertical: 12), // Margin around the container
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Max Passenger:"),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () {
+                          setState(() {
+                            if (_maxPassengers > 1) {
+                              _maxPassengers--;
+                              _maxPassengerController.text =
+                                  _maxPassengers.toString();
+                            }
+                          });
+                        },
+                      ),
+                      Container(
+                        width: 40,
+                        child: Text(
+                          _maxPassengers.toString(),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            if (_maxPassengers < 15) {
+                              _maxPassengers++;
+                              _maxPassengerController.text =
+                                  _maxPassengers.toString();
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            DropdownButtonFormField<Gas>(
+              decoration: InputDecoration(
+                labelText: "Gas Type",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              items: _gas?.map<DropdownMenuItem<Gas>>((Gas gas) {
+                return DropdownMenuItem<Gas>(
+                  value: gas,
+                  child: Text('${gas.gasName} | ₱${gas.gasPrice}'),
+                );
+              }).toList(),
+              onChanged: (Gas? newValue) {
+                setState(() {
+                  _selectedGasId = newValue?.id;
+                });
+              },
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a Max Passenger';
+                if (value == null) {
+                  return 'Please select a gas type';
                 }
                 return null;
               },
             ),
-
-            CustomeFormField(
-              labelText: "Gas ID",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _gasIDController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter Gas ID';
-                }
-                return null;
-              },
-            ),
-
-            // CustomeFormField(
-            //   labelText: "Van ID",
-            //   height: MediaQuery.sizeOf(context).height * .1,
-            //   controller: _dateHiredController,
-            //   validator: (value) {
-            //     if (value == null || value.isEmpty) {
-            //       return 'Please enter when did the driver is hired';
-            //     }
-            //     return null;
-            //   },
-            // ),
 
             _addVanButton(context, ref),
           ],
@@ -209,15 +274,20 @@ class _VanFormState extends ConsumerState<VanForm> {
   }
 
   // calendar
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(
+      BuildContext context, StateProvider<DateTime?> provider) async {
+    final DateTime now = DateTime.now();
+    final DateTime sixMonthsFromNow =
+        DateTime(now.year, now.month + 6, now.day);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: ref.read(selectedDateProvider) ?? DateTime.now(),
+      initialDate: ref.read(provider) ?? DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
+      lastDate: sixMonthsFromNow,
     );
     if (picked != null) {
-      ref.read(selectedDateProvider.notifier).state = picked;
+      ref.read(provider.notifier).state = picked;
     }
   }
 
@@ -240,7 +310,47 @@ class _VanFormState extends ConsumerState<VanForm> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
           ),
-          onPressed: () {},
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              try {
+                final vanStateNotifier = ref.read(vanStateProvider.notifier);
+
+                final dateBought = ref.read(dateBoughtProvider);
+                final expiryDate = ref.read(expiryDateProvider);
+
+                // Format dates to string
+                String? formattedDateBought;
+                String? formattedExpiryDate;
+
+                if (dateBought != null) {
+                  formattedDateBought =
+                      DateFormat('yyyy-MM-dd').format(dateBought);
+                }
+                if (expiryDate != null) {
+                  formattedExpiryDate =
+                      DateFormat('yyyy-MM-dd').format(expiryDate);
+                }
+
+                await vanStateNotifier.createVan(
+                  _vanModelController.text.trim(),
+                  _plateNumberController.text.trim(),
+                  formattedDateBought!,
+                  formattedExpiryDate!,
+                  int.parse(_maxPassengerController.text.trim()),
+                  _selectedGasId,
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('An error occurred. Please try again.')),
+                );
+              }
+
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => VanAdminPage()),
+              );
+            }
+          },
           child: Text(
             'Add Van',
             style: TextStyle(
