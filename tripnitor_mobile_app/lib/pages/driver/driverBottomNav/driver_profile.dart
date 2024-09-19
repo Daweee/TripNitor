@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
+import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
+import 'package:tripnitor_mobile_app/services/token_service.dart';
 
-import '../../providers/auth_provider.dart';
-import '../../services/token_service.dart';
-
-class ProfilePage extends ConsumerStatefulWidget {
-  const ProfilePage({super.key});
+class DriverProfilePage extends ConsumerStatefulWidget {
+  DriverProfilePage({super.key});
 
   @override
-  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<DriverProfilePage> createState() => _DriverProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage> {
+class _DriverProfilePageState extends ConsumerState<DriverProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +22,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         title: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
-            child: Text('Profile'),
+            child: Text('Driver\'s Profile'),
           ),
         ),
       ),
@@ -73,16 +72,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           SizedBox(
             height: 20,
           ),
-          Container(
+          GestureDetector(
+            onTap: () {},
             child: Row(
               children: const [
                 Icon(Icons.person_2_rounded),
                 SizedBox(width: 8.0),
-                Text('My Profile'),
+                Text('My Driver\'s Profile'),
                 Spacer(),
                 Row(
                   children: [
-                    Icon(Icons.arrow_forward_ios),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                    ),
                   ],
                 ),
               ],
