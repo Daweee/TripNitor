@@ -102,6 +102,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
     final selectedDate = ref.watch(selectedDateProvider);
     return SingleChildScrollView(
       child: Form(
+        key: _formKey,
         child: Column(
           children: [
             CustomeFormField(
@@ -154,6 +155,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
               labelText: "Password",
               height: MediaQuery.sizeOf(context).height * .1,
               controller: _passwordController,
+              obscureText: true,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter the password';
