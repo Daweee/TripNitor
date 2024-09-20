@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/auth_model.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_message.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_notification.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_profile.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driver_booking_details.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_details.dart';
 import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
 
 final currentIndexProvider =
@@ -24,7 +25,7 @@ class DriverHomePage extends ConsumerWidget {
       // body: // _buildUI(context),
       body: _buildPage(context, currentPage),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
         currentIndex: currentPage,
         type: BottomNavigationBarType.fixed, // .fixed; .shifting;
         selectedItemColor: Colors.black, // backgroundColor: Colors.black,
@@ -45,9 +46,9 @@ class DriverHomePage extends ConsumerWidget {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            activeIcon: Icon(Icons.notifications),
-            icon: Icon(Icons.notifications_outlined), // 1
-            label: "Notification",
+            activeIcon: Icon(Icons.book),
+            icon: Icon(Icons.book_outlined), // 1
+            label: "Booking",
           ),
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.chat_bubble),
@@ -68,34 +69,40 @@ class DriverHomePage extends ConsumerWidget {
     switch (index) {
       case 0:
         //return HomePage();
-        return MyDriverHomePage();
+        return DriverDashboard();
       case 1:
-        return DriverNotificationPage();
+        return DriverBookingPage();
       case 2:
         return DriverMessagePage();
       case 3:
         return DriverProfilePage();
       default:
-        return MyDriverHomePage();
+        return DriverDashboard();
     }
   }
 }
 
-class MyDriverHomePage extends ConsumerWidget {
-  const MyDriverHomePage({Key? key}) : super(key: key);
+class DriverDashboard extends StatefulWidget {
+  const DriverDashboard({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<DriverDashboard> createState() => _DriverDashboardState();
+}
+
+class _DriverDashboardState extends State<DriverDashboard> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: _buildUI(context),
-    );
+        body: Center(
+      child: _buildUI(context),
+    ));
   }
 
   Widget _buildUI(BuildContext context) {
     return Column(
       children: [
         _header(context),
-        _driverTaskList(context),
+        _driverDashBoardList(context),
       ],
     );
   }
@@ -155,178 +162,10 @@ class MyDriverHomePage extends ConsumerWidget {
     );
   }
 
-  Widget _driverTaskList(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 24.0,
-        top: 24,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "My Assign Task",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          _buildTaskCard(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaskCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.location_on, color: Colors.red, size: 20),
-                SizedBox(width: 5),
-                Text(
-                  'Prime Tourist Liloan',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            SizedBox(height: 5),
-            Padding(
-              padding: const EdgeInsets.only(left: 70.0),
-              child: Icon(Icons.swap_vert, color: Colors.black, size: 20),
-            ),
-            SizedBox(height: 5),
-            Row(
-              children: [
-                Icon(Icons.location_on, color: Colors.black, size: 20),
-                SizedBox(width: 5),
-                Text(
-                  'Medellien Aisle, Medillen Cebu',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.only(left: 5),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Booking ID:  ',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                              Text(
-                                '#0001',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('North: ', style: TextStyle(fontSize: 12)),
-                              Text(
-                                '#0001',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('Round Trip: ',
-                                  style: TextStyle(fontSize: 12)),
-                              Text(
-                                '25.76 km',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // Container(
-                    //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.green,
-                    //     borderRadius: BorderRadius.circular(10),
-                    //   ),
-                    //   child: Text('Confirmed',
-                    //       style: TextStyle(color: Colors.white, fontSize: 12)),
-                    // ),
-                    SizedBox(height: 5),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (context) => DriverBookingDetails()),
-                    //     );
-                    //   },
-                    //   child: Text('Show task'),
-                    //   style: ElevatedButton.styleFrom(
-                    //     iconColor: Colors.amber,
-                    //     shape: RoundedRectangleBorder(
-                    //         borderRadius: BorderRadius.circular(20)),
-                    //   ),
-                    // ),
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width * .3,
-                      height: MediaQuery.sizeOf(context).height * .06,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DriverBookingDetails()),
-                          );
-                        },
-                        child: Text(
-                          'Show Task',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ],
-        ),
+  Widget _driverDashBoardList(BuildContext context) {
+    return Container(
+      child: Center(
+        child: Text('Driver\'s Dashboard'),
       ),
     );
   }
