@@ -19,8 +19,6 @@ class DriverHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPage =
         ref.watch(currentIndexProvider); // listens to riverpod variable
-
-    final authState = ref.watch(authProvider);
     return Scaffold(
       // body: // _buildUI(context),
       body: _buildPage(context, currentPage),
@@ -82,14 +80,14 @@ class DriverHomePage extends ConsumerWidget {
   }
 }
 
-class DriverDashboard extends StatefulWidget {
+class DriverDashboard extends ConsumerStatefulWidget {
   const DriverDashboard({super.key});
 
   @override
-  State<DriverDashboard> createState() => _DriverDashboardState();
+  ConsumerState<DriverDashboard> createState() => _DriverDashboardState();
 }
 
-class _DriverDashboardState extends State<DriverDashboard> {
+class _DriverDashboardState extends ConsumerState<DriverDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,6 +106,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
   }
 
   Widget _header(BuildContext context) {
+    final authState = ref.watch(authProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -123,7 +122,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Welcome null', // ${authState.user?.username}
+                        'Welcome ${authState.user?.username}', // ${authState.user?.username}
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
