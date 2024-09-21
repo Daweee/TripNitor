@@ -117,6 +117,43 @@ class DriverDetailView(CustomResponseMixin, RetrieveAPIView):
     #     )
 
 @extend_schema(tags=['drivers'])
+class RetrieveDriverInstanceView(CustomResponseMixin, RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = DriverSerializer
+
+    def get_object(self):
+        current_user = self.request.user
+        if current_user.role == User.Role.DRIVER:
+            try:
+                return Driver.objects.get(user=current_user)
+            except Driver.DoesNotExist:
+                return None
+        return None
+
+    def get(self, request, *args, **kwargs):
+        driver = self.get_object()
+        if driver is None:
+            if request.user.role != User.Role.DRIVER:
+                return self.get_custom_response(
+                    status.HTTP_403_FORBIDDEN,
+                    None,
+                    'User is not a driver'
+                )
+            else:
+                return self.get_custom_response(
+                    status.HTTP_404_NOT_FOUND,
+                    None,
+                    'Driver not found'
+                )
+        
+        serializer = self.get_serializer(driver)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Driver details retrieved successfully'
+        )
+           
+@extend_schema(tags=['drivers'])
 class DriverUpdateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer

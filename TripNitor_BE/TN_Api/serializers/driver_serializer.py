@@ -5,17 +5,41 @@ from .van_serializer import VanSerializer
 from django.db import transaction
 
 class DriverSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    van = VanSerializer(read_only=True)
+    user = UserSerializer()
+    # user = UserSerializer(read_only=True)
+    # van = VanSerializer(read_only=True)
+    van = serializers.PrimaryKeyRelatedField(queryset=Van.objects.all(), write_only=True)  
+    van_details = VanSerializer(source='van', read_only=True)
 
     class Meta:
         model = Driver
-        fields = ['id', 'user', 'license_number', 'date_hired', 'van']
+        fields = ['id', 'user', 'license_number', 'date_hired', 'van', 'van_details']
+        # fields = ['id', 'user', 'license_number', 'date_hired', 'van']
         depth = 1
 
+    # def update(self, instance, validated_data):
+    #     instance.license_number = validated_data.get('license_number', instance.license_number)
+    #     instance.date_hired = validated_data.get('date_hired', instance.date_hired)
+    #     instance.save()
+    #     return instance
+    
     def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            # Update associated user
+            user = instance.user
+            for field, value in user_data.items():
+                setattr(user, field, value)
+            user.save()
+            
         instance.license_number = validated_data.get('license_number', instance.license_number)
         instance.date_hired = validated_data.get('date_hired', instance.date_hired)
+
+        # Handle van ID for updates
+        van = validated_data.get('van', None)
+        if van:
+            instance.van = van
+        
         instance.save()
         return instance
 
