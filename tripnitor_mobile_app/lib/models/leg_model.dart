@@ -33,4 +33,15 @@ class Leg {
           : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'leg_number': legNumber,
+      'start_location': startLocation.toJson(),
+      'end_location': endLocation.toJson(),
+      'departure_time': departureTime?.toIso8601String(),
+      'arrival_time': arrivalTime?.toIso8601String(),
+    };
+  }
 }

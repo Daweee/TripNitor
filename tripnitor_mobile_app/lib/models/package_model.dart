@@ -52,6 +52,24 @@ class Package {
           json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'package_name': packageName,
+      'description': description,
+      'base_price': basePrice,
+      'package_type': packageType,
+      'visibility': visibility,
+      'start_location': startLocation.toJson(),
+      'final_destination': finalDestination.toJson(),
+      'legs': List<dynamic>.from(legs.map((x) => x.toJson())),
+      'max_participants': maxParticipants,
+      'current_participants': currentParticipants,
+      'start_date': startDate?.toIso8601String(),
+      'end_date': endDate?.toIso8601String(),
+    };
+  }
 }
 
 class PackageState {

@@ -57,6 +57,23 @@ class Booking {
         drivers:
             List<Driver>.from(json["drivers"].map((x) => Driver.fromJson(x))),
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "user": user.toJson(),
+        "package": package.toJson(),
+        "drivers": List<dynamic>.from(drivers.map((x) => x.toJson())),
+        "status": status,
+        "base_fare": baseFare,
+        "number_of_nights": numberOfNights,
+        "total_price": totalPrice,
+        "number_of_passengers": numberOfPassengers,
+        "mode_of_payment": modeOfPayment,
+        "created_at": createdAt.toIso8601String(),
+        "updated_at": updatedAt.toIso8601String(),
+        "start_date": startDate.toIso8601String(),
+        "end_date": endDate.toIso8601String(),
+      };
 }
 
 class BookingState {
