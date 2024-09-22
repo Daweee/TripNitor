@@ -39,6 +39,35 @@ class User {
       };
 }
 
+class UserPatch {
+  String? name;
+  String? email;
+  String? phoneNumber;
+  String? role;
+  String? password;
+
+  UserPatch({
+    this.name,
+    this.email,
+    this.phoneNumber,
+    this.role,
+    this.password,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {
+      'name': name,
+      'phone_number': phoneNumber,
+    };
+
+    if (email != null) json['email'] = email;
+    if (role != null) json['role'] = role;
+    if (password != null) json['password'] = password;
+
+    return json;
+  }
+}
+
 class AuthState {
   final User? user;
   final bool isAuthenticated;

@@ -24,6 +24,28 @@ class Gas {
       };
 }
 
+class GasPatch {
+  String? gasName;
+  String? gasPrice;
+
+  GasPatch({
+    this.gasName,
+    this.gasPrice,
+  });
+
+  factory GasPatch.fromJson(Map<String, dynamic> json) {
+    return GasPatch(
+      gasName: json['gas_name'],
+      gasPrice: json['gas_price'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'gas_name': gasName,
+        'gas_price': gasPrice,
+      };
+}
+
 class GasState {
   final int? status;
   final Gas? gas;

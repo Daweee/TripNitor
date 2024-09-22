@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import 'gas_model.dart';
 
 class Van {
@@ -18,7 +20,6 @@ class Van {
     required this.maxPassengers,
     required this.gas,
   });
-
   factory Van.fromJson(Map<String, dynamic> json) {
     return Van(
       id: json['id'],
@@ -39,6 +40,34 @@ class Van {
         'registration_expiry_date': registrationExpiryDate.toIso8601String(),
         'max_passengers': maxPassengers,
         'gas': gas.toJson(),
+      };
+}
+
+class VanPatch {
+  String? model;
+  String? plateNumber;
+  DateTime dateBought;
+  DateTime registrationExpiryDate;
+  int? maxPassengers;
+  String? gasId;
+
+  VanPatch({
+    this.model,
+    this.plateNumber,
+    required this.dateBought,
+    required this.registrationExpiryDate,
+    this.maxPassengers,
+    this.gasId,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'model': model,
+        'plate_number': plateNumber,
+        'date_bought': DateFormat('yyyy-MM-dd').format(dateBought),
+        'registration_expiry_date':
+            DateFormat('yyyy-MM-dd').format(registrationExpiryDate),
+        'max_passengers': maxPassengers,
+        'gas_id': gasId,
       };
 }
 
