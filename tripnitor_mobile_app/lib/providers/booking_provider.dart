@@ -27,9 +27,8 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final createdBooking = await _bookingService.createBooking(request);
-      final bookingData = Booking.fromJson(createdBooking);
       state = state.copyWith(
-        booking: bookingData,
+        booking: createdBooking,
         isLoading: false,
         status: 201,
         message: "Booking created successfully",

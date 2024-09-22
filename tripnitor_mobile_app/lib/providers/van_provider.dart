@@ -60,28 +60,23 @@ class VanStateNotifier extends StateNotifier<VanState> {
     }
   }
 
-  Future<void> createVan(
-      String model,
-      String plate_number,
-      String date_bought,
-      String registration_expiry_date,
-      int max_passengers,
-      String? gas_id) async {
+  Future<Van> createVan(VanPatch vanPatch) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final createdVan = await _vanService.createVan(model, plate_number,
-          date_bought, registration_expiry_date, max_passengers, gas_id);
+      final createdVan = await _vanService.createVan(vanPatch);
       state = state.copyWith(
         isLoading: false,
         van: createdVan,
         error: null,
         message: 'Van created successfully',
       );
+      return createdVan;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to create van: $e',
       );
+      rethrow;
     }
   }
 
@@ -102,20 +97,22 @@ class VanStateNotifier extends StateNotifier<VanState> {
     }
   }
 
-  Future<void> updateVan(String vanId, Van van) async {
+  Future<Van> updateVan(String vanId, VanPatch van) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await _vanService.updateVan(vanId, van);
+      final updatedVan = await _vanService.updateVan(vanId, van);
       state = state.copyWith(
         isLoading: false,
         error: null,
         message: 'Van updated successfully.',
       );
+      return updatedVan;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to update van. $e',
       );
+      rethrow;
     }
   }
 }

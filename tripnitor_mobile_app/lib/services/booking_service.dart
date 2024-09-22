@@ -48,8 +48,7 @@ class BookingService {
     }
   }
 
-  Future<Map<String, dynamic>> createBooking(
-      BookingCreationRequest bookingRequest) async {
+  Future<Booking> createBooking(BookingCreationRequest bookingRequest) async {
     try {
       final response = await _dio.post(
         '${HTTPConstants.BASE_URL}api/bookings/create/',
@@ -57,7 +56,7 @@ class BookingService {
       );
 
       if (response.statusCode == 201) {
-        return response.data['data'];
+        return Booking.fromJson(response.data['data']);
       } else {
         throw DioException(
           requestOptions: response.requestOptions,

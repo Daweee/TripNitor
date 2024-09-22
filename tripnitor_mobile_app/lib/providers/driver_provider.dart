@@ -41,7 +41,7 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
     }
   }
 
-  Future<void> createDriver(
+  Future<DriverCreationResponse> createDriver(
     String username,
     String name,
     String email,
@@ -53,7 +53,7 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
   ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final createdDriver = await _driverService.createDriver(
+      final driverCreationResponse = await _driverService.createDriver(
         username,
         name,
         email,
@@ -65,14 +65,16 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
       );
       state = state.copyWith(
           isLoading: false,
-          driver: createdDriver,
+          driverCreationResponse: driverCreationResponse,
           error: null,
           message: 'Driver account created successfully.');
+      return driverCreationResponse;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to created driver account. $e',
       );
+      rethrow;
     }
   }
 
@@ -97,20 +99,41 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
     }
   }
 
-  Future<void> updateDriver(String driverId, Driver driver) async {
+  Future<Driver> updateDriver(String driverId, DriverPatch driver) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await _driverService.updateDriver(driverId, driver);
+      final updatedDriver = await _driverService.updateDriver(driverId, driver);
       state = state.copyWith(
         isLoading: false,
         error: null,
         message: 'Driver account updated successfully.',
       );
+      return updatedDriver;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to update van. $e',
+        error: 'Failed to update driver. $e',
       );
+      rethrow;
+    }
+  }
+
+  Future<Driver> getUserDriverDetail() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final driver = await _driverService.getUserDriverDetail();
+      state = state.copyWith(
+          isLoading: false,
+          driver: driver,
+          error: null,
+          message: 'Driver detail retrieved successfully.');
+      return driver;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to retrieve driver details. $e',
+      );
+      rethrow;
     }
   }
 }

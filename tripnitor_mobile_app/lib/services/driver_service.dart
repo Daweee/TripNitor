@@ -69,7 +69,7 @@ class DriverService {
     }
   }
 
-  Future<Driver> createDriver(
+  Future<DriverCreationResponse> createDriver(
     String username,
     String name,
     String email,
@@ -97,7 +97,7 @@ class DriverService {
       );
 
       if (response.statusCode == 201) {
-        return Driver.fromJson(response.data['data']);
+        return DriverCreationResponse.fromJson(response.data['data']);
       } else {
         throw DioException(
           requestOptions: response.requestOptions,
@@ -126,17 +126,32 @@ class DriverService {
     }
   }
 
-  Future<void> updateDriver(String driverId, Driver driver) async {
+  Future<Driver> updateDriver(String driverId, DriverPatch driver) async {
     try {
-      final response = await _dio.put(
+      final response = await _dio.patch(
         '${HTTPConstants.BASE_URL}api/drivers/$driverId/update/',
         data: driver.toJson(),
       );
 
       if (response.statusCode == 200) {
-        return;
+        return Driver.fromJson(response.data['data']);
       } else {
         throw Exception('Failed to update driver: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to update driver: ${e.message}');
+    }
+  }
+
+  Future<Driver> getUserDriverDetail() async {
+    try {
+      final response =
+          await _dio.get('${HTTPConstants.BASE_URL}api/user-info/');
+
+      if (response.statusCode == 200) {
+        return Driver.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to retrieve driver: ${response.statusCode}');
       }
     } on DioException catch (e) {
       throw Exception('Failed to update driver: ${e.message}');

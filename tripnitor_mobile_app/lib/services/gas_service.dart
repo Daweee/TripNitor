@@ -105,15 +105,15 @@ class GasService {
     }
   }
 
-  Future<void> updateGas(String gasId, Gas gas) async {
+  Future<Gas> updateGas(String? gasId, GasPatch gasPatch) async {
     try {
-      final response = await _dio.put(
-        '${HTTPConstants.BASE_URL}api/vans/$gasId/update/',
-        data: gas.toJson(),
+      final response = await _dio.patch(
+        '${HTTPConstants.BASE_URL}api/gas/$gasId/update/',
+        data: gasPatch.toJson(),
       );
 
       if (response.statusCode == 200) {
-        return;
+        return Gas.fromJson(response.data['data']);
       } else {
         throw Exception('Failed to update gas: ${response.statusCode}');
       }

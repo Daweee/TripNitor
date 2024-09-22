@@ -95,25 +95,11 @@ class VanService {
     }
   }
 
-  Future<Van> createVan(
-      String model,
-      String plate_number,
-      String date_bought,
-      String registration_expiry_date,
-      int max_passengers,
-      String? gas_id) async {
+  Future<Van> createVan(VanPatch vanPatch) async {
     try {
-      final data = {
-        'model': model,
-        'plate_number': plate_number,
-        'date_bought': date_bought,
-        'registration_expiry_date': registration_expiry_date,
-        'max_passengers': max_passengers,
-        'gas_id': gas_id,
-      };
       final response = await _dio.post(
         '${HTTPConstants.BASE_URL}api/vans/register/',
-        data: data,
+        data: vanPatch.toJson(),
       );
 
       if (response.statusCode == 201) {
@@ -146,7 +132,7 @@ class VanService {
     }
   }
 
-  Future<void> updateVan(String vanId, Van van) async {
+  Future<Van> updateVan(String vanId, VanPatch van) async {
     try {
       final response = await _dio.put(
         '${HTTPConstants.BASE_URL}api/vans/$vanId/update/',
@@ -154,7 +140,7 @@ class VanService {
       );
 
       if (response.statusCode == 200) {
-        return;
+        return Van.fromJson(response.data['data']);
       } else {
         throw Exception('Failed to update van: ${response.statusCode}');
       }

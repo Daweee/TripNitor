@@ -43,7 +43,7 @@ class GasStateNotifier extends StateNotifier<GasState> {
     }
   }
 
-  Future<void> createGas(Gas gas) async {
+  Future<Gas> createGas(Gas gas) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final createdGas = await _gasService.createGas(gas);
@@ -53,11 +53,13 @@ class GasStateNotifier extends StateNotifier<GasState> {
         error: null,
         message: 'Gas created successfully',
       );
+      return createdGas;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to create gas: $e',
       );
+      rethrow;
     }
   }
 
@@ -78,20 +80,23 @@ class GasStateNotifier extends StateNotifier<GasState> {
     }
   }
 
-  Future<void> updateGas(String gasId, Gas gas) async {
+  Future<Gas> updateGas(String? gasId, GasPatch gasPatch) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await _gasService.updateGas(gasId, gas);
+      final updatedGas = await _gasService.updateGas(gasId, gasPatch);
       state = state.copyWith(
         isLoading: false,
         error: null,
         message: 'Gas updated successfully.',
       );
+
+      return updatedGas;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to update gas. $e',
       );
+      rethrow;
     }
   }
 }
