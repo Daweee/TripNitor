@@ -21,8 +21,23 @@ class _VanAdminPageState extends ConsumerState<VanAdminPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(vanStateProvider.notifier).getAllVans();
+      _loadVans();
     });
+  }
+
+  Future<void> _loadVans() async {
+    try {
+      await ref.read(vanStateProvider.notifier).getAllVans();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load vans: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
