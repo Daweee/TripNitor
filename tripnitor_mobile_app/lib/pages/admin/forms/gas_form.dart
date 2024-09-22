@@ -8,9 +8,11 @@ import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 import '../../../models/gas_model.dart';
 import '../../../providers/gas_provider.dart';
 import '../gas_admin_page.dart';
+import '../profile/gas_admin_profile.dart';
 
 class GasForm extends ConsumerStatefulWidget {
-  const GasForm({super.key});
+  final Gas? gas;
+  const GasForm({super.key, this.gas});
 
   @override
   ConsumerState<GasForm> createState() => _GasFormState();
@@ -18,8 +20,23 @@ class GasForm extends ConsumerStatefulWidget {
 
 class _GasFormState extends ConsumerState<GasForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _gasNameController = TextEditingController();
-  final TextEditingController _gasPriceController = TextEditingController();
+  late TextEditingController _gasNameController;
+  late TextEditingController _gasPriceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _gasNameController = TextEditingController(text: widget.gas?.gasName ?? '');
+    _gasPriceController =
+        TextEditingController(text: widget.gas?.gasPrice.toString() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _gasNameController.dispose();
+    _gasPriceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,38 +140,79 @@ class _GasFormState extends ConsumerState<GasForm> {
       child: SizedBox(
         width: MediaQuery.sizeOf(context).width,
         height: MediaQuery.sizeOf(context).height * .06,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
-          ),
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              try {
-                final gasNotifier = ref.read(gasStateProvider.notifier);
+        child: widget.gas == null
+            ? ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+                ),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    try {
+                      final gasNotifier = ref.read(gasStateProvider.notifier);
 
-                await gasNotifier.createGas(Gas(
-                  gasName: _gasNameController.text.trim(),
-                  gasPrice: _gasPriceController.text.trim(),
-                ));
+                      final createGas = Gas(
+                        gasName: _gasNameController.text.trim(),
+                        gasPrice: _gasPriceController.text.trim(),
+                      );
 
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => GasAdminPage()),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('An error occurred. Please try again.')),
-                );
-              }
-            }
-          },
-          child: Text(
-            'Add Gas Details',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
+                      final createdGas = await gasNotifier.createGas(createGas);
+
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                GasAdminProfile(gas: createdGas)),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('An error occurred. Please try again.')),
+                      );
+                    }
+                  }
+                },
+                child: Text(
+                  'Add Gas Details',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            : ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+                ),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    try {
+                      final gasNotifier = ref.read(gasStateProvider.notifier);
+
+                      final patchGas = GasPatch(
+                        gasName: _gasNameController.text.trim(),
+                        gasPrice: _gasPriceController.text.trim(),
+                      );
+                      final updatedGas =
+                          await gasNotifier.updateGas(widget.gas!.id, patchGas);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              GasAdminProfile(gas: updatedGas),
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('An error occurred. Please try again.')),
+                      );
+                    }
+                  }
+                },
+                child: Text(
+                  'Edit Gas Details',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
       ),
     );
   }

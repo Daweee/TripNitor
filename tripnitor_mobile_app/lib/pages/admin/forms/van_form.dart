@@ -9,13 +9,15 @@ import 'package:tripnitor_mobile_app/providers/van_provider.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
 import '../../../models/gas_model.dart';
+import '../../../models/van_model.dart';
+import '../profile/van_admin_profile.dart';
 import '../van_admin_page.dart';
 
-final dateBoughtProvider = StateProvider<DateTime?>((ref) => null);
-final expiryDateProvider = StateProvider<DateTime?>((ref) => null);
-
 class VanForm extends ConsumerStatefulWidget {
-  const VanForm({Key? key}) : super(key: key);
+  final Van? van;
+  final bool isEditMode;
+  const VanForm({Key? key, this.van, required this.isEditMode})
+      : super(key: key);
 
   @override
   ConsumerState<VanForm> createState() => _VanFormState();
@@ -23,13 +25,13 @@ class VanForm extends ConsumerStatefulWidget {
 
 class _VanFormState extends ConsumerState<VanForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _vanModelController = TextEditingController();
-  final TextEditingController _plateNumberController = TextEditingController();
-  final TextEditingController _dateBoughtController = TextEditingController();
-  final TextEditingController _registryExpiryDateController =
+  late TextEditingController _vanModelController = TextEditingController();
+  late TextEditingController _plateNumberController = TextEditingController();
+  late TextEditingController _dateBoughtController = TextEditingController();
+  late TextEditingController _registryExpiryDateController =
       TextEditingController();
-  final TextEditingController _maxPassengerController = TextEditingController();
-  final TextEditingController _gasIDController = TextEditingController();
+  late TextEditingController _maxPassengerController = TextEditingController();
+  late TextEditingController _gasIDController = TextEditingController();
   String? _selectedGasId;
   int _maxPassengers = 1;
 
@@ -38,8 +40,24 @@ class _VanFormState extends ConsumerState<VanForm> {
   @override
   void initState() {
     super.initState();
-    _maxPassengerController.text =
-        _maxPassengers.toString(); // Set default value
+    _maxPassengerController.text = _maxPassengers.toString();
+
+    if (widget.isEditMode && widget.van != null) {
+      _vanModelController.text = widget.van!.model;
+      _plateNumberController.text = widget.van!.plateNumber;
+
+      // Set the date fields with formatted date strings
+      _dateBoughtController.text =
+          widget.van!.dateBought.toIso8601String().split("T")[0]; // YYYY-MM-DD
+      _registryExpiryDateController.text = widget.van!.registrationExpiryDate
+          .toIso8601String()
+          .split("T")[0]; // YYYY-MM-DD
+
+      _maxPassengerController.text = widget.van!.maxPassengers.toString();
+      _selectedGasId = widget.van!.gas.id;
+      _maxPassengers = widget.van!.maxPassengers;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(gasStateProvider.notifier).getAllGas();
     });
@@ -47,23 +65,21 @@ class _VanFormState extends ConsumerState<VanForm> {
 
   @override
   Widget build(BuildContext context) {
-    final gasState = ref.watch(gasStateProvider);
-    final List<Gas>? _gas = gasState.gasList;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        title: Text(widget.isEditMode ? "Edit Van" : "Add Van"),
       ),
       resizeToAvoidBottomInset: false,
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       body: Container(
         padding: EdgeInsets.only(top: 20),
-        child: _buildUI(_gas),
+        child: _buildUI(),
       ),
     );
   }
 
-  Widget _buildUI(_gas) {
+  Widget _buildUI() {
     return Container(
       width: MediaQuery.sizeOf(context).width,
       padding: EdgeInsets.symmetric(
@@ -80,7 +96,7 @@ class _VanFormState extends ConsumerState<VanForm> {
               ),
               child: _headerText(context),
             ),
-            _VanFormBody(_gas),
+            _VanFormBody(),
           ],
         ),
       ),
@@ -90,7 +106,7 @@ class _VanFormState extends ConsumerState<VanForm> {
   Widget _headerText(BuildContext context) {
     return Container(
       child: Text(
-        "Add Van",
+        widget.isEditMode ? "Edit Van" : "Add Van",
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.bold,
@@ -99,9 +115,10 @@ class _VanFormState extends ConsumerState<VanForm> {
     );
   }
 
-  Widget _VanFormBody(_gas) {
-    final dateBought = ref.watch(dateBoughtProvider);
-    final expiryDate = ref.watch(expiryDateProvider);
+  Widget _VanFormBody() {
+    final gasState = ref.watch(gasStateProvider);
+    final List<Gas>? _gas = gasState.gasList;
+
     return SingleChildScrollView(
       child: Form(
         key: _formKey,
@@ -132,60 +149,43 @@ class _VanFormState extends ConsumerState<VanForm> {
             ),
 
             // Date of Purchase
-            InkWell(
-              onTap: () => _selectDate(context, dateBoughtProvider),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Date Bought',
-                  fillColor: Color(ColorConstants.SECONDARY_COLOR),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                    ),
-                  ),
+            TextField(
+              controller: _dateBoughtController,
+              decoration: InputDecoration(
+                labelText: "Date of Purchase",
+                filled: true,
+                prefixIcon: Icon(Icons.calendar_today),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      dateBought == null
-                          ? 'Select Date Bought'
-                          : DateFormat('yyyy-MM-dd').format(dateBought),
-                    ),
-                    Icon(Icons.calendar_today),
-                  ],
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
                 ),
               ),
+              readOnly: true,
+              onTap: () {
+                _selectDate(_dateBoughtController);
+              },
             ),
             SizedBox(height: 12),
-
             // Date of Expiration
-            InkWell(
-              onTap: () => _selectDate(context, expiryDateProvider),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Registration Expiration Date',
-                  fillColor: Color(ColorConstants.SECONDARY_COLOR),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                    ),
-                  ),
+            TextField(
+              controller: _registryExpiryDateController,
+              decoration: InputDecoration(
+                labelText: "Date of Expiration",
+                filled: true,
+                prefixIcon: Icon(Icons.calendar_today),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      expiryDate == null
-                          ? 'Registration expiry date'
-                          : DateFormat('yyyy-MM-dd').format(expiryDate),
-                    ),
-                    Icon(Icons.calendar_today),
-                  ],
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
                 ),
               ),
+              readOnly: true,
+              onTap: () {
+                _selectDate(_registryExpiryDateController);
+              },
             ),
             SizedBox(height: 12),
 
@@ -247,6 +247,10 @@ class _VanFormState extends ConsumerState<VanForm> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              value: _selectedGasId != null
+                  ? _gas?.firstWhere((gas) => gas.id == _selectedGasId,
+                      orElse: () => _gas.first)
+                  : null, // Set initial value,
               items: _gas?.map<DropdownMenuItem<Gas>>((Gas gas) {
                 return DropdownMenuItem<Gas>(
                   value: gas,
@@ -274,20 +278,18 @@ class _VanFormState extends ConsumerState<VanForm> {
   }
 
   // calendar
-  Future<void> _selectDate(
-      BuildContext context, StateProvider<DateTime?> provider) async {
-    final DateTime now = DateTime.now();
-    final DateTime sixMonthsFromNow =
-        DateTime(now.year, now.month + 6, now.day);
-
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectDate(TextEditingController controller) async {
+    DateTime? _picked = await showDatePicker(
       context: context,
-      initialDate: ref.read(provider) ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: sixMonthsFromNow,
+      lastDate: DateTime(2100),
     );
-    if (picked != null) {
-      ref.read(provider.notifier).state = picked;
+
+    if (_picked != null) {
+      setState(() {
+        controller.text = _picked.toString().split(" ")[0];
+      });
     }
   }
 
@@ -315,30 +317,37 @@ class _VanFormState extends ConsumerState<VanForm> {
               try {
                 final vanStateNotifier = ref.read(vanStateProvider.notifier);
 
-                final dateBought = ref.read(dateBoughtProvider);
-                final expiryDate = ref.read(expiryDateProvider);
-
-                // Format dates to string
-                String? formattedDateBought;
-                String? formattedExpiryDate;
-
-                if (dateBought != null) {
-                  formattedDateBought =
-                      DateFormat('yyyy-MM-dd').format(dateBought);
-                }
-                if (expiryDate != null) {
-                  formattedExpiryDate =
-                      DateFormat('yyyy-MM-dd').format(expiryDate);
-                }
-
-                await vanStateNotifier.createVan(
-                  _vanModelController.text.trim(),
-                  _plateNumberController.text.trim(),
-                  formattedDateBought!,
-                  formattedExpiryDate!,
-                  int.parse(_maxPassengerController.text.trim()),
-                  _selectedGasId,
+                final van = VanPatch(
+                  model: _vanModelController.text.trim(),
+                  plateNumber: _plateNumberController.text.trim(),
+                  dateBought:
+                      DateTime.tryParse(_dateBoughtController.text.trim()) ??
+                          DateTime.now(),
+                  registrationExpiryDate: DateTime.tryParse(
+                          _registryExpiryDateController.text.trim()) ??
+                      DateTime.now(),
+                  maxPassengers: int.parse(_maxPassengerController.text.trim()),
+                  gasId: _selectedGasId,
                 );
+
+                if (widget.isEditMode) {
+                  final updatedVan =
+                      await vanStateNotifier.updateVan(widget.van!.id, van);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VanAdminProfile(van: updatedVan),
+                    ),
+                  );
+                } else {
+                  final createdVan = await vanStateNotifier.createVan(van);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VanAdminProfile(van: createdVan),
+                    ),
+                  );
+                }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -352,7 +361,7 @@ class _VanFormState extends ConsumerState<VanForm> {
             }
           },
           child: Text(
-            'Add Van',
+            widget.isEditMode ? 'Update Van' : 'Add Van',
             style: TextStyle(
               color: Colors.white,
             ),
