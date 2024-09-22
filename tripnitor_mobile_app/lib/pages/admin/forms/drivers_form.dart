@@ -11,6 +11,7 @@ import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
 import '../../../models/auth_model.dart';
 import '../driver_admin_page.dart';
+import '../profile/driver_admin_profile.dart';
 
 final selectedDateProvider = StateProvider<DateTime?>((ref) => null);
 
@@ -34,18 +35,24 @@ class _DriversFormState extends ConsumerState<DriversForm> {
       TextEditingController();
   String? _selectedVanId;
 
+  bool get _isEditMode => widget.driver != null;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(vanStateProvider.notifier).getAllUnassignedVans();
 
-      if (widget.driver != null) {
+      if (_isEditMode && widget.driver != null) {
         _usernameController.text = widget.driver!.user.username;
         _nameController.text = widget.driver!.user.name;
         _emailController.text = widget.driver!.user.email;
         _phoneNumberController.text = widget.driver!.user.phoneNumber;
         _licenseNumberController.text = widget.driver!.licenseNumber;
+        _selectedVanId = widget.driver!.van.id;
+        // Set the selected date if available
+        ref.read(selectedDateProvider.notifier).state =
+            widget.driver!.dateHired;
       }
     });
   }
@@ -89,7 +96,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
   Widget _headerText(BuildContext context) {
     return Container(
       child: Text(
-        "Add Driver",
+        _isEditMode ? "Edit Driver" : "Add Driver",
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.bold,
@@ -105,17 +112,18 @@ class _DriversFormState extends ConsumerState<DriversForm> {
         key: _formKey,
         child: Column(
           children: [
-            CustomeFormField(
-              labelText: "Username",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _usernameController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a username';
-                }
-                return null;
-              },
-            ),
+            if (!_isEditMode)
+              CustomeFormField(
+                labelText: "Username",
+                height: MediaQuery.sizeOf(context).height * .1,
+                controller: _usernameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a username';
+                  }
+                  return null;
+                },
+              ),
             CustomeFormField(
               labelText: "name",
               height: MediaQuery.sizeOf(context).height * .1,
@@ -127,17 +135,18 @@ class _DriversFormState extends ConsumerState<DriversForm> {
                 return null;
               },
             ),
-            CustomeFormField(
-              labelText: "Email",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _emailController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a Email';
-                }
-                return null;
-              },
-            ),
+            if (!_isEditMode)
+              CustomeFormField(
+                labelText: "Email",
+                height: MediaQuery.sizeOf(context).height * .1,
+                controller: _emailController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an Email';
+                  }
+                  return null;
+                },
+              ),
 
             CustomeFormField(
               labelText: "Phone Number",
@@ -151,18 +160,19 @@ class _DriversFormState extends ConsumerState<DriversForm> {
                 return null;
               },
             ),
-            CustomeFormField(
-              labelText: "Password",
-              height: MediaQuery.sizeOf(context).height * .1,
-              controller: _passwordController,
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter the password';
-                }
-                return null;
-              },
-            ),
+            if (!_isEditMode)
+              CustomeFormField(
+                labelText: "Password",
+                height: MediaQuery.of(context).size.height * .1,
+                controller: _passwordController,
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the password';
+                  }
+                  return null;
+                },
+              ),
             CustomeFormField(
               labelText: "License number",
               height: MediaQuery.sizeOf(context).height * .1,
@@ -203,27 +213,30 @@ class _DriversFormState extends ConsumerState<DriversForm> {
             ),
 
             SizedBox(height: 20),
-            DropdownButtonFormField<Van>(
+            DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: "Assign a van",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              items: _vans?.map<DropdownMenuItem<Van>>((Van van) {
-                    return DropdownMenuItem<Van>(
-                      value: van,
+              value: _vans?.any((van) => van.id == _selectedVanId) == true
+                  ? _selectedVanId
+                  : null,
+              items: _vans?.map<DropdownMenuItem<String>>((Van van) {
+                    return DropdownMenuItem<String>(
+                      value: van.id,
                       child: Text('${van.model} | ${van.plateNumber}'),
                     );
                   }).toList() ??
                   [],
-              onChanged: (Van? newValue) {
+              onChanged: (String? newValue) {
                 setState(() {
-                  _selectedVanId = newValue?.id; // Store the selected van ID
+                  _selectedVanId = newValue;
                 });
               },
               validator: (value) {
-                if (value == null) {
+                if (value == null || value.isEmpty) {
                   return 'Please select a van';
                 }
                 return null;
@@ -283,8 +296,31 @@ class _DriversFormState extends ConsumerState<DriversForm> {
                   formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
                 }
 
-                if (widget.driver == null) {
-                  await driverNotifier.createDriver(
+                if (_isEditMode) {
+                  final user = UserPatch(
+                    name: _nameController.text.trim(),
+                    phoneNumber: _phoneNumberController.text.trim(),
+                  );
+
+                  final updateDriver = await driverNotifier.updateDriver(
+                    widget.driver!.id,
+                    DriverPatch(
+                      user: user,
+                      licenseNumber: _licenseNumberController.text.trim(),
+                      dateHired: formattedDate,
+                      vanId: _selectedVanId,
+                    ),
+                  );
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DriverAdminProfile(driver: updateDriver),
+                    ),
+                  );
+                } else {
+                  final createdDriver = await driverNotifier.createDriver(
                     _usernameController.text.trim(),
                     _nameController.text.trim(),
                     _emailController.text.trim(),
@@ -294,21 +330,32 @@ class _DriversFormState extends ConsumerState<DriversForm> {
                     formattedDate,
                     _selectedVanId,
                   );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Driver created successfully')),
+                  );
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DriverAdminPage(),
+                    ),
+                  );
                 }
+
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => DriverAdminPage()),
+                );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                       content: Text('An error occurred. Please try again.')),
                 );
               }
-
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => DriverAdminPage()),
-              );
             }
           },
           child: Text(
-            'Add Driver',
+            _isEditMode ? 'Update Driver' : 'Add Driver',
             style: TextStyle(
               color: Colors.white,
             ),

@@ -13,7 +13,7 @@ import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
 import 'package:tripnitor_mobile_app/services/token_service.dart';
 
 class AdminDrawer extends ConsumerWidget {
-  const AdminDrawer({Key? key}) : super(key: key);  
+  const AdminDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,18 +66,18 @@ class AdminDrawer extends ConsumerWidget {
                 width: 8.0,
                 child: IconButton(
                   icon: FaIcon(
-                    FontAwesomeIcons.gaugeHigh,
+                    FontAwesomeIcons.calendarWeek,
                     color: Color(ColorConstants.PRIMARY_COLOR),
                     size: 20.0,
                   ),
                   onPressed: () {},
                 ),
               ),
-              title: const Text('Dashboard'),
+              title: const Text('Driver Schedules'),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AdminDashboard()),
+                  MaterialPageRoute(builder: (context) => DriverSchedulePage()),
                 );
               },
             ),

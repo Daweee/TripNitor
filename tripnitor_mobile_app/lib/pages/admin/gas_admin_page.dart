@@ -61,8 +61,11 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
             ),
           );
         },
-        child: Icon(Icons.add),
-        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        child: Icon(
+          Icons.add,
+          color: Color(ColorConstants.BACKGROUND_COLOR),
+        ),
+        backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
       ),
     );
   }
@@ -141,12 +144,11 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //       builder: (context) =>
-                          //           DriverProfilePage(driver: driver)),
-                          // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => GasForm(gas: gas)),
+                          );
                         },
                         icon: Icon(Icons.edit, color: Colors.green),
                       ),

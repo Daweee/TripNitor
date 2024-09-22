@@ -59,8 +59,11 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
             ),
           );
         },
-        child: Icon(Icons.add),
-        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        child: Icon(
+          Icons.add,
+          color: Color(ColorConstants.BACKGROUND_COLOR),
+        ),
+        backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
       ),
     );
   }
