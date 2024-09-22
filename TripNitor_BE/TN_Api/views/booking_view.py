@@ -148,14 +148,15 @@ class BookingPreviewView(APIView):
             )
 
             temp_booking.clean()  # Ensure validation is applied
-            temp_booking.calculate_final_fare()
+            assigned_drivers = temp_booking.preview_driver_assignment()
+
+            temp_booking.calculate_final_fare(len(assigned_drivers))
 
             # Calculate total price
             total_price = temp_booking.total_price
             base_fare = temp_booking.base_fare
             number_of_nights = temp_booking.number_of_nights
 
-            assigned_drivers = temp_booking.preview_driver_assignment()
             # available_drivers = temp_booking.get_available_drivers()
             # required_vans = (number_of_passengers + 14) // 15
             # assigned_drivers = available_drivers[:required_vans]

@@ -52,24 +52,12 @@ class Booking(CustomPrimaryKeyModel):
     def get_nights(self):
         return (self.end_date - self.start_date).days
 
-    def calculate_final_fare(self):
+    def calculate_final_fare(self, number_of_drivers):
         self.base_fare = 3000
         number_of_nights = self.get_nights()
         self.number_of_nights = number_of_nights
-        self.total_price = self.package.base_price + self.base_fare + (number_of_nights * 1000)
+        self.total_price = (self.package.base_price * number_of_drivers) + self.base_fare + (number_of_nights * 1000)
 
-    # def assign_drivers(self):
-    #     from .driver_assignment_model import DriverAssignment
-    #     required_vans = (self.number_of_passengers + 14) // 15 
-    #     available_drivers = list(self.get_available_drivers())
-    #     shuffle(available_drivers)  # Randomize the order of available drivers
-
-    #     assigned_drivers = []
-    #     for driver in available_drivers[:required_vans]:
-    #         DriverAssignment.objects.create(driver=driver, booking=self)
-    #         assigned_drivers.append(driver)
-        
-    #     return assigned_drivers
     
     def get_available_drivers(self):
         from .driver_model import Driver 
