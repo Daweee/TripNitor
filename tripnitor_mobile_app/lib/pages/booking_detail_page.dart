@@ -61,7 +61,7 @@ Widget _buildBody(bookingState) {
   if (bookingState.isLoading) {
     return Center(child: CircularProgressIndicator());
   }
-  return BookingDetailsContent(booking: bookingState.booking!);
+  return BookingDetailsContent(booking: bookingState.booking);
 }
 
 class BookingDetailsContent extends StatelessWidget {

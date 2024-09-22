@@ -80,7 +80,11 @@ Widget _buildBody(bookingState) {
   if (bookingState.isLoading) {
     return Center(child: CircularProgressIndicator());
   }
-  return BookingDetailsContent(booking: bookingState.booking);
+  if (bookingState.booking != null) {
+    return BookingDetailsContent(booking: bookingState.booking!);
+  } else {
+    return Center(child: Text('No booking available.'));
+  }
 }
 
 class BookingDetailsContent extends StatelessWidget {
