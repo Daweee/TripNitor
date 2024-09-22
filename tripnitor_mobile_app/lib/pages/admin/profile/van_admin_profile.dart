@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/van_model.dart';
 
+import '../van_admin_page.dart';
+
 class VanAdminProfile extends StatelessWidget {
   final Van van;
 
@@ -18,6 +20,16 @@ class VanAdminProfile extends StatelessWidget {
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => VanAdminPage()),
+              (route) => false,
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -66,13 +78,11 @@ class VanAdminProfile extends StatelessWidget {
                     SizedBox(
                       height: 8,
                     ),
-                    Text(
-                        'Date of Purchase: ${dateFormat.format(van.dateBought)}'),
+                    Text('Date of Purchase: ${van.dateBought}'),
                     SizedBox(
                       height: 8,
                     ),
-                    Text(
-                        'Data of Expiration: ${dateFormat.format(van.registrationExpiryDate)}'),
+                    Text('Data of Expiration: ${van.registrationExpiryDate}'),
                     SizedBox(
                       height: 8,
                     ),

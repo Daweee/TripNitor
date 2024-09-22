@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/gas_model.dart';
 
+import '../gas_admin_page.dart';
+
 class GasAdminProfile extends StatelessWidget {
   final Gas gas;
 
@@ -16,6 +18,16 @@ class GasAdminProfile extends StatelessWidget {
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => GasAdminPage()),
+              (route) => false,
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
