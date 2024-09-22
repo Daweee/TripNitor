@@ -3,12 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_details.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_notifications.dart';
+import 'package:tripnitor_mobile_app/providers/driver_provider.dart';
 
-class DriverBookingPage extends ConsumerWidget {
+import '../../../../providers/driver_assignment_provider.dart';
+
+class DriverBookingPage extends ConsumerStatefulWidget {
   const DriverBookingPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DriverBookingPage> createState() => _DriverBookingPageState();
+}
+
+class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(driverStateProvider.notifier).getUserDriverDetail();
+      ref.read(driverAssignmentStateProvider.notifier).getDriverBookings();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -45,11 +62,13 @@ class DriverBookingPage extends ConsumerWidget {
   }
 
   Widget _buildUI(BuildContext context) {
-    return Column(
-      children: [
-        //_header(context),
-        _driverTaskList(context),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          //_header(context),
+          _driverTaskList(context),
+        ],
+      ),
     );
   }
 
@@ -138,56 +157,64 @@ class DriverBookingPage extends ConsumerWidget {
   }
 
   Widget _buildTaskCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    final driverBookingState = ref.watch(driverAssignmentStateProvider);
+    final driverBookingList = driverBookingState.driverAssignmentList;
+
+    if (driverBookingList == null || driverBookingList.isEmpty) {
+      return Center(child: Text("No bookings available"));
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: driverBookingList.length,
+      itemBuilder: (context, index) {
+        final driverBooking = driverBookingList[index];
+        return Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.location_on, color: Colors.red, size: 20),
-                SizedBox(width: 5),
-                Text(
-                  'Prime Tourist Liloan',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            SizedBox(height: 5),
-            Icon(Icons.swap_vert, color: Colors.black, size: 20),
-            SizedBox(height: 5),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: Colors.black,
-                  size: 20,
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                Text(
-                  'Medellien Aisle, Medillen Cebu',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Divider(),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Container(
-                      padding: EdgeInsets.only(left: 5),
+                    Icon(Icons.location_on, color: Colors.red, size: 20),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        driverBooking.booking.package.startLocation.name,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Icon(Icons.swap_vert, color: Colors.black, size: 20),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, color: Colors.black, size: 20),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        driverBooking.booking.package.finalDestination.name,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Divider(),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -198,32 +225,7 @@ class DriverBookingPage extends ConsumerWidget {
                                 style: TextStyle(fontSize: 12),
                               ),
                               Text(
-                                '#0001',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('Route: ', style: TextStyle(fontSize: 12)),
-                              Text(
-                                'Round Trip',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('Est. Destination: ',
-                                  style: TextStyle(fontSize: 12)),
-                              Text(
-                                '25.76 km',
+                                '${driverBooking.booking.id}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.green,
@@ -234,39 +236,8 @@ class DriverBookingPage extends ConsumerWidget {
                         ],
                       ),
                     ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // Container(
-                    //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.green,
-                    //     borderRadius: BorderRadius.circular(10),
-                    //   ),
-                    //   child: Text('Confirmed',
-                    //       style: TextStyle(color: Colors.white, fontSize: 12)),
-                    // ),
-                    SizedBox(height: 5),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (context) => DriverBookingDetails()),
-                    //     );
-                    //   },
-                    //   child: Text('Show task'),
-                    //   style: ElevatedButton.styleFrom(
-                    //     iconColor: Colors.amber,
-                    //     shape: RoundedRectangleBorder(
-                    //         borderRadius: BorderRadius.circular(20)),
-                    //   ),
-                    // ),
                     SizedBox(
-                      width: MediaQuery.sizeOf(context).width * .3,
-                      height: MediaQuery.sizeOf(context).height * .06,
+                      width: MediaQuery.of(context).size.width * .3,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
@@ -275,24 +246,23 @@ class DriverBookingPage extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DriverBookingDetails()),
+                              builder: (context) => DriverBookingDetails(),
+                            ),
                           );
                         },
                         child: Text(
                           'Show Task',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
