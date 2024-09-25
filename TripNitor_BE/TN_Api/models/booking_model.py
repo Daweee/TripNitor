@@ -45,8 +45,7 @@ class Booking(CustomPrimaryKeyModel):
 
     def save(self, *args, **kwargs):
         self.clean()
-        self.calculate_final_fare()
-        
+        self.calculate_number_of_nights()
         super().save(*args, **kwargs)
 
     def get_nights(self):
@@ -58,7 +57,11 @@ class Booking(CustomPrimaryKeyModel):
         self.number_of_nights = number_of_nights
         self.total_price = (self.package.base_price * number_of_drivers) + self.base_fare + (number_of_nights * 1000)
 
-    
+    def calculate_number_of_nights(self):
+        self.base_fare = 3000
+        number_of_nights = self.get_nights()
+        self.number_of_nights = number_of_nights
+
     def get_available_drivers(self):
         from .driver_model import Driver 
         all_drivers = Driver.objects.all()
