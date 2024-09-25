@@ -61,7 +61,7 @@ Widget _buildBody(bookingState) {
   if (bookingState.isLoading) {
     return Center(child: CircularProgressIndicator());
   }
-  return BookingDetailsContent(booking: bookingState.booking);
+  return BookingDetailsContent(booking: bookingState.booking!);
 }
 
 class BookingDetailsContent extends StatelessWidget {
@@ -314,8 +314,8 @@ class BookingDetailsContent extends StatelessWidget {
                       SizedBox(height: 10),
                       _buildInfoRow("Name", driver.user.name),
                       _buildInfoRow("Phone Number", driver.user.phoneNumber),
-                      _buildInfoRow("Van Model", driver.van.model),
-                      _buildInfoRow("Plate Number", driver.van.plateNumber),
+                      //   _buildInfoRow("Van Model", driver.van.model),
+                      //   _buildInfoRow("Plate Number", driver.van.plateNumber),
                     ],
                   ),
                 ),

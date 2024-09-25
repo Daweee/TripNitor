@@ -7,6 +7,7 @@ import '../../models/driver_assignment.dart';
 import '../../models/driver_model.dart';
 import '../../providers/driver_provider.dart';
 import 'admin_drawer.dart';
+import 'profile/booking_admin_profile.dart';
 
 class DriverSchedulePage extends ConsumerStatefulWidget {
   const DriverSchedulePage({super.key});
@@ -177,11 +178,16 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
                           'Start: ${booking.startDate.toString().substring(0, 10)}'),
                       Text(
                           'End: ${booking.endDate.toString().substring(0, 10)}'),
-                      // Add more booking details here as needed
                     ],
                   ),
                   onTap: () {
-                    // Handle tap on booking if needed
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            BookingAdminProfile(booking: booking.booking),
+                      ),
+                    );
                   },
                 );
               },

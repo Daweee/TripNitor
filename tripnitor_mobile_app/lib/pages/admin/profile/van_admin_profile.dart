@@ -15,7 +15,7 @@ class VanAdminProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+    DateFormat dateFormat = DateFormat('MMMM d, yyyy');
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
@@ -55,12 +55,10 @@ class VanAdminProfile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Van Model: ${van.model} ', // ${driver.user.name}
+                        Text('Van Model: ${van.model}',
                             style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(
-                            'Van\'s Plate No. : ${van.plateNumber}'), // ${driver.user.email}
-                        Text(
-                            'Type of Gas: ${van.gas.gasName}'), // ${driver.user.username}
+                        Text('Van\'s Plate No. : ${van.plateNumber}'),
+                        Text('Type of Gas: ${van.gas?.gasName}'),
                       ],
                     ),
                   ),
@@ -75,43 +73,22 @@ class VanAdminProfile extends StatelessWidget {
                       'Van ID: ${van.id}',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text('Date of Purchase: ${van.dateBought}'),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text('Data of Expiration: ${van.registrationExpiryDate}'),
-                    SizedBox(
-                      height: 8,
-                    ),
+                    SizedBox(height: 8),
                     Text(
-                        'Van\'s Maximum Capacity: ${van.maxPassengers}', // ${driver.user.name}
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      height: 8,
-                    ),
+                        'Date of Purchase: ${dateFormat.format(van.dateBought)}'),
+                    SizedBox(height: 8),
                     Text(
-                        'Price of Gas: ₱${van.gas.gasPrice}/liter'), // ${driver.user.email}
+                        'Date of Expiration: ${dateFormat.format(van.registrationExpiryDate)}'),
+                    SizedBox(height: 8),
+                    Text(
+                      'Van\'s Maximum Capacity: ${van.maxPassengers}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text('Price of Gas: ₱${van.gas?.gasPrice}/liter'),
                   ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(top: 32),
-                    child: SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Text('Delete'),
-                      ),
-                    ),
-                  ),
-                ],
-              )
             ],
           ),
         ),

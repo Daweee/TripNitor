@@ -44,12 +44,13 @@ class DriverAdminProfile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            'Name: ${driver.user.name} ', // ${driver.user.name}
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                          driver.id,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ), // ${driver.user.email}
+                        Text(driver.user.name), // ${driver.user.name}
+
                         Text(
-                            'Email: ${driver.user.email}'), // ${driver.user.email}
-                        Text(
-                            'Phone Number: ${driver.user.phoneNumber}'), // ${driver.user.username}
+                            driver.user.phoneNumber), // ${driver.user.username}
                       ],
                     ),
                   ),
@@ -67,11 +68,10 @@ class DriverAdminProfile extends StatelessWidget {
                     SizedBox(
                       height: 8,
                     ),
-                    Text('Role: ${driver.user.role}'),
+                    Text('Email: ${(driver.user.email)}'),
                     SizedBox(
                       height: 8,
                     ),
-                    Text('Driver\'s ID: ${driver.id}'),
                     SizedBox(
                       height: 8,
                     ),
@@ -86,21 +86,21 @@ class DriverAdminProfile extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(top: 32),
-                    child: SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Text('Delete'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              //   Row(
+              //     mainAxisAlignment: MainAxisAlignment.end,
+              //     children: [
+              //       Container(
+              //         padding: EdgeInsets.only(top: 32),
+              //         child: SizedBox(
+              //           width: 150,
+              //           child: ElevatedButton(
+              //             onPressed: () {},
+              //             child: Text('Delete'),
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
             ],
           ),
         ),

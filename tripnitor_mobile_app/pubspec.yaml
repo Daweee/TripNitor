@@ -67,6 +67,7 @@ flutter:
     - assets\images\ph_van-fill.png
     - assets\images\Unknown_person.jpg
     - assets\images\pana.png
+    - assets\images\TripNitor.png
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -95,21 +95,21 @@ class GasAdminProfile extends StatelessWidget {
               //     ],
               //   ),
               // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(top: 32),
-                    child: SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Text('Delete'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              //   Row(
+              //     mainAxisAlignment: MainAxisAlignment.end,
+              //     children: [
+              //       Container(
+              //         padding: EdgeInsets.only(top: 32),
+              //         child: SizedBox(
+              //           width: 150,
+              //           child: ElevatedButton(
+              //             onPressed: () {},
+              //             child: Text('Delete'),
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
             ],
           ),
         ),

@@ -110,8 +110,8 @@ class BookingDetailsContent extends StatelessWidget {
           _buildDriverSection(),
           _buildSection("Payment Summary", [
             _buildPaymentInfoRow("Base Fare", "₱${booking.baseFare}"),
-            _buildPaymentInfoRow(
-                "Package Fare", "₱${booking.package.basePrice}"),
+            _buildPaymentInfoRow("Package Fare",
+                "₱${booking.package.basePrice} x ${booking.drivers.length} vans"),
             _buildPaymentInfoRow("Booking Duration",
                 "${booking.numberOfNights} nights x ₱1000.00"),
             Padding(
@@ -337,8 +337,8 @@ class BookingDetailsContent extends StatelessWidget {
                       SizedBox(height: 10),
                       _buildInfoRow("Name", driver.user.name),
                       _buildInfoRow("Phone Number", driver.user.phoneNumber),
-                      _buildInfoRow("Van Model", driver.van.model),
-                      _buildInfoRow("Plate Number", driver.van.plateNumber),
+                      //   _buildInfoRow("Van Model", driver.van.model),
+                      //   _buildInfoRow("Plate Number", driver.van.plateNumber),
                     ],
                   ),
                 ),

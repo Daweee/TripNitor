@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../constants/constant.dart';
 import '../../providers/booking_provider.dart';
 import 'admin_drawer.dart';
+import 'profile/booking_admin_profile.dart';
 
 class BookingAdminPage extends ConsumerStatefulWidget {
   const BookingAdminPage({super.key});
@@ -62,13 +63,13 @@ class _BookingAdminPageState extends ConsumerState<BookingAdminPage> {
                     try {
                       return InkWell(
                         onTap: () {
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //       builder: (context) =>
-                          //           BookingDetailPageTwo(bookingId: booking.id),
-                          //     ),
-                          //   );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  BookingAdminProfile(booking: booking),
+                            ),
+                          );
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(

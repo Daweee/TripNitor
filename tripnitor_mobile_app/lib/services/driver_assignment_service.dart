@@ -31,12 +31,20 @@ class DriverAssignmentService {
           .get('${HTTPConstants.BASE_URL}api/drivers-assignment/by-driver/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
-        final dynamicData = responseData?['data'] as List<dynamic>;
+        final dynamicData = responseData?['data'];
 
-        final List<Map<String, dynamic>> data =
-            dynamicData.whereType<Map<String, dynamic>>().toList();
+        if (dynamicData == null) {
+          return [];
+        }
 
-        return data.map((json) => DriverAssignment.fromJson(json)).toList();
+        if (dynamicData is List) {
+          final List<Map<String, dynamic>> data =
+              dynamicData.whereType<Map<String, dynamic>>().toList();
+
+          return data.map((json) => DriverAssignment.fromJson(json)).toList();
+        } else {
+          return [];
+        }
       } else {
         throw DioException(
           requestOptions: response.requestOptions,

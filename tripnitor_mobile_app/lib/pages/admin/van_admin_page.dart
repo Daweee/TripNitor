@@ -90,39 +90,38 @@ class _VanAdminPageState extends ConsumerState<VanAdminPage> {
   }
 
   Widget _vanAdminList(vanState) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 24.0, top: 32),
-          child: Row(
-            children: [
-              Text(
-                "Van'\s List",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              itemCount: vanState.vanList?.length ?? 0,
-              itemBuilder: (context, index) {
-                return _vanBuildCard(context, vanState.vanList![index]);
-              },
+    return RefreshIndicator(
+      onRefresh: _loadVans,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 24.0, top: 32),
+            child: Row(
+              children: [
+                Text(
+                  "Van's List",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
-        ),
-        SizedBox(
-          height: 24,
-        ),
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: _DriverBuildCard(context),
-        // ),
-      ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: vanState.vanList?.length ?? 0,
+                itemBuilder: (context, index) {
+                  return _vanBuildCard(context, vanState.vanList![index]);
+                },
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 24,
+          ),
+        ],
+      ),
     );
   }
 
@@ -146,7 +145,7 @@ class _VanAdminPageState extends ConsumerState<VanAdminPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Van Model: ${van.model}',
+                '${van.model} | ${van.plateNumber}',
                 overflow: TextOverflow.ellipsis,
               ),
               SizedBox(
@@ -156,7 +155,7 @@ class _VanAdminPageState extends ConsumerState<VanAdminPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Type of Gas: ${van.gas.gasName} | ₱${van.gas.gasPrice}',
+                    '${van.gas?.gasName} | ₱${van.gas?.gasPrice}/liter',
                     overflow: TextOverflow.ellipsis,
                   ),
                   Row(

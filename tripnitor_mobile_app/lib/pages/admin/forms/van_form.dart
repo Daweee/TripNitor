@@ -54,7 +54,7 @@ class _VanFormState extends ConsumerState<VanForm> {
           .split("T")[0]; // YYYY-MM-DD
 
       _maxPassengerController.text = widget.van!.maxPassengers.toString();
-      _selectedGasId = widget.van!.gas.id;
+      _selectedGasId = widget.van!.gas?.id;
       _maxPassengers = widget.van!.maxPassengers;
     }
 

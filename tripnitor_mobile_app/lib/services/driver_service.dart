@@ -112,8 +112,14 @@ class DriverService {
 
   Future<void> deleteDriver(String driverId) async {
     try {
-      final response = await _dio
-          .delete('${HTTPConstants.BASE_URL}api/drivers/$driverId/delete/');
+      final response = await _dio.delete(
+          '${HTTPConstants.BASE_URL}api/drivers/$driverId/delete/',
+          options: Options(
+            followRedirects: false,
+            validateStatus: (status) {
+              return status! < 500;
+            },
+          ));
 
       if (response.statusCode == 204) {
         return;

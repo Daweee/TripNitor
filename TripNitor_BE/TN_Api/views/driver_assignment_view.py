@@ -37,21 +37,31 @@ class DriverAssignmentByDriverList(CustomResponseMixin, ListAPIView):
     def get_queryset(self):
         try:
             driver = Driver.objects.get(user=self.request.user)
-            queryset = DriverAssignment.objects.filter(driver=driver)
-            if not queryset.exists():
-                raise NotFound(detail="No driver assignments found for the current user.")
-            return queryset
+            return DriverAssignment.objects.filter(driver=driver)
         except Driver.DoesNotExist:
             raise NotFound(detail="No driver profile found for the current user.")
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return self.get_custom_response(
-            status.HTTP_200_OK,
-            serializer.data,
-            'Driver booking list retrieved successfully'
-        )
+        try:
+            queryset = self.get_queryset()
+            if not queryset.exists():
+                return self.get_custom_response(
+                    status.HTTP_200_OK,
+                    None,
+                    'No driver assignments found for the current user'
+                )
+            serializer = self.get_serializer(queryset, many=True)
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                serializer.data,
+                'Driver booking list retrieved successfully'
+            )
+        except NotFound as e:
+            return self.get_custom_response(
+                status.HTTP_404_NOT_FOUND,
+                None,
+                str(e)
+            )
 
 @extend_schema(tags=['driver assignments'])
 class DriverAssignmentCreate(CustomResponseMixin, CreateAPIView):

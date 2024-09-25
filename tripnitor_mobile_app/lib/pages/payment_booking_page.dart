@@ -291,10 +291,10 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                                 _buildDriverInfoRow("Name", driver.name),
                                 _buildDriverInfoRow(
                                     "Phone Number", driver.phoneNumber),
-                                _buildDriverInfoRow(
-                                    "Van Model", driver.vanModel),
-                                _buildDriverInfoRow(
-                                    "Plate Number", driver.vanPlateNumber),
+                                // _buildDriverInfoRow(
+                                //     "Van Model", driver.vanModel),
+                                // _buildDriverInfoRow(
+                                //     "Plate Number", driver.vanPlateNumber),
                               ],
                             ),
                           ),
@@ -332,7 +332,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                         _buildPaymentInfoRow("Base Fare",
                             "₱${bookingState.previewBooking!.baseFare.toStringAsFixed(2)}"),
                         _buildPaymentInfoRow("Package Fare",
-                            "₱${bookingState.previewBooking!.basePackagePrice.toStringAsFixed(2)}"),
+                            "₱${bookingState.previewBooking!.basePackagePrice.toStringAsFixed(2)} x ${bookingState.previewBooking!.assignedDrivers.length} vans"),
                         _buildPaymentInfoRow("Booking Duration",
                             "${bookingState.previewBooking!.numberOfNights} nights x ₱1000.00"),
                         Padding(
@@ -417,6 +417,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             modeOfPayment: _selectedPaymentMethod,
                             startDate: bookingState.previewBooking!.startDate,
                             endDate: bookingState.previewBooking!.endDate,
+                            totalPrice: bookingState.previewBooking!.totalPrice,
                           );
 
                           ref

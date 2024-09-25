@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_details.dart';
@@ -24,6 +25,11 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
     });
   }
 
+  Future<void> _refreshData() async {
+    await ref.read(driverStateProvider.notifier).getUserDriverDetail();
+    await ref.read(driverAssignmentStateProvider.notifier).getDriverBookings();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +49,6 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    // Soon will not implement materiaPageRoute rather just slide 2 screen in one frame. Temporary screen
                     builder: (context) => DriverBookingNotifications(),
                   ),
                 );
@@ -57,74 +62,21 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
         ],
       ),
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: _buildUI(context),
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: _buildUI(context),
+      ),
     );
   }
 
   Widget _buildUI(BuildContext context) {
     return SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
       child: Column(
         children: [
-          //_header(context),
           _driverTaskList(context),
         ],
       ),
-    );
-  }
-
-  Widget _header(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          color: Color(ColorConstants.PRIMARY_COLOR),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome null', // ${authState.user?.username}
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Text(
-                        'Your hard work drives our success. Keep moving forward!',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: SizedBox(
-                    height: 120,
-                    child: Image.asset(
-                      'assets/images/pana.png', // Replace with the path to your image asset
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -193,7 +145,17 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                   ],
                 ),
                 SizedBox(height: 5),
-                Icon(Icons.swap_vert, color: Colors.black, size: 20),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Dash(
+                    direction: Axis.vertical,
+                    length: 30,
+                    dashLength: 5,
+                    dashColor: Colors.black.withOpacity(.5),
+                    dashGap: 5,
+                    dashThickness: 2,
+                  ),
+                ),
                 SizedBox(height: 5),
                 Row(
                   children: [
@@ -210,7 +172,6 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                 ),
                 SizedBox(height: 10),
                 Divider(),
-                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -228,8 +189,23 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                                 '${driverBooking.booking.id}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Status:  ',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              Text(
+                                driverBooking.booking.status,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: Color(ColorConstants.ACCENT_COLOR)),
                               ),
                             ],
                           ),
@@ -246,7 +222,8 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DriverBookingDetails(),
+                              builder: (context) => DriverBookingDetails(
+                                  booking: driverBooking.booking),
                             ),
                           );
                         },

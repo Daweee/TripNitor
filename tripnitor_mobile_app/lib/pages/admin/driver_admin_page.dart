@@ -17,8 +17,23 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(driverStateProvider.notifier).getDriverList();
+      _loadDrivers();
     });
+  }
+
+  Future<void> _loadDrivers() async {
+    try {
+      await ref.read(driverStateProvider.notifier).getDriverList();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load drivers: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -69,34 +84,37 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
   }
 
   Widget _DriverAdminList(driverState) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 24.0, top: 32),
-          child: Row(
-            children: [
-              Text(
-                "Driver's List",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              itemCount: driverState.driverList?.length ?? 0,
-              itemBuilder: (context, index) {
-                return _DriverBuildCard(
-                    context, driverState.driverList![index]);
-              },
+    return RefreshIndicator(
+      onRefresh: _loadDrivers,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 24.0, top: 32),
+            child: Row(
+              children: [
+                Text(
+                  "Driver's List",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
-        ),
-        SizedBox(height: 24),
-      ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: driverState.driverList?.length ?? 0,
+                itemBuilder: (context, index) {
+                  return _DriverBuildCard(
+                      context, driverState.driverList![index]);
+                },
+              ),
+            ),
+          ),
+          SizedBox(height: 24),
+        ],
+      ),
     );
   }
 
@@ -119,8 +137,7 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Name: ${driver.user.name}',
-                  overflow: TextOverflow.ellipsis),
+              Text(driver.user.name, overflow: TextOverflow.ellipsis),
               SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,17 +145,11 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
                   Flexible(
                     flex: 1,
                     child: Text(
-                      'Username: ${driver.user.username}',
+                      'License Number: ${driver.licenseNumber}',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Email: ${driver.user.email}',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
                   Row(
                     children: [
                       IconButton(
@@ -179,9 +190,37 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
                           );
 
                           if (result == true) {
-                            await ref
-                                .read(driverStateProvider.notifier)
-                                .deleteDriver(driver.id);
+                            try {
+                              await ref
+                                  .read(driverStateProvider.notifier)
+                                  .deleteDriver(driver.id);
+                              // Check the state after the operation
+                              final currentState =
+                                  ref.read(driverStateProvider);
+                              if (currentState.error != null) {
+                                throw Exception(currentState.error);
+                              }
+                              // Show success snackbar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(currentState.message ??
+                                      'Driver deleted successfully'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } catch (error) {
+                              // Log the detailed error for debugging
+                              print('Detailed error: $error');
+
+                              // Show a general error snackbar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Failed to delete driver. Please try again later.'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           }
                         },
                         icon: Icon(Icons.delete, color: Colors.red),

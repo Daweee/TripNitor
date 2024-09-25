@@ -1,20 +1,45 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/models/driver_model.dart';
-
 import '../../../../models/booking_model.dart';
 
-class DriverBookingDetails extends StatefulWidget {
+class BookingAdminProfile extends StatefulWidget {
   final Booking booking;
-  DriverBookingDetails({super.key, required this.booking});
+  BookingAdminProfile({super.key, required this.booking});
 
   @override
-  State<DriverBookingDetails> createState() => _DriverBookingDetailsState();
+  State<BookingAdminProfile> createState() => _BookingAdminProfileState();
 }
 
-class _DriverBookingDetailsState extends State<DriverBookingDetails> {
+class _BookingAdminProfileState extends State<BookingAdminProfile> {
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Cancellation'),
+          content: Text('Are you sure you want to cancel this booking?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                // Add your cancel logic here
+                print("Booking cancelled");
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isBookingPending = widget.booking.status.toUpperCase() == 'PENDING';
@@ -58,9 +83,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -80,9 +103,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -92,9 +113,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -106,9 +125,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -118,9 +135,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,9 +146,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -145,9 +158,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -157,9 +168,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -180,9 +189,7 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                 ],
               ),
               Divider(),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -192,28 +199,56 @@ class _DriverBookingDetailsState extends State<DriverBookingDetails> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width * .4,
-                  height: MediaQuery.sizeOf(context).height * .06,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
-                      disabledBackgroundColor:
-                          Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.5),
-                    ),
-                    onPressed: isBookingPending ? null : () {},
-                    child: Text(
-                      'Begin',
-                      style: TextStyle(
-                        color: Colors.white,
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * .4,
+                    height: MediaQuery.of(context).size.height * .06,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+                        disabledBackgroundColor:
+                            Color(ColorConstants.PRIMARY_COLOR)
+                                .withOpacity(0.5),
+                      ),
+                      onPressed: isBookingPending
+                          ? () {
+                              // Add your confirm logic here
+                              print("Booking confirmed");
+                            }
+                          : null,
+                      child: Text(
+                        isBookingPending ? 'Confirm' : 'Begin',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * .4,
+                    height: MediaQuery.of(context).size.height * .06,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(ColorConstants.ERROR_COLOR),
+                        disabledBackgroundColor: Colors.red.withOpacity(0.5),
+                      ),
+                      onPressed: isBookingPending
+                          ? () {
+                              _showCancelConfirmationDialog();
+                            }
+                          : null,
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

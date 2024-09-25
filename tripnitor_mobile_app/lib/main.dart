@@ -30,7 +30,7 @@ class MyApp extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return MaterialApp(
-      // debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
       //   title: 'Login and User Registration',
       //   theme: ThemeData(
       //     primarySwatch: ColorConstants.BACKGROUND_COLOR,

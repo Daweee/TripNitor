@@ -91,8 +91,11 @@ class GasService {
 
   Future<void> deleteGas(String? gasId) async {
     try {
-      final response =
-          await _dio.delete('${HTTPConstants.BASE_URL}api/gas/$gasId/delete/');
+      final response = await _dio
+          .delete<dynamic>('${HTTPConstants.BASE_URL}api/gas/$gasId/delete/');
+
+      print(
+          'Response: ${response.statusCode}, Data: ${response.data}'); // Logging response
 
       if (response.statusCode == 204) {
         return;
@@ -101,7 +104,12 @@ class GasService {
             'Failed to delete gas with status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      throw Exception('Failed to delete gas: ${e.message}');
+      print('Dio error: ${e.message}');
+      if (e.response != null) {
+      } else {
+        print('Error type: ${e.type}');
+      }
+      throw Exception('Failed to delete gas: ${e.message ?? 'Unknown error'}');
     }
   }
 

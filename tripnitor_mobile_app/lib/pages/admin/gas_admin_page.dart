@@ -23,6 +23,10 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
     });
   }
 
+  Future<void> _refreshGasList() async {
+    await ref.read(gasStateProvider.notifier).getAllGas();
+  }
+
   @override
   Widget build(BuildContext context) {
     final gasState = ref.watch(gasStateProvider);
@@ -51,7 +55,10 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
         ),
       ),
       drawer: const AdminDrawer(),
-      body: _gasAdminList(gasState),
+      body: RefreshIndicator(
+        onRefresh: _refreshGasList,
+        child: _gasAdminList(gasState),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -79,7 +86,7 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
           child: Row(
             children: [
               Text(
-                "Gas'\s List",
+                "Gas's List",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],
@@ -89,6 +96,7 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListView.builder(
+              physics: AlwaysScrollableScrollPhysics(),
               itemCount: gasState.gasList?.length ?? 0,
               itemBuilder: (context, index) {
                 return _gasBuildCard(context, gasState.gasList![index]);
@@ -99,10 +107,6 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
         SizedBox(
           height: 24,
         ),
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: _DriverBuildCard(context),
-        // ),
       ],
     );
   }
@@ -127,17 +131,15 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Gas ID: ${gas.id}',
+                gas.gasName,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Type of Gas: ${gas.gasName}',
+                    '₱${gas.gasPrice}/liter',
                     overflow: TextOverflow.ellipsis,
                   ),
                   Row(
@@ -181,6 +183,15 @@ class _GasAdminPageState extends ConsumerState<GasAdminPage> {
                             await ref
                                 .read(gasStateProvider.notifier)
                                 .deleteGas(gas.id);
+                            final currentState = ref.read(gasStateProvider);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(currentState.message ??
+                                    'Gas deleted successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
                           }
                         },
                         icon: Icon(Icons.delete, color: Colors.red),

@@ -15,22 +15,23 @@ class Package {
   final int? currentParticipants;
   final DateTime? startDate;
   final DateTime? endDate;
+  final String? totalDistance;
 
-  Package({
-    required this.id,
-    required this.packageName,
-    required this.description,
-    required this.basePrice,
-    required this.packageType,
-    required this.visibility,
-    required this.startLocation,
-    required this.finalDestination,
-    required this.legs,
-    this.maxParticipants,
-    this.currentParticipants,
-    this.startDate,
-    this.endDate,
-  });
+  Package(
+      {required this.id,
+      required this.packageName,
+      required this.description,
+      required this.basePrice,
+      required this.packageType,
+      required this.visibility,
+      required this.startLocation,
+      required this.finalDestination,
+      required this.legs,
+      this.maxParticipants,
+      this.currentParticipants,
+      this.startDate,
+      this.endDate,
+      this.totalDistance});
 
   factory Package.fromJson(Map<String, dynamic> json) {
     return Package(
@@ -50,6 +51,7 @@ class Package {
           : null,
       endDate:
           json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
+      totalDistance: json["total_distance"],
     );
   }
 
@@ -68,6 +70,7 @@ class Package {
       'current_participants': currentParticipants,
       'start_date': startDate?.toIso8601String(),
       'end_date': endDate?.toIso8601String(),
+      "total_distance": totalDistance,
     };
   }
 }

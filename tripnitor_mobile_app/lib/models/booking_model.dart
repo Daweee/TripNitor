@@ -124,6 +124,7 @@ class BookingCreationRequest {
   final String modeOfPayment;
   final DateTime startDate;
   final DateTime endDate;
+  final double totalPrice;
 
   BookingCreationRequest({
     required this.user,
@@ -133,6 +134,7 @@ class BookingCreationRequest {
     required this.modeOfPayment,
     required this.startDate,
     required this.endDate,
+    required this.totalPrice,
   });
 
   Map<String, dynamic> toJson() => {
@@ -143,5 +145,6 @@ class BookingCreationRequest {
         "mode_of_payment": modeOfPayment,
         "start_date": startDate.toIso8601String(),
         "end_date": endDate.toIso8601String(),
+        "total_price": totalPrice,
       };
 }
