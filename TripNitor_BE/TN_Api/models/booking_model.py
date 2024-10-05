@@ -1,3 +1,4 @@
+from decimal import Decimal
 from random import shuffle
 from django.db import models
 from django.forms import ValidationError
@@ -23,6 +24,7 @@ class Booking(CustomPrimaryKeyModel):
     user = models.ForeignKey('User', related_name='bookings', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=BookingStatus.choices, default=BookingStatus.PENDING)
     base_fare = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    updated_package_fare = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_nights = models.PositiveIntegerField(null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_passengers = models.PositiveIntegerField()
@@ -51,11 +53,27 @@ class Booking(CustomPrimaryKeyModel):
     def get_nights(self):
         return (self.end_date - self.start_date).days
 
-    def calculate_final_fare(self, number_of_drivers):
+    def calculate_final_fare(self, assigned_drivers):
         self.base_fare = 3000
         number_of_nights = self.get_nights()
         self.number_of_nights = number_of_nights
-        self.total_price = (self.package.base_price * number_of_drivers) + self.base_fare + (number_of_nights * 1000)
+
+        self.updated_package_fare = self.calculate_gas_consumption_cost(assigned_drivers)
+        self.total_price = self.updated_package_fare + self.base_fare + (number_of_nights * 1000)
+
+    def calculate_gas_consumption_cost(self, assigned_drivers):
+        total_distance = self.package.total_distance
+        total_cost = Decimal('0.0')
+
+        for driver in assigned_drivers:
+            van = driver.van
+            if van.gas:
+                gas_price = van.gas.gas_price
+                fuel_efficiency = 10
+                cost = (gas_price / fuel_efficiency) * total_distance
+                total_cost += cost
+
+        return total_cost.quantize(Decimal('0.01'))
 
     def calculate_number_of_nights(self):
         self.base_fare = 3000
@@ -82,6 +100,6 @@ class Booking(CustomPrimaryKeyModel):
     def preview_driver_assignment(self):
         required_vans = (self.number_of_passengers + 14) // 15 
         available_drivers = list(self.get_available_drivers())
-        shuffle(available_drivers)  # Randomize the order of available drivers
+        shuffle(available_drivers)  
 
         return available_drivers[:required_vans]

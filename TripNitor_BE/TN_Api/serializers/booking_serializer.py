@@ -23,6 +23,7 @@ class BookingCreationSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     package = serializers.PrimaryKeyRelatedField(queryset=Package.objects.all())
     drivers = serializers.PrimaryKeyRelatedField(queryset=Driver.objects.all(), many=True, write_only=True)  # Accept driver IDs
+    updated_package_fare = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = Booking
