@@ -14,6 +14,7 @@ class Booking {
   final List<Driver> drivers;
   final String status;
   final String baseFare;
+  final String updatedPackageFare;
   final int numberOfNights;
   final String totalPrice;
   final int numberOfPassengers;
@@ -30,6 +31,7 @@ class Booking {
     required this.drivers,
     required this.status,
     required this.baseFare,
+    required this.updatedPackageFare,
     required this.numberOfNights,
     required this.totalPrice,
     required this.numberOfPassengers,
@@ -46,6 +48,7 @@ class Booking {
         package: Package.fromJson(json["package"]),
         status: json["status"],
         baseFare: json["base_fare"],
+        updatedPackageFare: json["updated_package_fare"],
         numberOfNights: json["number_of_nights"],
         totalPrice: json["total_price"],
         numberOfPassengers: json["number_of_passengers"],
@@ -65,6 +68,7 @@ class Booking {
         "drivers": List<dynamic>.from(drivers.map((x) => x.toJson())),
         "status": status,
         "base_fare": baseFare,
+        "updated_package_fare": updatedPackageFare,
         "number_of_nights": numberOfNights,
         "total_price": totalPrice,
         "number_of_passengers": numberOfPassengers,
@@ -124,6 +128,7 @@ class BookingCreationRequest {
   final String modeOfPayment;
   final DateTime startDate;
   final DateTime endDate;
+  final double updatedPackageFare;
   final double totalPrice;
 
   BookingCreationRequest({
@@ -134,6 +139,7 @@ class BookingCreationRequest {
     required this.modeOfPayment,
     required this.startDate,
     required this.endDate,
+    required this.updatedPackageFare,
     required this.totalPrice,
   });
 
@@ -145,6 +151,7 @@ class BookingCreationRequest {
         "mode_of_payment": modeOfPayment,
         "start_date": startDate.toIso8601String(),
         "end_date": endDate.toIso8601String(),
+        "updated_package_fare": updatedPackageFare,
         "total_price": totalPrice,
       };
 }
