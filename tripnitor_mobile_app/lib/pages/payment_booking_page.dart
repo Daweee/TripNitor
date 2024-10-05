@@ -9,6 +9,7 @@ import '../models/booking_model.dart';
 import '../models/package_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../widgets/custom_modal_dialogue.dart';
 
 class PaymentBookingPage extends ConsumerStatefulWidget {
   final String packageId;
@@ -280,21 +281,30 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Driver ${index + 1} Details',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Driver ${index + 1} Details',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${driver.vanModel} | ${driver.vanPlateNumber}', // Replace with your desired text
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black.withOpacity(.5),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 SizedBox(height: 10),
                                 _buildDriverInfoRow("Name", driver.name),
                                 _buildDriverInfoRow(
                                     "Phone Number", driver.phoneNumber),
-                                // _buildDriverInfoRow(
-                                //     "Van Model", driver.vanModel),
-                                // _buildDriverInfoRow(
-                                //     "Plate Number", driver.vanPlateNumber),
                               ],
                             ),
                           ),
@@ -329,12 +339,41 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                         horizontal: 32.0, vertical: 5.0),
                     child: Column(
                       children: [
-                        _buildPaymentInfoRow("Base Fare",
-                            "₱${bookingState.previewBooking!.baseFare.toStringAsFixed(2)}"),
-                        _buildPaymentInfoRow("Package Fare",
-                            "₱${bookingState.previewBooking!.basePackagePrice.toStringAsFixed(2)} x ${bookingState.previewBooking!.assignedDrivers.length} vans"),
-                        _buildPaymentInfoRow("Booking Duration",
-                            "${bookingState.previewBooking!.numberOfNights} nights x ₱1000.00"),
+                        _buildPaymentInfoRow(
+                          "Base Fare",
+                          "₱${bookingState.previewBooking!.baseFare.toStringAsFixed(2)}",
+                        ),
+                        _buildPaymentInfoRow(
+                          "Package Fare",
+                          "₱${bookingState.previewBooking!.basePackagePrice.toStringAsFixed(2)}",
+                          icon: GestureDetector(
+                            onTap: () {
+                              _showFareInfoDialog(context);
+                            },
+                            child: Container(
+                              width: 12.0,
+                              height: 12.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.black.withOpacity(.5),
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Center(
+                                child: FaIcon(
+                                  FontAwesomeIcons.info,
+                                  color: Colors.black.withOpacity(.5),
+                                  size: 6.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        _buildPaymentInfoRow(
+                          "Booking Duration",
+                          "(${bookingState.previewBooking!.numberOfNights}) ₱1000.00",
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 7.0),
                           child: Divider(
@@ -344,9 +383,11 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             thickness: 1,
                           ),
                         ),
-                        _buildPaymentInfoRow("Total Price",
-                            "₱${bookingState.previewBooking!.totalPrice.toStringAsFixed(2)}",
-                            isBold: true),
+                        _buildPaymentInfoRow(
+                          "Total Price",
+                          "₱${bookingState.previewBooking!.totalPrice.toStringAsFixed(2)}",
+                          isBold: true,
+                        ),
                       ],
                     ),
                   ),
@@ -417,6 +458,8 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             modeOfPayment: _selectedPaymentMethod,
                             startDate: bookingState.previewBooking!.startDate,
                             endDate: bookingState.previewBooking!.endDate,
+                            updatedPackageFare:
+                                bookingState.previewBooking!.basePackagePrice,
                             totalPrice: bookingState.previewBooking!.totalPrice,
                           );
 
@@ -500,14 +543,18 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
   }
 
   Widget _buildPaymentInfoRow(String label, String value,
-      {bool isBold = false}) {
+      {bool isBold = false, Widget? icon}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           flex: 2,
-          child: Text(
-            label,
+          child: Row(
+            children: [
+              Text(label),
+              if (icon != null) SizedBox(width: 4),
+              if (icon != null) icon,
+            ],
           ),
         ),
         SizedBox(width: 50),
@@ -515,9 +562,25 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
           value,
           textAlign: TextAlign.left,
           style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
       ],
+    );
+  }
+
+  void _showFareInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomModalDialog(
+          title: 'Package Fare Information',
+          content:
+              'The package fare has been updated to include transportation costs, number of vans, the trip\'s distance.',
+          onConfirm: () {},
+          color: Color(ColorConstants.PRIMARY_COLOR),
+        );
+      },
     );
   }
 }

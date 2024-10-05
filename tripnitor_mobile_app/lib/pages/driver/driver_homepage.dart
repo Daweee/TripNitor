@@ -122,7 +122,7 @@ class _DriverDashboardState extends ConsumerState<DriverDashboard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Welcome ${authState.user?.username}', // ${authState.user?.username}
+                        'Welcome ${authState.user?.name}',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -164,7 +164,7 @@ class _DriverDashboardState extends ConsumerState<DriverDashboard> {
   Widget _driverDashBoardList(BuildContext context) {
     return Container(
       child: Center(
-        child: Text('Driver\'s Dashboard'),
+        child: Text(''),
       ),
     );
   }

@@ -83,7 +83,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -103,7 +105,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -113,7 +117,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -125,7 +131,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -135,8 +143,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
-              Divider(),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -146,37 +155,48 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Price per kilometer: "),
-                  Text(
-                    "${(widget.booking.package.totalDistance != null ? double.parse(widget.booking.package.totalDistance!) / 10 : 0).toStringAsFixed(1)} km",
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              SizedBox(
+                height: 10,
               ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Package Price: "),
-                  Text(widget.booking.package.basePrice,
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                ],
+              Divider(),
+              SizedBox(
+                height: 10,
               ),
-              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Base Fare: "),
-                  Text(widget.booking.baseFare,
+                  Text('₱${widget.booking.baseFare}',
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Package Fare: "),
+                  Text('₱${widget.booking.package.basePrice}',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Booking Duration: "),
+                  Text("(${widget.booking.numberOfNights}) ₱1000",
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(
+                height: 10,
               ),
               Divider(),
               Row(
@@ -189,7 +209,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                 ],
               ),
               Divider(),
-              SizedBox(height: 10),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -199,7 +221,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(
+                height: 20,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [

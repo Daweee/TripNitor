@@ -17,6 +17,7 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
         previewBooking: preview.bookingPreview,
         status: preview.status,
         message: preview.message,
+        error: null,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,12 +10,14 @@ import '../models/package_model.dart';
 import '../models/leg_model.dart';
 import '../models/location_model.dart';
 import '../widgets/booking_bottom_sheet.dart';
+import '../widgets/custom_modal_dialogue.dart';
 import '../widgets/shimmer_package_detail_page.dart';
 
 class PackageDetailPage extends ConsumerStatefulWidget {
   final String packageId;
 
-  const PackageDetailPage({Key? key, required this.packageId}) : super(key: key);
+  const PackageDetailPage({Key? key, required this.packageId})
+      : super(key: key);
 
   @override
   _PackageDetailPageState createState() => _PackageDetailPageState();
@@ -24,9 +27,8 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => 
-      ref.read(packageProvider.notifier).getPackageDetails(widget.packageId)
-    );
+    Future.microtask(() =>
+        ref.read(packageProvider.notifier).getPackageDetails(widget.packageId));
   }
 
   @override
@@ -38,14 +40,14 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: FaIcon(
-            FontAwesomeIcons.angleLeft, 
+            FontAwesomeIcons.angleLeft,
             color: Colors.black,
             size: 20.0,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Package Details', 
+          'Package Details',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -62,20 +64,20 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         ),
       ),
       body: packageState.isLoading
-          ? PackageDetailShimmer() 
+          ? PackageDetailShimmer()
           : Stack(
-                children: [
-                    _buildScrollableContent(packageState),
-                    Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: _buildBottomBar(packageState),
-                    ),
-                ],
+              children: [
+                _buildScrollableContent(packageState),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildBottomBar(packageState),
+                ),
+              ],
             ),
-        );
-    }
+    );
+  }
 
   Widget _buildScrollableContent(PackageState packageState) {
     if (packageState.isLoading) {
@@ -92,39 +94,43 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Text(package.packageName,
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                ),
+          Text(
+            package.packageName,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
-            Row(
-                children: [
-                _buildPackageInfo(package.packageType),
-                SizedBox(width: 5),
-                _buildPackageInfo(package.visibility),
-                ],
-            ),
+          ),
+          Row(
+            children: [
+              _buildPackageInfo(package.packageType),
+              SizedBox(width: 5),
+              _buildPackageInfo(package.visibility),
+            ],
+          ),
           SizedBox(height: 20),
           _buildSection('Description', [
             Text(package.description),
           ]),
           SizedBox(height: 20),
-          _buildSection('Locations', [
-            _buildLocationStartInfo(package.startLocation),
-            Padding(
-                padding: const EdgeInsets.only(left: 6, top: 4, bottom: 8),
-                    child: Dash(
-                        direction: Axis.vertical,
-                        length: 35,
-                        dashLength: 2,
-                        dashColor: Colors.black.withOpacity(.5),
-                        dashGap: 5,
-                        dashThickness: 2,
-                    ),
-            ),
-            _buildLocationEndInfo(package.finalDestination),
-          ]),
+          _buildSection(
+              'Locations',
+              [
+                _buildLocationStartInfo(package.startLocation),
+                Padding(
+                  padding: const EdgeInsets.only(left: 6, top: 4, bottom: 8),
+                  child: Dash(
+                    direction: Axis.vertical,
+                    length: 35,
+                    dashLength: 2,
+                    dashColor: Colors.black.withOpacity(.5),
+                    dashGap: 5,
+                    dashThickness: 2,
+                  ),
+                ),
+                _buildLocationEndInfo(package.finalDestination),
+              ],
+              totalDistance: '${package.totalDistance}km'),
           SizedBox(height: 20),
           _buildSection('Itinerary', [
             for (var leg in package.legs) _buildLegInfo(leg),
@@ -134,48 +140,56 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(
+  Widget _buildSection(String title, List<Widget> children,
+      {String? totalDistance}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
                     color: Color(ColorConstants.PRIMARY_COLOR),
-                    borderRadius: BorderRadius.all(Radius.circular(5)), 
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                  height: 20,
+                  width: 5,
                 ),
-                height: 20,
-                width: 5,
-              ),
-              SizedBox(width: 10),
+                SizedBox(width: 10),
+                Text(title,
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            if (title == 'Itinerary')
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  'Change',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                  ),
+                ),
+              )
+            else if (totalDistance != null)
               Text(
-                title, 
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
-              ),
-            ],
-          ),
-          if (title == 'Itinerary')
-            GestureDetector(
-              onTap: () {},
-              child: Text(
-                'Change',
+                'Total distance: $totalDistance',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.blue,
+                  color: Colors.grey[600],
                 ),
               ),
-            ),
-        ],
-      ),
-      SizedBox(height: 10),
-      ...children,
-    ],
-  );
-}
+          ],
+        ),
+        SizedBox(height: 10),
+        ...children,
+      ],
+    );
+  }
 
   Widget _buildLocationStartInfo(Location location) {
     return Column(
@@ -184,15 +198,14 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         Row(
           children: [
             FaIcon(
-                FontAwesomeIcons.solidCircleDot,
-                size: 16.0,
-                color: Color(0xFFFB0000),
+              FontAwesomeIcons.solidCircleDot,
+              size: 16.0,
+              color: Color(0xFFFB0000),
             ),
             SizedBox(width: 15),
-            Text(location.name, 
-                style: TextStyle(
-                    fontSize: 16
-                ),
+            Text(
+              location.name,
+              style: TextStyle(fontSize: 16),
             ),
           ],
         ),
@@ -207,15 +220,14 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         Row(
           children: [
             FaIcon(
-                FontAwesomeIcons.locationDot,
-                size: 19.0,
-                color: Colors.black,
+              FontAwesomeIcons.locationDot,
+              size: 19.0,
+              color: Colors.black,
             ),
             SizedBox(width: 15),
-            Text(location.name, 
-                style: TextStyle(
-                    fontSize: 16
-                ),
+            Text(
+              location.name,
+              style: TextStyle(fontSize: 16),
             ),
           ],
         ),
@@ -233,19 +245,20 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Itinerary ${leg.legNumber}', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Itinerary ${leg.legNumber}',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
             _buildLocationStartInfo(leg.startLocation),
             Padding(
-                padding: const EdgeInsets.only(left: 6, top: 4, bottom: 8),
-                    child: Dash(
-                        direction: Axis.vertical,
-                        length: 35,
-                        dashLength: 2,
-                        dashColor: Colors.black.withOpacity(.5),
-                        dashGap: 5,
-                        dashThickness: 2,
-                    ),
+              padding: const EdgeInsets.only(left: 6, top: 4, bottom: 8),
+              child: Dash(
+                direction: Axis.vertical,
+                length: 35,
+                dashLength: 2,
+                dashColor: Colors.black.withOpacity(.5),
+                dashGap: 5,
+                dashThickness: 2,
+              ),
             ),
             _buildLocationEndInfo(leg.endLocation),
           ],
@@ -256,21 +269,22 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
 
   Widget _buildPackageInfo(String info) {
     return Container(
-        decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(.2),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-            child: Text(info, 
-                style: TextStyle(
-                    color: Colors.black.withOpacity(.4),
-                    fontSize: 10,
-                ), 
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(.2),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+          child: Text(
+            info,
+            style: TextStyle(
+              color: Colors.black.withOpacity(.4),
+              fontSize: 10,
             ),
           ),
         ),
+      ),
     );
   }
 
@@ -293,14 +307,42 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Base fare:",
-                style: TextStyle(
-                  fontSize: 12,
-                ),
+              Row(
+                children: [
+                  Text(
+                    "Package fare:",
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  GestureDetector(
+                    onTap: () {
+                      _showFareInfoDialog(context);
+                    },
+                    child: Container(
+                      width: 12.0,
+                      height: 12.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.black.withOpacity(.5),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Center(
+                        child: FaIcon(
+                          FontAwesomeIcons.info,
+                          color: Colors.black.withOpacity(.5),
+                          size: 6.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               Text(
-                '₱${packageState.selectedPackage?.basePrice ?? ''}', 
+                '₱${packageState.selectedPackage?.basePrice ?? ''}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -316,8 +358,8 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               ),
             ),
             onPressed: () {
-                _showBookingBottomSheet(context, packageState.selectedPackage);
-            }, 
+              _showBookingBottomSheet(context, packageState.selectedPackage);
+            },
             child: Text(
               'Book now',
               style: TextStyle(
@@ -333,13 +375,28 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
 
   void _showBookingBottomSheet(BuildContext context, Package? package) {
     if (package == null) return;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return BookingBottomSheet(package: package);
+      },
+    );
+  }
+
+  void _showFareInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomModalDialog(
+          title: 'Package Fare Information',
+          content:
+              'The package fare includes transportation costs and may increase based on the number of vans, the trip\'s distance, and other factors.',
+          onConfirm: () {},
+          color: Color(ColorConstants.PRIMARY_COLOR),
+        );
       },
     );
   }
