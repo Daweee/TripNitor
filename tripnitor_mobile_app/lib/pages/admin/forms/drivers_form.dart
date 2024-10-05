@@ -53,6 +53,9 @@ class _DriversFormState extends ConsumerState<DriversForm> {
         // Set the selected date if available
         ref.read(selectedDateProvider.notifier).state =
             widget.driver!.dateHired;
+      } else {
+        // Set _selectedVanId to null for new drivers
+        _selectedVanId = null;
       }
     });
   }
@@ -213,7 +216,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
             ),
 
             SizedBox(height: 20),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<String?>(
               decoration: InputDecoration(
                 labelText: "Assign a van",
                 border: OutlineInputBorder(
@@ -223,20 +226,26 @@ class _DriversFormState extends ConsumerState<DriversForm> {
               value: _vans?.any((van) => van.id == _selectedVanId) == true
                   ? _selectedVanId
                   : null,
-              items: _vans?.map<DropdownMenuItem<String>>((Van van) {
-                    return DropdownMenuItem<String>(
-                      value: van.id,
-                      child: Text('${van.model} | ${van.plateNumber}'),
-                    );
-                  }).toList() ??
-                  [],
+              items: [
+                DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Select a van'),
+                ),
+                ..._vans?.map<DropdownMenuItem<String>>((Van van) {
+                      return DropdownMenuItem<String>(
+                        value: van.id,
+                        child: Text('${van.model} | ${van.plateNumber}'),
+                      );
+                    }).toList() ??
+                    [],
+              ],
               onChanged: (String? newValue) {
                 setState(() {
                   _selectedVanId = newValue;
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                if (!_isEditMode && (value == null || value.isEmpty)) {
                   return 'Please select a van';
                 }
                 return null;
