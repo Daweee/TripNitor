@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/pages/admin/admin_homepage.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driver_homepage.dart';
-import 'package:tripnitor_mobile_app/pages/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
-import 'package:tripnitor_mobile_app/pages/package_page.dart';
-import 'package:tripnitor_mobile_app/pages/registration_page.dart';
-import 'package:tripnitor_mobile_app/widgets/package_card.dart';
-import 'package:tripnitor_mobile_app/widgets/shimmer_package_card.dart';
 import 'pages/auth_page.dart';
 import 'providers/auth_provider.dart';
-import 'constants/constant.dart';
 
 void main() async {
   runApp(
@@ -24,28 +15,14 @@ void main() async {
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      //   title: 'Login and User Registration',
-      //   theme: ThemeData(
-      //     primarySwatch: ColorConstants.BACKGROUND_COLOR,
-      //     // colorScheme: ColorScheme.fromSeed(seedColor: Color(ColorConstants.BACKGROUND_COLOR)),
-      //     // useMaterial3: true,
-      //   ),
-      // home: LoginPage(),
-      //   home: RegistrationPage(),
+      title: 'TripNitor',
       home: authState.isAuthenticated ? AuthPage() : LoginPage(),
-      // home: PackageTrips(),
-      // home: ShimmerPackageCard(),
-      // home: PackagePage(),
-      // home: HomePage(),
-      //   home: AdminDashboard(),
-      // home: DriverHomePage(),
     );
   }
 }
