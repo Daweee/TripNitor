@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import '../pages/package_detail_page.dart';
+import '../pages/user/package_detail_page.dart';
 import '../providers/package_provider.dart';
 import 'shimmer_package_card.dart';
 import 'package:flutter_dash/flutter_dash.dart';

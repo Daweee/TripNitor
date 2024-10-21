@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/pages/payment_booking_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/payment_booking_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custom_modal_dialogue.dart';
 import '../constants/constant.dart';
 import '../models/package_model.dart';
