@@ -4,14 +4,14 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import '../constants/constant.dart';
-import '../providers/package_provider.dart';
-import '../models/package_model.dart';
-import '../models/leg_model.dart';
-import '../models/location_model.dart';
-import '../widgets/booking_bottom_sheet.dart';
-import '../widgets/custom_modal_dialogue.dart';
-import '../widgets/shimmer_package_detail_page.dart';
+import '../../constants/constant.dart';
+import '../../providers/package_provider.dart';
+import '../../models/package_model.dart';
+import '../../models/leg_model.dart';
+import '../../models/location_model.dart';
+import '../../widgets/booking_bottom_sheet.dart';
+import '../../widgets/custom_modal_dialogue.dart';
+import '../../widgets/shimmer_package_detail_page.dart';
 
 class PackageDetailPage extends ConsumerStatefulWidget {
   final String packageId;

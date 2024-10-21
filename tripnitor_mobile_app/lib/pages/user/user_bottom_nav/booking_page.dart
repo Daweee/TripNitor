@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../constants/constant.dart';
-import '../../providers/booking_provider.dart';
+import '../../../constants/constant.dart';
+import '../../../providers/booking_provider.dart';
 import '../booking_detail_page.dart';
-import '../booking_detail_page_two.dart';
+import '../user_booking_detail_page.dart';
 
 class BookingPage extends ConsumerStatefulWidget {
   const BookingPage({super.key});
@@ -96,7 +96,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  BookingDetailPageTwo(bookingId: booking.id),
+                                  UserBookingDetailPage(bookingId: booking.id),
                             ),
                           );
                         },

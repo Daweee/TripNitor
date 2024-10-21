@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 
-import '../../providers/auth_provider.dart';
-import '../../services/token_service.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../services/token_service.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});

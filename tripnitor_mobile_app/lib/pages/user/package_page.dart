@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/widgets/package_card.dart';
-import '../providers/package_provider.dart';
+import '../../providers/package_provider.dart';
 
 class PackagePage extends ConsumerStatefulWidget {
   const PackagePage({Key? key}) : super(key: key);

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_details.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_notifications.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_booking_details.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_booking_notifications.dart';
 import 'package:tripnitor_mobile_app/providers/driver_provider.dart';
 
-import '../../../../providers/driver_assignment_provider.dart';
+import '../../../providers/driver_assignment_provider.dart';
 
 class DriverBookingPage extends ConsumerStatefulWidget {
   const DriverBookingPage({Key? key}) : super(key: key);
@@ -35,12 +35,8 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-        title: Padding(
-          padding: const EdgeInsets.only(left: 40.0),
-          child: Center(
-            child: Text('Booking '),
-          ),
-        ),
+        centerTitle: true,
+        title: Text('Bookings'),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 24),
@@ -94,7 +90,7 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "My Assign Task",
+                "My Bookings",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],

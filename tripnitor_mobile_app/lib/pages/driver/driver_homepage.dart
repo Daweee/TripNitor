@@ -1,61 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/models/auth_model.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_message.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_notification.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_profile.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driverBottomNav/driver_booking/driver_booking_details.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_bottom_nav/driver_booking.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_bottom_nav/driver_message.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_bottom_nav/driver_profile.dart';
 import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
 
-final currentIndexProvider =
-    StateProvider<int>((ref) => 0); // riverpod variable
+final currentIndexProvider = StateProvider<int>((ref) => 0);
 
-class DriverHomePage extends ConsumerWidget {
-  const DriverHomePage({Key? key}) : super(key: key);
+class DriverPage extends StatefulWidget {
+  const DriverPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentPage =
-        ref.watch(currentIndexProvider); // listens to riverpod variable
+  State<DriverPage> createState() => _DriverPageState();
+}
+
+class _DriverPageState extends State<DriverPage> {
+  int currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      // body: // _buildUI(context),
-      body: _buildPage(context, currentPage),
+      body: _buildPage(currentPage),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
         currentIndex: currentPage,
-        type: BottomNavigationBarType.fixed, // .fixed; .shifting;
-        selectedItemColor: Colors.black, // backgroundColor: Colors.black,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
         onTap: (value) {
-          // setState(
-          //   () {
-          //     currentPage = value;
-          //   },
-          // );
-          ref.read(currentIndexProvider.notifier).state =
-              value; // riverpod setState
+          setState(
+            () {
+              currentPage = value;
+            },
+          );
         },
         items: const [
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined), // 0
+            icon: Icon(Icons.home_outlined),
             label: "Home",
           ),
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.book),
-            icon: Icon(Icons.book_outlined), // 1
+            icon: Icon(Icons.book_outlined),
             label: "Booking",
           ),
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.chat_bubble),
-            icon: Icon(Icons.chat_bubble_outline_rounded), // 2
+            icon: Icon(Icons.chat_bubble_outline_rounded),
             label: "Message",
           ),
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.person),
-            icon: Icon(Icons.person_outlined), // 3
+            icon: Icon(Icons.person_outlined),
             label: 'Profile',
           ),
         ],
@@ -63,11 +61,10 @@ class DriverHomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPage(BuildContext context, int index) {
+  Widget _buildPage(int index) {
     switch (index) {
       case 0:
-        //return HomePage();
-        return DriverDashboard();
+        return DriverHomepage();
       case 1:
         return DriverBookingPage();
       case 2:
@@ -75,19 +72,19 @@ class DriverHomePage extends ConsumerWidget {
       case 3:
         return DriverProfilePage();
       default:
-        return DriverDashboard();
+        return DriverHomepage();
     }
   }
 }
 
-class DriverDashboard extends ConsumerStatefulWidget {
-  const DriverDashboard({super.key});
+class DriverHomepage extends ConsumerStatefulWidget {
+  const DriverHomepage({super.key});
 
   @override
-  ConsumerState<DriverDashboard> createState() => _DriverDashboardState();
+  ConsumerState<DriverHomepage> createState() => _DriverHomepageState();
 }
 
-class _DriverDashboardState extends ConsumerState<DriverDashboard> {
+class _DriverHomepageState extends ConsumerState<DriverHomepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +97,6 @@ class _DriverDashboardState extends ConsumerState<DriverDashboard> {
     return Column(
       children: [
         _header(context),
-        _driverDashBoardList(context),
       ],
     );
   }
@@ -146,11 +142,8 @@ class _DriverDashboardState extends ConsumerState<DriverDashboard> {
                 Expanded(
                   child: SizedBox(
                     height: 120,
-                    child: Image.asset(
-                        'assets/images/pana.png', // Replace with the path to your image asset
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.fill),
+                    child: Image.asset('assets/images/pana.png',
+                        width: 80, height: 80, fit: BoxFit.fill),
                   ),
                 ),
               ],
@@ -158,14 +151,6 @@ class _DriverDashboardState extends ConsumerState<DriverDashboard> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _driverDashBoardList(BuildContext context) {
-    return Container(
-      child: Center(
-        child: Text(''),
-      ),
     );
   }
 }

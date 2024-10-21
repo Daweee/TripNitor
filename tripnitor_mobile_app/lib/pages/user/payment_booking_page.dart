@@ -3,13 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/models/auth_model.dart';
-import 'package:tripnitor_mobile_app/pages/booking_detail_page.dart';
-import '../models/booking_model.dart';
-import '../models/package_model.dart';
-import '../providers/auth_provider.dart';
-import '../providers/booking_provider.dart';
-import '../widgets/custom_modal_dialogue.dart';
+import 'package:tripnitor_mobile_app/pages/user/booking_detail_page.dart';
+import '../../models/booking_model.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/booking_provider.dart';
+import '../../widgets/custom_modal_dialogue.dart';
 
 class PaymentBookingPage extends ConsumerStatefulWidget {
   final String packageId;

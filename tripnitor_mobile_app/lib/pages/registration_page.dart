@@ -9,7 +9,7 @@ import '../constants/constant.dart';
 import '../constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
-import 'home_page.dart';
+import 'user/home_page.dart';
 import 'login_page.dart';
 
 class RegistrationPage extends ConsumerStatefulWidget {

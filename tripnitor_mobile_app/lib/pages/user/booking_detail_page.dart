@@ -2,36 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import '../constants/constant.dart';
-import '../providers/booking_provider.dart';
-import '../models/booking_model.dart';
-import '../widgets/custom_modal_dialogue.dart';
+import '../../constants/constant.dart';
+import '../../providers/booking_provider.dart';
+import '../../models/booking_model.dart';
+import '../../widgets/custom_modal_dialogue.dart';
 import 'home_page.dart';
 
-class BookingDetailPageTwo extends ConsumerStatefulWidget {
-  final String bookingId;
-  const BookingDetailPageTwo({Key? key, required this.bookingId})
-      : super(key: key);
+class BookingDetailPage extends ConsumerWidget {
+  const BookingDetailPage({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<BookingDetailPageTwo> createState() =>
-      _BookingDetailPageTwoState();
-}
-
-class _BookingDetailPageTwoState extends ConsumerState<BookingDetailPageTwo> {
-  @override
-  void initState() {
-    super.initState();
-    // Fetch booking details in initState, not in build
-    Future.microtask(() {
-      ref
-          .read(bookingStateProvider.notifier)
-          .getBookingDetails(widget.bookingId);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bookingState = ref.watch(bookingStateProvider);
 
     return Scaffold(
@@ -81,11 +62,7 @@ Widget _buildBody(bookingState) {
   if (bookingState.isLoading) {
     return Center(child: CircularProgressIndicator());
   }
-  if (bookingState.booking != null) {
-    return BookingDetailsContent(booking: bookingState.booking!);
-  } else {
-    return Center(child: Text('No booking available.'));
-  }
+  return BookingDetailsContent(booking: bookingState.booking!);
 }
 
 class BookingDetailsContent extends StatelessWidget {
@@ -168,6 +145,8 @@ class BookingDetailsContent extends StatelessWidget {
   }
 
   Widget _buildBookingDetails(DateFormat dateTimeFormat) {
+    DateTime localCreatedAt = booking.createdAt.toLocal();
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
@@ -210,7 +189,7 @@ class BookingDetailsContent extends StatelessWidget {
                   _buildInfoRow("Booking ID:", booking.id, isWhite: true),
                   _buildInfoRow(
                     "Booked On:",
-                    dateTimeFormat.format(booking.createdAt),
+                    dateTimeFormat.format(localCreatedAt),
                     isWhite: true,
                   ),
                 ],
@@ -363,7 +342,7 @@ class BookingDetailsContent extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${driver.van.model} | ${driver.van.plateNumber}',
+                            '${driver.van.model} | ${driver.van.plateNumber}', // Replace with your desired text
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.black.withOpacity(.5),
@@ -374,8 +353,6 @@ class BookingDetailsContent extends StatelessWidget {
                       SizedBox(height: 10),
                       _buildInfoRow("Name", driver.user.name),
                       _buildInfoRow("Phone Number", driver.user.phoneNumber),
-                      //   _buildInfoRow("Van Model", driver.van.model),
-                      //   _buildInfoRow("Plate Number", driver.van.plateNumber),
                     ],
                   ),
                 ),
