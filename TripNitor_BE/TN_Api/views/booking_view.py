@@ -17,10 +17,12 @@ from django.db.models import Case, When, IntegerField
 
 @extend_schema(tags=['bookings'])
 class BookingListView(CustomResponseMixin, ListAPIView):
-    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
+        return Booking.objects.all().order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return self.get_custom_response(
@@ -145,21 +147,35 @@ class BookingPreviewView(APIView):
                 number_of_passengers=number_of_passengers
             )
 
-            available_drivers = temp_booking.get_available_drivers()
-            required_vans = (number_of_passengers + 14) // 15
-            assigned_drivers = available_drivers[:required_vans]
-            temp_booking.calculate_final_fare()
+            temp_booking.clean()  # Ensure validation is applied
+            assigned_drivers = temp_booking.preview_driver_assignment()
+
+            # number_of_vans = len(assigned_drivers) 
+            temp_booking.calculate_final_fare(assigned_drivers)
+
+            # Calculate total price
             total_price = temp_booking.total_price
+            base_fare = temp_booking.base_fare
+            number_of_nights = temp_booking.number_of_nights
+            updated_package_fare = temp_booking.updated_package_fare
+
+            # available_drivers = temp_booking.get_available_drivers()
+            # required_vans = (number_of_passengers + 14) // 15
+            # assigned_drivers = available_drivers[:required_vans]
 
             preview_data = {
                 'package': package.package_name,
                 'start_date': start_date,
                 'end_date': end_date,
                 'number_of_passengers': number_of_passengers,
-                'base_fare': package.base_price,
+                'base_fare': base_fare,
+                'number_of_nights': number_of_nights,
+                'base_package_price': updated_package_fare,
                 'total_price': total_price,
+                
                 'assigned_drivers': [
                     {
+                        'id': driver.id,
                         'name': driver.user.name,
                         'phone_number': driver.user.phone_number,
                         'van_model': driver.van.model,
@@ -169,7 +185,7 @@ class BookingPreviewView(APIView):
             }
             return Response({
                 'status': status.HTTP_200_OK,
-                'data': {'booking_preview': preview_data},
+                'data': preview_data,
                 'message': 'Booking preview generated successfully.'
             })
         else:

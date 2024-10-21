@@ -3,84 +3,55 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../constants/constant.dart';
 import '../../providers/booking_provider.dart';
-import '../booking_detail_page.dart';
-import '../booking_detail_page_two.dart';
+import 'admin_drawer.dart';
+import 'profile/booking_admin_profile.dart';
 
-class BookingPage extends ConsumerStatefulWidget {
-  const BookingPage({super.key});
+class BookingAdminPage extends ConsumerStatefulWidget {
+  const BookingAdminPage({super.key});
 
   @override
-  ConsumerState<BookingPage> createState() => _BookingPageState();
+  ConsumerState<BookingAdminPage> createState() => _BookingAdminPageState();
 }
 
-class _BookingPageState extends ConsumerState<BookingPage> {
-  String _selectedFilter = 'ALL';
-
+class _BookingAdminPageState extends ConsumerState<BookingAdminPage> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(bookingStateProvider.notifier).getUserBookings(_selectedFilter);
+      ref.read(bookingStateProvider.notifier).getAllBookings();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
-
     final bookings = bookingState.bookingList;
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      appBar: AppBar(
-        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-        title: const Text(
-          'Your Bookings',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight + 1),
+        child: AppBar(
+          title: Text(
+            'Bookings',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        centerTitle: true,
-        scrolledUnderElevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: Column(
-            children: [
-              Container(
-                color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(.3),
-                height: 1.0,
-              ),
-              Container(
-                padding: const EdgeInsets.only(right: 16.0),
-                alignment: Alignment.centerRight,
-                child: DropdownButton<String>(
-                  value: _selectedFilter,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedFilter = newValue!;
-                    });
-
-                    ref
-                        .read(bookingStateProvider.notifier)
-                        .getUserBookings(_selectedFilter);
-                  },
-                  items: const <String>[
-                    'ALL',
-                    'PENDING',
-                    'CONFIRMED',
-                    'ONGOING',
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+          centerTitle: true,
+          backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+          scrolledUnderElevation: 0,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(1.0),
+            child: Divider(
+              color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(.3),
+              thickness: 1,
+              height: 1,
+            ),
           ),
         ),
       ),
+      drawer: const AdminDrawer(),
       body: bookingState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : bookings.isEmpty
@@ -96,7 +67,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  BookingDetailPageTwo(bookingId: booking.id),
+                                  BookingAdminProfile(booking: booking),
                             ),
                           );
                         },

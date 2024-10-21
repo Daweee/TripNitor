@@ -9,7 +9,7 @@ class Van(CustomPrimaryKeyModel):
     date_bought = models.DateField()
     registration_expiry_date = models.DateField()
     max_passengers = models.IntegerField()
-    gas = models.ForeignKey(Gas, on_delete=models.SET_NULL, null=True, blank=True)
+    gas = models.ForeignKey(Gas, on_delete=models.PROTECT, null=True, blank=True)
 
     def clean(self):
         if not (1 <= self.max_passengers <= 15):

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import '../constants/constant.dart';
-import '../providers/booking_provider.dart';
-import '../models/booking_model.dart';
+import '../../constants/constant.dart';
+import '../../providers/booking_provider.dart';
+import '../../models/booking_model.dart';
+import '../../widgets/custom_modal_dialogue.dart';
 import 'home_page.dart';
 
 class BookingDetailPage extends ConsumerWidget {
@@ -86,7 +87,35 @@ class BookingDetailsContent extends StatelessWidget {
           ]),
           _buildDriverSection(),
           _buildSection("Payment Summary", [
-            _buildPaymentInfoRow("Base Fare", "₱${booking.package.basePrice}"),
+            _buildPaymentInfoRow("Base Fare", "₱${booking.baseFare}"),
+            _buildPaymentInfoRow(
+              "Package Fare",
+              "₱${booking.updatedPackageFare}",
+              icon: GestureDetector(
+                onTap: () => _showFareInfoDialog(context),
+                child: Container(
+                  width: 12.0,
+                  height: 12.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black.withOpacity(.5),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.info,
+                      color: Colors.black.withOpacity(.5),
+                      size: 6.0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            _buildPaymentInfoRow(
+                "Booking Duration", "(${booking.numberOfNights}) ₱1000.00",
+                boldPart: "(${booking.numberOfNights})"),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 7.0),
               child: Divider(
@@ -116,6 +145,8 @@ class BookingDetailsContent extends StatelessWidget {
   }
 
   Widget _buildBookingDetails(DateFormat dateTimeFormat) {
+    DateTime localCreatedAt = booking.createdAt.toLocal();
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
@@ -158,7 +189,7 @@ class BookingDetailsContent extends StatelessWidget {
                   _buildInfoRow("Booking ID:", booking.id, isWhite: true),
                   _buildInfoRow(
                     "Booked On:",
-                    dateTimeFormat.format(booking.createdAt),
+                    dateTimeFormat.format(localCreatedAt),
                     isWhite: true,
                   ),
                 ],
@@ -300,18 +331,28 @@ class BookingDetailsContent extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Driver ${index + 1} Details',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Driver ${index + 1} Details',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${driver.van.model} | ${driver.van.plateNumber}', // Replace with your desired text
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(.5),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 10),
                       _buildInfoRow("Name", driver.user.name),
                       _buildInfoRow("Phone Number", driver.user.phoneNumber),
-                      _buildInfoRow("Van Model", driver.van.model),
-                      _buildInfoRow("Plate Number", driver.van.plateNumber),
                     ],
                   ),
                 ),
@@ -324,20 +365,52 @@ class BookingDetailsContent extends StatelessWidget {
   }
 
   Widget _buildPaymentInfoRow(String label, String value,
-      {bool isBold = false}) {
+      {bool isBold = false, String? boldPart, Widget? icon}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           flex: 2,
-          child: Text(label),
+          child: Row(
+            children: [
+              Text(label),
+              if (icon != null) SizedBox(width: 4),
+              if (icon != null) icon,
+            ],
+          ),
         ),
-        SizedBox(width: 50),
-        Text(
-          value,
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+        Expanded(
+          flex: 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (boldPart != null)
+                RichText(
+                  textAlign: TextAlign.right,
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: boldPart,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: value.substring(boldPart.length)),
+                    ],
+                  ),
+                )
+              else
+                Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
     );
@@ -421,6 +494,21 @@ class BookingDetailsContent extends StatelessWidget {
           child: Column(children: children),
         ),
       ],
+    );
+  }
+
+  void _showFareInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomModalDialog(
+          title: 'Package Fare Information',
+          content:
+              'The package fare has been updated to include transportation costs, number of vans, the trip\'s distance.',
+          onConfirm: () {},
+          color: Color(ColorConstants.PRIMARY_COLOR),
+        );
+      },
     );
   }
 }

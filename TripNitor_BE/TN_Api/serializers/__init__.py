@@ -7,3 +7,4 @@ from .booking_serializer import BookingSerializer, BookingCreationSerializer, Bo
 from .location_serializer import LocationSerializer
 from .leg_serializer import LegSerializer
 from .package_serializer import PackageSerializer
+from .driver_assignment_serializer import DriverAssignmentSerializer

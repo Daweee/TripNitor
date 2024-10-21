@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/pages/bottomNav/booking_page.dart';
-import 'package:tripnitor_mobile_app/pages/bottomNav/message_page.dart';
-import 'package:tripnitor_mobile_app/pages/bottomNav/profile_page.dart';
-import 'package:tripnitor_mobile_app/pages/package_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/user_bottom_nav/booking_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/user_bottom_nav/message_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/user_bottom_nav/profile_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/package_page.dart';
 
-final bottomNavIndexProvider = StateProvider((ref) => 0); // riverpod
+final bottomNavIndexProvider = StateProvider((ref) => 0);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,9 +21,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //, WidgetRef ref
     return Scaffold(
-      body: _buildPage(currentPage), // pages[currentPage],//_buildUI(),
+      body: _buildPage(currentPage),
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(boxShadow: <BoxShadow>[
@@ -36,8 +35,8 @@ class _HomePageState extends State<HomePage> {
         child: BottomNavigationBar(
           backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
           currentIndex: currentPage,
-          type: BottomNavigationBarType.fixed, // .fixed; .shifting;
-          selectedItemColor: Colors.black, // backgroundColor: Colors.black,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.black,
           unselectedItemColor: Colors.black,
           onTap: (value) {
             setState(
@@ -49,22 +48,22 @@ class _HomePageState extends State<HomePage> {
           items: const [
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.home),
-              icon: Icon(Icons.home_outlined), // 0
+              icon: Icon(Icons.home_outlined),
               label: "Home",
             ),
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.book),
-              icon: Icon(Icons.book_outlined), // 1
+              icon: Icon(Icons.book_outlined),
               label: "Bookings",
             ),
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.chat_bubble),
-              icon: Icon(Icons.chat_bubble_outline_rounded), // 2
+              icon: Icon(Icons.chat_bubble_outline_rounded),
               label: "Message",
             ),
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.person),
-              icon: Icon(Icons.person_outlined), // 3
+              icon: Icon(Icons.person_outlined),
               label: 'Profile',
             ),
           ],
@@ -76,7 +75,6 @@ class _HomePageState extends State<HomePage> {
   Widget _buildPage(int index) {
     switch (index) {
       case 0:
-        //return HomePage();
         return MyHomePage();
       case 1:
         return BookingPage();
@@ -90,7 +88,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Home Page
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 

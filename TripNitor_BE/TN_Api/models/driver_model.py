@@ -31,3 +31,9 @@ class Driver(CustomPrimaryKeyModel):
             models.Q(end_date__range=(start_date, end_date)),
             status__in=[Booking.BookingStatus.CONFIRMED, Booking.BookingStatus.PENDING]
         ).exists()
+    
+    def delete(self, *args, **kwargs):
+        from .driver_assignment_model import DriverAssignment  # Adjust import as needed
+        if DriverAssignment.objects.filter(driver=self).exists():
+            raise ValueError("Cannot delete driver with assigned bookings.")
+        super().delete(*args, **kwargs)

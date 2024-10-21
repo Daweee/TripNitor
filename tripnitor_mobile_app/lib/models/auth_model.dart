@@ -28,6 +28,44 @@ class User {
         role: json["role"],
         token: json["token"] != null ? Token.fromJson(json["token"]) : null,
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "username": username,
+        "name": name,
+        "email": email,
+        "phone_number": phoneNumber,
+        "role": role,
+      };
+}
+
+class UserPatch {
+  String? name;
+  String? email;
+  String? phoneNumber;
+  String? role;
+  String? password;
+
+  UserPatch({
+    this.name,
+    this.email,
+    this.phoneNumber,
+    this.role,
+    this.password,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {
+      'name': name,
+      'phone_number': phoneNumber,
+    };
+
+    if (email != null) json['email'] = email;
+    if (role != null) json['role'] = role;
+    if (password != null) json['password'] = password;
+
+    return json;
+  }
 }
 
 class AuthState {

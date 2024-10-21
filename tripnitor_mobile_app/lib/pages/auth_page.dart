@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/pages/home_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import '../providers/auth_provider.dart';
-import 'driver_homepage.dart';
+import 'admin/admin_homepage.dart';
+import 'driver/driver_homepage.dart';
 import 'login_page.dart';
 
 class AuthPage extends ConsumerWidget {
@@ -18,14 +19,14 @@ class AuthPage extends ConsumerWidget {
     }
 
     switch (authState.user?.role) {
-    //   case 'ADMIN':
-    //     return AdminPage();
+      case 'ADMIN':
+        return DriverSchedulePage();
       case 'USER':
         print(authState.user?.role);
         return HomePage(); // previously HomePage() for user
       case 'DRIVER':
         print(authState.user?.role);
-        return DriverHomepage();
+        return DriverPage();
       default:
         return LoginPage();
     }

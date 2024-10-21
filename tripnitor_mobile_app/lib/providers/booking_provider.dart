@@ -17,6 +17,7 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
         previewBooking: preview.bookingPreview,
         status: preview.status,
         message: preview.message,
+        error: null,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -27,9 +28,8 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final createdBooking = await _bookingService.createBooking(request);
-      final bookingData = Booking.fromJson(createdBooking);
       state = state.copyWith(
-        booking: bookingData,
+        booking: createdBooking,
         isLoading: false,
         status: 201,
         message: "Booking created successfully",
@@ -53,6 +53,23 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> getAllBookings() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final bookingList = await _bookingService.getAllBookings();
+      state = state.copyWith(
+        isLoading: false,
+        bookingList: bookingList,
+        status: 200,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load list of bookings: $e',
+      );
     }
   }
 

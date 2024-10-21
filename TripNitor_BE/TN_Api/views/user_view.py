@@ -74,7 +74,7 @@ class LoginView(CustomResponseMixin, TokenObtainPairView):
             return self.get_custom_response(
                 status.HTTP_400_BAD_REQUEST,
                 None,
-                str(e)
+                'Invalid Credentials'
             )
         
 class LogoutView(CustomResponseMixin, GenericAPIView):

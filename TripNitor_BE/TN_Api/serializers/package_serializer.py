@@ -9,12 +9,14 @@ class PackageSerializer(serializers.ModelSerializer):
     legs = LegSerializer(many=True, required=False)
     start_location = LocationSerializer(required=False)
     final_destination = LocationSerializer(required=False)
+    total_distance = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    base_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     class Meta:
         model = Package
         fields = ['id', 'package_name', 'description', 'base_price', 'package_type', 'visibility', 
                   'start_location', 'final_destination', 'legs', 'max_participants', 
-                  'current_participants', 'start_date', 'end_date']
+                  'current_participants', 'start_date', 'end_date', 'total_distance']
 
     def validate(self, data):
         if data['visibility'] == Package.PackageVisibility.JOINER and not data.get('max_participants'):
@@ -48,6 +50,12 @@ class PackageSerializer(serializers.ModelSerializer):
 
         package = Package.objects.create(**validated_data)
 
+        # If base_price is not provided, calculate it
+        if 'base_price' not in validated_data:
+            package.base_price = package.calculate_base_price()
+
+        package.save()
+
         for leg_data in legs_data:
             start_location_data = leg_data.pop('start_location')
             end_location_data = leg_data.pop('end_location')
@@ -67,6 +75,14 @@ class PackageSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         legs_data = validated_data.pop('legs', [])
+
+        # Handle base_price update
+        if 'base_price' not in validated_data and 'total_distance' in validated_data:
+            instance.total_distance = validated_data['total_distance']
+            validated_data['base_price'] = instance.calculate_base_price()
+
+        instance = super().update(instance, validated_data)
+
         instance = super().update(instance, validated_data)
         
         # Update or create legs

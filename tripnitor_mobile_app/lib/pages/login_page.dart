@@ -50,6 +50,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       child: SafeArea(
         child: Column(
           children: [
+            SizedBox(
+              height: 100,
+            ),
             _header(),
             _loginForm(),
           ],
@@ -61,12 +64,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _header() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * .40,
+      height: MediaQuery.of(context).size.height * .30,
       child: Center(
-        child: Image(
-          image: AssetImage(
-            'assets/images/tripnitor_logo_rmbg.png',
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Image(
+                image: AssetImage('assets/images/tripnitor_logo_rmbg.png'),
+                fit: BoxFit.contain,
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: Image(
+                image: AssetImage('assets/images/TripNitor.png'),
+                width: MediaQuery.of(context).size.width * .7,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -164,7 +181,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text('Login failed. Please try again.')),
+                            content: Text('${ref.read(authProvider).error}')),
                       );
                     }
                   }

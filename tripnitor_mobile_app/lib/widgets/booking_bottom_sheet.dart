@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/pages/payment_booking_page.dart';
+import 'package:tripnitor_mobile_app/pages/user/payment_booking_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custom_modal_dialogue.dart';
 import '../constants/constant.dart';
 import '../models/package_model.dart';
@@ -139,7 +139,6 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
 
                           final userId = await tokenService.getUserId();
                           if (userId == null) {
-                            // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('User details failed')),
                             );
@@ -163,33 +162,29 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                             final requiredDrivers = (passengers + 14) ~/ 15;
 
                             if (assignedDrivers.length < requiredDrivers) {
-                              showDialog(
-                                barrierDismissible: false,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CustomModalDialog(
-                                    title: 'Booking Error!',
-                                    content:
-                                        'Our drivers are busy. Please adjust booking date or number of passengers.',
-                                    onConfirm: () {},
-                                    color: Color(ColorConstants.ERROR_COLOR),
-                                    buttonText: 'OK',
-                                  );
-                                },
-                              );
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PaymentBookingPage(
-                                      packageId: widget.package.id),
-                                ),
-                              );
+                              throw 'Our drivers are busy. Please adjust booking date or number of passengers.';
                             }
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PaymentBookingPage(
+                                    packageId: widget.package.id),
+                              ),
+                            );
                           } catch (error) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('An error occurred: $error')),
+                            showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CustomModalDialog(
+                                  title: 'Booking Error!',
+                                  content: error.toString(),
+                                  onConfirm: () {},
+                                  color: Color(ColorConstants.ERROR_COLOR),
+                                  buttonText: 'OK',
+                                );
+                              },
                             );
                           }
                         } else {
