@@ -1,0 +1,46 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "DRF Backend",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/TripNitor_BE/manage.py",
+            "args": [
+                "runserver",
+                "--noreload"
+            ],
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "TripNitor_BE.settings"
+            },
+            "python": "${workspaceFolder}/TripNitor_BE/venv/Scripts/python.exe",
+            "cwd": "${workspaceFolder}/TripNitor_BE",
+            "justMyCode": false
+        },
+        {
+            "name": "tripnitor_mobile_app",
+            "cwd": "tripnitor_mobile_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "tripnitor_mobile_app (profile mode)",
+            "cwd": "tripnitor_mobile_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "tripnitor_mobile_app (release mode)",
+            "cwd": "tripnitor_mobile_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
