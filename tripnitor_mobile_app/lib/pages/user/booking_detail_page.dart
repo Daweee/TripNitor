@@ -114,7 +114,7 @@ class BookingDetailsContent extends StatelessWidget {
               ),
             ),
             _buildPaymentInfoRow(
-                "Booking Duration", "(${booking.numberOfNights}) ₱1000.00",
+                "Duration Fee", "(${booking.numberOfNights}) ₱1000.00",
                 boldPart: "(${booking.numberOfNights})"),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 7.0),

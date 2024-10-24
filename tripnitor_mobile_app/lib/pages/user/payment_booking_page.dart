@@ -369,7 +369,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                           ),
                         ),
                         _buildPaymentInfoRow(
-                          "Booking Duration",
+                          "Duration Fee",
                           "(${bookingState.previewBooking!.numberOfNights}) ₱1000.00",
                         ),
                         Padding(
