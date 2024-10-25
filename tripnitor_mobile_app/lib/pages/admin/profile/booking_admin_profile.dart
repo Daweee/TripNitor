@@ -1,46 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
 import '../../../../models/booking_model.dart';
+import '../../../widgets/custom_modal_dialogue.dart';
 
-class BookingAdminProfile extends StatefulWidget {
+class BookingAdminProfile extends ConsumerStatefulWidget {
   final Booking booking;
-  BookingAdminProfile({super.key, required this.booking});
+  const BookingAdminProfile({super.key, required this.booking});
 
   @override
-  State<BookingAdminProfile> createState() => _BookingAdminProfileState();
+  ConsumerState<BookingAdminProfile> createState() =>
+      _BookingAdminProfileState();
 }
 
-class _BookingAdminProfileState extends State<BookingAdminProfile> {
-  void _showCancelConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Cancellation'),
-          content: Text('Are you sure you want to cancel this booking?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Add your cancel logic here
-                print("Booking cancelled");
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
+class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
   @override
   Widget build(BuildContext context) {
     final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
@@ -283,7 +259,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                 height: 40,
               ),
               if (widget.booking.status == 'PENDING') ...[
-                _confirmBookingButton(),
+                _confirmBookingButton(widget.booking.id),
                 SizedBox(
                   height: 20,
                 ),
@@ -299,11 +275,30 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
   Widget _cancelBookingButton(String bookingStatus) {
     final bool isEnabled = bookingStatus == "PENDING";
 
+    void _showCancelConfirmation() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomModalDialog(
+            title: 'Cancel Booking',
+            content:
+                'Are you sure you want to cancel this booking? This action cannot be undone.',
+            onConfirm: () {
+              // Add your cancel booking logic here
+              print('Booking cancelled');
+            },
+            color: Color(ColorConstants.CANCEL_COLOR),
+            buttonText: 'Cancel Booking',
+          );
+        },
+      );
+    }
+
     return SizedBox(
       width: double.infinity,
       height: 45,
       child: ElevatedButton(
-        onPressed: isEnabled ? () {} : null,
+        onPressed: isEnabled ? () => _showCancelConfirmation() : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(ColorConstants.CANCEL_COLOR),
           disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),
@@ -323,12 +318,34 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
     );
   }
 
-  Widget _confirmBookingButton() {
+  Widget _confirmBookingButton(String bookingId) {
+    void _showConfirmationDialog(BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomModalDialog(
+            title: 'Confirm Booking',
+            content: 'Are you sure you want to confirm this booking?',
+            onConfirm: () async {
+              // Add your confirm booking logic here
+              print('Booking confirmed: $bookingId');
+
+              await ref
+                  .read(bookingStateProvider.notifier)
+                  .confirmBooking(bookingId);
+            },
+            color: Color(ColorConstants.PRIMARY_COLOR),
+            buttonText: 'Confirm',
+          );
+        },
+      );
+    }
+
     return SizedBox(
       width: double.infinity,
       height: 45,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () => _showConfirmationDialog(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
           disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),

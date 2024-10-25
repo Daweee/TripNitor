@@ -86,6 +86,20 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<void> confirmBooking(String bookingId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final confirmedBooking = await _bookingService.confirmBooking(bookingId);
+      state = state.copyWith(
+        isLoading: false,
+        booking: confirmedBooking,
+        status: 200,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: true, error: e.toString());
+    }
+  }
 }
 
 final bookingServiceProvider = Provider<BookingService>((ref) {
