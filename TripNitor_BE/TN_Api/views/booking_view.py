@@ -194,3 +194,26 @@ class BookingPreviewView(APIView):
                 'data': serializer.errors,
                 'message': 'Invalid data provided for booking preview.'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+@extend_schema(tags=['bookings'])
+class ConfirmBookingView(CustomResponseMixin, UpdateAPIView):
+
+    def patch(self, request, pk):
+        try:
+            booking = Booking.objects.get(id=pk, status=Booking.BookingStatus.PENDING)
+        except Booking.DoesNotExist:
+            return self.get_custom_response(
+            status.HTTP_400_BAD_REQUEST,
+            None,
+            'Booking not found or is not in pending status.'
+        )
+
+        Booking.objects.filter(id=pk).update(status=Booking.BookingStatus.CONFIRMED)
+        booking.refresh_from_db() 
+        serializer = BookingSerializer(booking)
+
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Booking confirmed successfully.'
+        )
