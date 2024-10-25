@@ -135,7 +135,7 @@ class BookingDetailsContent extends StatelessWidget {
               ),
             ),
             _buildPaymentInfoRow(
-                "Booking Duration", "(${booking.numberOfNights}) ₱1000.00",
+                "Duration Fee", "(${booking.numberOfNights}) ₱1000.00",
                 boldPart: "(${booking.numberOfNights})"),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 7.0),
@@ -159,7 +159,11 @@ class BookingDetailsContent extends StatelessWidget {
           ]),
           SizedBox(
             height: 30,
-          )
+          ),
+          _cancelBookingButton(booking.status),
+          SizedBox(
+            height: 30,
+          ),
         ],
       ),
     );
@@ -372,8 +376,6 @@ class BookingDetailsContent extends StatelessWidget {
                       SizedBox(height: 10),
                       _buildInfoRow("Name", driver.user.name),
                       _buildInfoRow("Phone Number", driver.user.phoneNumber),
-                      //   _buildInfoRow("Van Model", driver.van.model),
-                      //   _buildInfoRow("Plate Number", driver.van.plateNumber),
                     ],
                   ),
                 ),
@@ -515,6 +517,36 @@ class BookingDetailsContent extends StatelessWidget {
           child: Column(children: children),
         ),
       ],
+    );
+  }
+
+  Widget _cancelBookingButton(String bookingStatus) {
+    final bool isEnabled = bookingStatus == "PENDING";
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: 45,
+        child: ElevatedButton(
+          onPressed: isEnabled ? () {} : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(ColorConstants.CANCEL_COLOR),
+            disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          child: Text(
+            'Cancel Booking',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

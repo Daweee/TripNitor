@@ -224,7 +224,7 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                           );
                         },
                         child: Text(
-                          'Show Task',
+                          'Details',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
