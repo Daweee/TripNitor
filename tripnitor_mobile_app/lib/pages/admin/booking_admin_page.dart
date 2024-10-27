@@ -67,7 +67,7 @@ class _BookingAdminPageState extends ConsumerState<BookingAdminPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  BookingAdminProfile(booking: booking),
+                                  BookingAdminProfile(bookingId: booking.id),
                             ),
                           );
                         },

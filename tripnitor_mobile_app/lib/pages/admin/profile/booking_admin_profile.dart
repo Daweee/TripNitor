@@ -8,8 +8,8 @@ import '../../../../models/booking_model.dart';
 import '../../../widgets/custom_modal_dialogue.dart';
 
 class BookingAdminProfile extends ConsumerStatefulWidget {
-  final Booking booking;
-  const BookingAdminProfile({super.key, required this.booking});
+  final String bookingId;
+  const BookingAdminProfile({Key? key, required this.bookingId});
 
   @override
   ConsumerState<BookingAdminProfile> createState() =>
@@ -18,9 +18,18 @@ class BookingAdminProfile extends ConsumerStatefulWidget {
 
 class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref
+        .read(bookingStateProvider.notifier)
+        .getBookingDetails(widget.bookingId));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bookingState = ref.watch(bookingStateProvider);
     final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
-    bool isBookingPending = widget.booking.status.toUpperCase() == 'PENDING';
+    // bool isBookingPending = bookingState.status?.toUpperCase() == 'PENDING';
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -28,7 +37,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
         scrolledUnderElevation: 0.0,
         title: Text(
-          dateTimeFormat.format(widget.booking.createdAt),
+          dateTimeFormat.format(bookingState.booking!.createdAt),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -50,7 +59,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     "Booking ID: ",
                     style: TextStyle(color: Colors.black, fontSize: 24),
                   ),
-                  Text(widget.booking.id,
+                  Text(bookingState.booking!.id,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -60,7 +69,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Booking Status: "),
-                  Text(widget.booking.status,
+                  Text(bookingState.booking!.status,
                       style: TextStyle(
                           color: Color(ColorConstants.ACCENT_COLOR),
                           fontWeight: FontWeight.bold)),
@@ -73,7 +82,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Booked By: "),
-                  Text(widget.booking.user.name,
+                  Text(bookingState.booking!.user.name,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -85,7 +94,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Number of Passengers: "),
-                  Text("${widget.booking.numberOfPassengers}",
+                  Text("${bookingState.booking!.numberOfPassengers}",
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -130,7 +139,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Starting Location: "),
-                        Text(widget.booking.package.startLocation.name,
+                        Text(bookingState.booking!.package.startLocation.name,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -141,7 +150,8 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Final Location: "),
-                        Text(widget.booking.package.finalDestination.name,
+                        Text(
+                            bookingState.booking!.package.finalDestination.name,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -169,7 +179,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Payment Method: "),
-                        Text(widget.booking.modeOfPayment,
+                        Text(bookingState.booking!.modeOfPayment,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -183,7 +193,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                         Row(
                           children: [
                             Text(
-                              "₱${widget.booking.totalPrice}",
+                              "₱${bookingState.booking!.totalPrice}",
                               style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold),
@@ -242,8 +252,10 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Divider(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children:
-                          widget.booking.drivers.asMap().entries.map((entry) {
+                      children: bookingState.booking!.drivers
+                          .asMap()
+                          .entries
+                          .map((entry) {
                         final index = entry.key;
                         final driver = entry.value;
                         return Padding(
@@ -258,13 +270,13 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
               SizedBox(
                 height: 40,
               ),
-              if (widget.booking.status == 'PENDING') ...[
-                _confirmBookingButton(widget.booking.id),
+              if (bookingState.booking!.status == 'PENDING') ...[
+                _confirmBookingButton(bookingState.booking!.id),
                 SizedBox(
                   height: 20,
                 ),
               ],
-              _cancelBookingButton(widget.booking.status),
+              _cancelBookingButton(bookingState.booking!.status),
             ],
           ),
         ),
