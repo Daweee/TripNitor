@@ -8,7 +8,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView,
 )
-from ..serializers import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer
+from ..serializers import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer
 from ..models import Booking
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
@@ -197,6 +197,8 @@ class BookingPreviewView(APIView):
         
 @extend_schema(tags=['bookings'])
 class ConfirmBookingView(CustomResponseMixin, UpdateAPIView):
+    serializer_class = BookingStatusUpdateSerializer
+    queryset = Booking.objects.all()
 
     def patch(self, request, pk):
         try:
@@ -216,4 +218,37 @@ class ConfirmBookingView(CustomResponseMixin, UpdateAPIView):
             status.HTTP_200_OK,
             serializer.data,
             'Booking confirmed successfully.'
+        )
+    
+@extend_schema(tags=['bookings'])
+class CancelBookingView(CustomResponseMixin, UpdateAPIView):
+    serializer_class = BookingStatusUpdateSerializer
+    queryset = Booking.objects.all()
+
+    def patch(self, request, pk):
+        try:
+            booking = Booking.objects.get(id=pk)
+        except Booking.DoesNotExist:
+            return self.get_custom_response(
+            status.HTTP_400_BAD_REQUEST,
+            None,
+            'Booking not found or is not in pending status.'
+        )
+
+        if booking.status in [Booking.BookingStatus.COMPLETED, Booking.BookingStatus.CANCELLED]:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                'Booking cannot be canceled.'
+            )
+        
+        booking.driverassignment_set.all().delete()
+        Booking.objects.filter(id=pk).update(status=Booking.BookingStatus.CANCELLED)
+        booking.refresh_from_db()
+        serializer = BookingSerializer(booking)
+
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Booking has been successfully canceled.'
         )
