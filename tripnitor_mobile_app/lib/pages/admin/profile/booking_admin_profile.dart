@@ -71,7 +71,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                   Text("Booking Status: "),
                   Text(bookingState.booking!.status,
                       style: TextStyle(
-                          color: Color(ColorConstants.ACCENT_COLOR),
+                          color: _getStatusColor(bookingState.booking!.status),
                           fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -271,12 +271,12 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                 height: 40,
               ),
               if (bookingState.booking!.status == 'PENDING') ...[
-                _confirmBookingButton(bookingState.booking!.id),
+                _confirmBookingButton(bookingState.booking!),
                 SizedBox(
                   height: 20,
                 ),
               ],
-              _cancelBookingButton(bookingState.booking!.status),
+              _cancelBookingButton(bookingState.booking!),
             ],
           ),
         ),
@@ -284,8 +284,8 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
     );
   }
 
-  Widget _cancelBookingButton(String bookingStatus) {
-    final bool isEnabled = bookingStatus == "PENDING";
+  Widget _cancelBookingButton(Booking booking) {
+    final bool isEnabled = booking.status == "PENDING";
 
     void _showCancelConfirmation() {
       showDialog(
@@ -295,9 +295,13 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
             title: 'Cancel Booking',
             content:
                 'Are you sure you want to cancel this booking? This action cannot be undone.',
-            onConfirm: () {
+            onConfirm: () async {
               // Add your cancel booking logic here
               print('Booking cancelled');
+
+              await ref
+                  .read(bookingStateProvider.notifier)
+                  .cancelBooking(booking.id);
             },
             color: Color(ColorConstants.CANCEL_COLOR),
             buttonText: 'Cancel Booking',
@@ -330,7 +334,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
     );
   }
 
-  Widget _confirmBookingButton(String bookingId) {
+  Widget _confirmBookingButton(Booking booking) {
     void _showConfirmationDialog(BuildContext context) {
       showDialog(
         context: context,
@@ -340,11 +344,11 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
             content: 'Are you sure you want to confirm this booking?',
             onConfirm: () async {
               // Add your confirm booking logic here
-              print('Booking confirmed: $bookingId');
+              print('Booking confirmed: $booking.id');
 
               await ref
                   .read(bookingStateProvider.notifier)
-                  .confirmBooking(bookingId);
+                  .confirmBooking(booking.id);
             },
             color: Color(ColorConstants.PRIMARY_COLOR),
             buttonText: 'Confirm',
@@ -375,5 +379,22 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return Color(ColorConstants.ACCENT_COLOR);
+      case 'CONFIRMED':
+        return Color(ColorConstants.PRIMARY_COLOR);
+      case 'ONGOING':
+        return Color(ColorConstants.SUCCESS_COLOR);
+      case 'CANCELLED':
+        return Color(ColorConstants.ERROR_COLOR);
+      case 'COMPLETED':
+        return Colors.blue;
+      default:
+        return Colors.black;
+    }
   }
 }

@@ -86,14 +86,14 @@ Widget _buildBody(bookingState) {
   }
 }
 
-class BookingDetailsContent extends StatelessWidget {
+class BookingDetailsContent extends ConsumerWidget {
   final Booking booking;
 
   const BookingDetailsContent({Key? key, required this.booking})
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final DateFormat dateTimeFormat = DateFormat('MMM d, yyyy h:mm a');
 
     return SingleChildScrollView(
@@ -160,7 +160,7 @@ class BookingDetailsContent extends StatelessWidget {
           SizedBox(
             height: 30,
           ),
-          _cancelBookingButton(booking.status),
+          _cancelBookingButton(booking, context, ref),
           SizedBox(
             height: 30,
           ),
@@ -520,8 +520,32 @@ class BookingDetailsContent extends StatelessWidget {
     );
   }
 
-  Widget _cancelBookingButton(String bookingStatus) {
-    final bool isEnabled = bookingStatus == "PENDING";
+  Widget _cancelBookingButton(
+      Booking booking, BuildContext context, WidgetRef ref) {
+    final bool isEnabled = booking.status == "PENDING";
+
+    void _showCancelConfirmation() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomModalDialog(
+            title: 'Cancel Booking',
+            content:
+                'Are you sure you want to cancel this booking? This action cannot be undone.',
+            onConfirm: () async {
+              // Add your cancel booking logic here
+              print('Booking cancelled');
+
+              await ref
+                  .read(bookingStateProvider.notifier)
+                  .cancelBooking(booking.id);
+            },
+            color: Color(ColorConstants.CANCEL_COLOR),
+            buttonText: 'Cancel Booking',
+          );
+        },
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -529,7 +553,7 @@ class BookingDetailsContent extends StatelessWidget {
         width: double.infinity,
         height: 45,
         child: ElevatedButton(
-          onPressed: isEnabled ? () {} : null,
+          onPressed: isEnabled ? () => _showCancelConfirmation() : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(ColorConstants.CANCEL_COLOR),
             disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),

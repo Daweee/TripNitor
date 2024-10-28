@@ -168,4 +168,18 @@ class BookingService {
       throw Exception('Failed to confirm booking: ${e.message}');
     }
   }
+
+  Future<Booking> cancelBooking(String bookingId) async {
+    try {
+      final response = await _dio
+          .patch('${HTTPConstants.BASE_URL}api/bookings/$bookingId/cancel/');
+      if (response.statusCode == 200) {
+        return Booking.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to cancel booking: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to cancel booking: ${e.message}');
+    }
+  }
 }
