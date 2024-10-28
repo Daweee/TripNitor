@@ -87,3 +87,7 @@ class BookingPreviewSerializer(serializers.ModelSerializer):
                 except ValueError as e:
                     raise serializers.ValidationError({field: f"Invalid date format: {str(e)}"})
         return super().to_internal_value(data)
+    
+class BookingStatusUpdateSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
