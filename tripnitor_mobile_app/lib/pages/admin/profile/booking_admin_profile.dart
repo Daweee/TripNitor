@@ -118,7 +118,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Package Details',
+                          'Itinerary Details',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -217,56 +217,57 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
               SizedBox(
                 height: 20,
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Driver Details',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+              if (bookingState.booking!.drivers.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Driver Details',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: FaIcon(
-                            FontAwesomeIcons.angleRight,
-                            color: Colors.black,
-                            size: 16,
+                          GestureDetector(
+                            onTap: () {},
+                            child: FaIcon(
+                              FontAwesomeIcons.angleRight,
+                              color: Colors.black,
+                              size: 16,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Divider(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: bookingState.booking!.drivers
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                        final index = entry.key;
-                        final driver = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text(driver.user.name),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                        ],
+                      ),
+                      Divider(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: bookingState.booking!.drivers
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                          final index = entry.key;
+                          final driver = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(driver.user.name),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               SizedBox(
                 height: 40,
               ),

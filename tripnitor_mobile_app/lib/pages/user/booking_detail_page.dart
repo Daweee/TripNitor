@@ -85,7 +85,7 @@ class BookingDetailsContent extends StatelessWidget {
             _buildInfoRow("Phone Number", booking.user.phoneNumber),
             _buildInfoRow("Email", booking.user.email),
           ]),
-          _buildDriverSection(),
+          if (booking.drivers.isNotEmpty) _buildDriverSection(),
           _buildSection("Payment Summary", [
             _buildPaymentInfoRow("Base Fare", "₱${booking.baseFare}"),
             _buildPaymentInfoRow(
