@@ -12,7 +12,7 @@ class ColorConstants {
   static const int BOTTOM_PACKAGE_CARD_COLOR = 0xFFE5842A;
   static const int ACCENT_COLOR = 0xFFEEB85C;
   static const int ERROR_COLOR = 0xFFD32F2F;
-  static const int SUCCESS_COLOR = 0xFF4CAF50;
+  static const int SUCCESS_COLOR = 0xFF00B14F;
   static const int CANCEL_COLOR = 0xFFE67C73;
   static const int DISABLED_COLOR = 0xFFC5C5C5;
 }
