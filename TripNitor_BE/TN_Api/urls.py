@@ -4,7 +4,8 @@ from .views import (
     DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView, RetrieveDriverInstanceView,
     VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView, UnassignedVanListView,
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
-    BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView,
+    BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView, 
+    ConfirmBookingView, CancelBookingView, StartBookingView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView,
     DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList,
 )
@@ -47,6 +48,9 @@ urlpatterns = [
     path('bookings/<str:pk>/', BookingDetailView.as_view(), name='booking-detail'),
     path('bookings/<str:pk>/update/', BookingUpdateView.as_view(), name='booking-update'),
     path('bookings/<str:pk>/delete/', BookingDeleteView.as_view(), name='booking-delete'),
+    path('bookings/<str:pk>/confirm/', ConfirmBookingView.as_view(), name='booking-confirm'),
+    path('bookings/<str:pk>/cancel/', CancelBookingView.as_view(), name='booking-cancel'),
+    path('bookings/<str:pk>/start/', StartBookingView.as_view(), name='booking-start'),
 
     path('packages/register/', PackageCreateView.as_view(), name='register_package'),
     path('packages/', PackageListView.as_view(), name='package_list'),

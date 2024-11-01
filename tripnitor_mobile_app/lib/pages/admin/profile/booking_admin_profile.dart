@@ -1,50 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
 import '../../../../models/booking_model.dart';
+import '../../../widgets/custom_modal_dialogue.dart';
 
-class BookingAdminProfile extends StatefulWidget {
-  final Booking booking;
-  BookingAdminProfile({super.key, required this.booking});
+class BookingAdminProfile extends ConsumerStatefulWidget {
+  final String bookingId;
+  const BookingAdminProfile({Key? key, required this.bookingId});
 
   @override
-  State<BookingAdminProfile> createState() => _BookingAdminProfileState();
+  ConsumerState<BookingAdminProfile> createState() =>
+      _BookingAdminProfileState();
 }
 
-class _BookingAdminProfileState extends State<BookingAdminProfile> {
-  void _showCancelConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Cancellation'),
-          content: Text('Are you sure you want to cancel this booking?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Add your cancel logic here
-                print("Booking cancelled");
-              },
-            ),
-          ],
-        );
-      },
-    );
+class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref
+        .read(bookingStateProvider.notifier)
+        .getBookingDetails(widget.bookingId));
   }
 
   @override
   Widget build(BuildContext context) {
+    final bookingState = ref.watch(bookingStateProvider);
     final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
-    bool isBookingPending = widget.booking.status.toUpperCase() == 'PENDING';
+    // bool isBookingPending = bookingState.status?.toUpperCase() == 'PENDING';
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -52,7 +37,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
         scrolledUnderElevation: 0.0,
         title: Text(
-          dateTimeFormat.format(widget.booking.createdAt),
+          dateTimeFormat.format(bookingState.booking!.createdAt),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -74,7 +59,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                     "Booking ID: ",
                     style: TextStyle(color: Colors.black, fontSize: 24),
                   ),
-                  Text(widget.booking.id,
+                  Text(bookingState.booking!.id,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -84,9 +69,9 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Booking Status: "),
-                  Text(widget.booking.status,
+                  Text(bookingState.booking!.status,
                       style: TextStyle(
-                          color: Color(ColorConstants.ACCENT_COLOR),
+                          color: _getStatusColor(bookingState.booking!.status),
                           fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -97,7 +82,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Booked By: "),
-                  Text(widget.booking.user.name,
+                  Text(bookingState.booking!.user.name,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -109,7 +94,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Number of Passengers: "),
-                  Text("${widget.booking.numberOfPassengers}",
+                  Text("${bookingState.booking!.numberOfPassengers}",
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -133,7 +118,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Package Details',
+                          'Itinerary Details',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -154,7 +139,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Starting Location: "),
-                        Text(widget.booking.package.startLocation.name,
+                        Text(bookingState.booking!.package.startLocation.name,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -165,7 +150,8 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Final Location: "),
-                        Text(widget.booking.package.finalDestination.name,
+                        Text(
+                            bookingState.booking!.package.finalDestination.name,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -193,7 +179,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Payment Method: "),
-                        Text(widget.booking.modeOfPayment,
+                        Text(bookingState.booking!.modeOfPayment,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -207,7 +193,7 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
                         Row(
                           children: [
                             Text(
-                              "₱${widget.booking.totalPrice}",
+                              "₱${bookingState.booking!.totalPrice}",
                               style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold),
@@ -231,64 +217,67 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
               SizedBox(
                 height: 20,
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Driver Details',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+              if (bookingState.booking!.drivers.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Driver Details',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: FaIcon(
-                            FontAwesomeIcons.angleRight,
-                            color: Colors.black,
-                            size: 16,
+                          GestureDetector(
+                            onTap: () {},
+                            child: FaIcon(
+                              FontAwesomeIcons.angleRight,
+                              color: Colors.black,
+                              size: 16,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Divider(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children:
-                          widget.booking.drivers.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final driver = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text(driver.user.name),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                        ],
+                      ),
+                      Divider(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: bookingState.booking!.drivers
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                          final index = entry.key;
+                          final driver = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(driver.user.name),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               SizedBox(
                 height: 40,
               ),
-              if (widget.booking.status == 'PENDING') ...[
-                _confirmBookingButton(),
+              if (bookingState.booking!.status == 'PENDING') ...[
+                _confirmBookingButton(bookingState.booking!),
                 SizedBox(
                   height: 20,
                 ),
               ],
-              _cancelBookingButton(widget.booking.status),
+              _cancelBookingButton(bookingState.booking!),
             ],
           ),
         ),
@@ -296,14 +285,37 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
     );
   }
 
-  Widget _cancelBookingButton(String bookingStatus) {
-    final bool isEnabled = bookingStatus == "PENDING";
+  Widget _cancelBookingButton(Booking booking) {
+    final bool isEnabled = booking.status == "PENDING";
+
+    void _showCancelConfirmation() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomModalDialog(
+            title: 'Cancel Booking',
+            content:
+                'Are you sure you want to cancel this booking? This action cannot be undone.',
+            onConfirm: () async {
+              // Add your cancel booking logic here
+              print('Booking cancelled');
+
+              await ref
+                  .read(bookingStateProvider.notifier)
+                  .cancelBooking(booking.id);
+            },
+            color: Color(ColorConstants.CANCEL_COLOR),
+            buttonText: 'Cancel Booking',
+          );
+        },
+      );
+    }
 
     return SizedBox(
       width: double.infinity,
       height: 45,
       child: ElevatedButton(
-        onPressed: isEnabled ? () {} : null,
+        onPressed: isEnabled ? () => _showCancelConfirmation() : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(ColorConstants.CANCEL_COLOR),
           disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),
@@ -323,12 +335,34 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
     );
   }
 
-  Widget _confirmBookingButton() {
+  Widget _confirmBookingButton(Booking booking) {
+    void _showConfirmationDialog(BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomModalDialog(
+            title: 'Confirm Booking',
+            content: 'Are you sure you want to confirm this booking?',
+            onConfirm: () async {
+              // Add your confirm booking logic here
+              print('Booking confirmed: $booking.id');
+
+              await ref
+                  .read(bookingStateProvider.notifier)
+                  .confirmBooking(booking.id);
+            },
+            color: Color(ColorConstants.PRIMARY_COLOR),
+            buttonText: 'Confirm',
+          );
+        },
+      );
+    }
+
     return SizedBox(
       width: double.infinity,
       height: 45,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () => _showConfirmationDialog(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
           disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),
@@ -346,5 +380,22 @@ class _BookingAdminProfileState extends State<BookingAdminProfile> {
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return Color(ColorConstants.ACCENT_COLOR);
+      case 'CONFIRMED':
+        return Color(ColorConstants.PRIMARY_COLOR);
+      case 'ONGOING':
+        return Color(ColorConstants.SUCCESS_COLOR);
+      case 'CANCELLED':
+        return Color(ColorConstants.ERROR_COLOR);
+      case 'COMPLETED':
+        return Colors.blue;
+      default:
+        return Colors.black;
+    }
   }
 }

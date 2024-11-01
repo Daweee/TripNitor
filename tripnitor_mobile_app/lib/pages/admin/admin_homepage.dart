@@ -185,7 +185,7 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            BookingAdminProfile(booking: booking.booking),
+                            BookingAdminProfile(bookingId: booking.booking.id),
                       ),
                     );
                   },

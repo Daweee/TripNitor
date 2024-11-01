@@ -20,13 +20,26 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(driverStateProvider.notifier).getUserDriverDetail();
+      //   ref.read(driverStateProvider.notifier).getUserDriverDetail();
       ref.read(driverAssignmentStateProvider.notifier).getDriverBookings();
     });
   }
 
+  Future<void> _navigateToDetails(String bookingId) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DriverBookingDetails(bookingId: bookingId),
+      ),
+    );
+
+    if (result == true || result == null) {
+      await _refreshData();
+    }
+  }
+
   Future<void> _refreshData() async {
-    await ref.read(driverStateProvider.notifier).getUserDriverDetail();
+    // await ref.read(driverStateProvider.notifier).getUserDriverDetail();
     await ref.read(driverAssignmentStateProvider.notifier).getDriverBookings();
   }
 
@@ -35,6 +48,7 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        scrolledUnderElevation: 0.0,
         centerTitle: true,
         title: Text('Bookings'),
         actions: [
@@ -182,7 +196,7 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                                 style: TextStyle(fontSize: 12),
                               ),
                               Text(
-                                '${driverBooking.booking.id}',
+                                driverBooking.booking.id,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -201,7 +215,8 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
-                                    color: Color(ColorConstants.ACCENT_COLOR)),
+                                    color: _getStatusColor(
+                                        driverBooking.booking.status)),
                               ),
                             ],
                           ),
@@ -214,15 +229,8 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DriverBookingDetails(
-                                  booking: driverBooking.booking),
-                            ),
-                          );
-                        },
+                        onPressed: () =>
+                            _navigateToDetails(driverBooking.booking.id),
                         child: Text(
                           'Details',
                           style: TextStyle(color: Colors.white),
@@ -237,5 +245,22 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
         );
       },
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return Color(ColorConstants.ACCENT_COLOR);
+      case 'CONFIRMED':
+        return Color(ColorConstants.PRIMARY_COLOR);
+      case 'ONGOING':
+        return Color(ColorConstants.SUCCESS_COLOR);
+      case 'CANCELLED':
+        return Color(ColorConstants.ERROR_COLOR);
+      case 'COMPLETED':
+        return Colors.blue;
+      default:
+        return Colors.black;
+    }
   }
 }

@@ -22,6 +22,23 @@ class _BookingAdminPageState extends ConsumerState<BookingAdminPage> {
     });
   }
 
+  Future<void> _navigateToDetails(String bookingId) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookingAdminProfile(bookingId: bookingId),
+      ),
+    );
+
+    if (result == true || result == null) {
+      await _refreshData();
+    }
+  }
+
+  Future<void> _refreshData() async {
+    await ref.read(bookingStateProvider.notifier).getAllBookings();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
@@ -62,15 +79,7 @@ class _BookingAdminPageState extends ConsumerState<BookingAdminPage> {
                     final booking = bookings[index];
                     try {
                       return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  BookingAdminProfile(booking: booking),
-                            ),
-                          );
-                        },
+                        onTap: () => _navigateToDetails(booking.id),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 24),
@@ -82,7 +91,7 @@ class _BookingAdminPageState extends ConsumerState<BookingAdminPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '${booking.package.packageName}',
+                                      booking.package.packageName,
                                       style: const TextStyle(
                                         fontSize: 18,
                                       ),
