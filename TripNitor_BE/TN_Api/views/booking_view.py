@@ -252,3 +252,28 @@ class CancelBookingView(CustomResponseMixin, UpdateAPIView):
             serializer.data,
             'Booking has been successfully canceled.'
         )
+    
+@extend_schema(tags=['bookings'])
+class StartBookingView(CustomResponseMixin, UpdateAPIView):
+    serializer_class = BookingStatusUpdateSerializer
+    queryset = Booking.objects.all()
+
+    def patch(self, request, pk):
+        try:
+            booking = Booking.objects.get(id=pk, status=Booking.BookingStatus.CONFIRMED)
+        except Booking.DoesNotExist:
+            return self.get_custom_response(
+            status.HTTP_400_BAD_REQUEST,
+            None,
+            'Booking not found or is not yet confirmed.'
+        )
+
+        Booking.objects.filter(id=pk).update(status=Booking.BookingStatus.ONGOING)
+        booking.refresh_from_db() 
+        serializer = BookingSerializer(booking)
+
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Booking started successfully.'
+        )
