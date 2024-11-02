@@ -26,7 +26,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
     final authState = ref.watch(authProvider);
-    final DateFormat dateTimeFormat = DateFormat('MMM d, yyyy h:mm a');
+    final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
