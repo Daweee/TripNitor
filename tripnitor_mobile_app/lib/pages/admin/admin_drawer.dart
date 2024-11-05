@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
-import 'package:tripnitor_mobile_app/pages/admin/admin_homepage.dart';
+import 'package:tripnitor_mobile_app/pages/admin/admin_driver_schedule_page.dart';
 import 'package:tripnitor_mobile_app/pages/admin/gas_admin_page.dart';
 import 'package:tripnitor_mobile_app/pages/admin/booking_admin_page.dart';
 import 'package:tripnitor_mobile_app/pages/admin/driver_admin_page.dart';

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/user/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import '../providers/auth_provider.dart';
-import 'admin/admin_homepage.dart';
+import 'admin/admin_driver_schedule_page.dart';
 import 'driver/driver_homepage.dart';
 import 'login_page.dart';
 
