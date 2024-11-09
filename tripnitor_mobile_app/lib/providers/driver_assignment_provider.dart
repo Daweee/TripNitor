@@ -48,6 +48,26 @@ class DriverAssignmentStateNotifier
     }
   }
 
+  Future<void> getActiveDriverBookingsList() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final confirmedDriverBookings =
+          await _driverAssignmentService.getActiveDriverBookingsList();
+      state = state.copyWith(
+        isLoading: false,
+        driverAssignmentList: confirmedDriverBookings,
+        error: null,
+        message: 'Confirmed driver booking list retrieved successfully.',
+      );
+    } catch (e) {
+      state.copyWith(
+        isLoading: false,
+        error: 'Failed to load confirmed driver booking list: $e',
+        driverAssignmentList: [],
+      );
+    }
+  }
+
   void clearBookings() {
     state = state.copyWith(driverAssignmentList: []);
   }

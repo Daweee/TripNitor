@@ -83,4 +83,38 @@ class DriverAssignmentService {
       throw Exception('Failed to load driver bookings list: ${e.message}');
     }
   }
+
+  Future<List<DriverAssignment>> getActiveDriverBookingsList() async {
+    try {
+      final response = await _dio.get(
+          '${HTTPConstants.BASE_URL}api/drivers-assignment/by-driver/active/');
+      if (response.statusCode == 200) {
+        final responseData = response.data as Map<String, dynamic>?;
+        final dynamicData = responseData?['data'];
+
+        if (dynamicData == null) {
+          return [];
+        }
+
+        if (dynamicData is List) {
+          final List<Map<String, dynamic>> data =
+              dynamicData.whereType<Map<String, dynamic>>().toList();
+
+          return data.map((json) => DriverAssignment.fromJson(json)).toList();
+        } else {
+          return [];
+        }
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error:
+              'Failed to load list of driver bookings. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception(
+          'Failed to load confirmed driver bookings list: ${e.message}');
+    }
+  }
 }
