@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:tripnitor_mobile_app/providers/driver_assignment_provider.dart';
 import '../../constants/constant.dart';
@@ -40,6 +41,7 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
     final driverState = ref.watch(driverStateProvider);
     final driverAssignmentState = ref.watch(driverAssignmentStateProvider);
     final List<Driver>? drivers = driverState.driverList;
+    final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
 
     final List<PickerDateRange> bookingDateRanges = driverAssignmentState
             .driverAssignmentList
@@ -97,7 +99,8 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
               ),
             ),
           ),
-          _buildBookingsList(driverAssignmentState.driverAssignmentList),
+          _buildBookingsList(
+              driverAssignmentState.driverAssignmentList, dateTimeFormat),
         ],
       ),
     );
@@ -159,7 +162,8 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
     );
   }
 
-  Widget _buildBookingsList(List<DriverAssignment>? bookings) {
+  Widget _buildBookingsList(
+      List<DriverAssignment>? bookings, DateFormat dateTimeFormat) {
     return Expanded(
       child: bookings == null || bookings.isEmpty
           ? Center(child: Text('No bookings available for this driver'))
@@ -169,15 +173,59 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
               itemBuilder: (context, index) {
                 final booking = bookings[index];
                 return ListTile(
-                  title: Text('Booking id:${booking.booking.id}',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  contentPadding: const EdgeInsets.all(12),
+                  title: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: Colors.black),
+                      children: [
+                        const TextSpan(text: 'Booking id: '),
+                        TextSpan(
+                          text: '${booking.booking.id} • ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: booking.booking.status,
+                          style: TextStyle(
+                            color: _getStatusColor(booking.booking.status),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                          'Start: ${booking.startDate.toString().substring(0, 10)}'),
-                      Text(
-                          'End: ${booking.endDate.toString().substring(0, 10)}'),
+                      const SizedBox(height: 8),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(color: Colors.black),
+                          children: [
+                            const TextSpan(text: 'Start: '),
+                            TextSpan(
+                              text: dateTimeFormat.format(booking.startDate),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(color: Colors.black),
+                          children: [
+                            const TextSpan(text: 'End: '),
+                            TextSpan(
+                              text: dateTimeFormat.format(booking.endDate),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   onTap: () {
@@ -193,5 +241,22 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
               },
             ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return Color(ColorConstants.ACCENT_COLOR);
+      case 'CONFIRMED':
+        return Color(ColorConstants.PRIMARY_COLOR);
+      case 'ONGOING':
+        return Color(ColorConstants.SUCCESS_COLOR);
+      case 'CANCELLED':
+        return Color(ColorConstants.ERROR_COLOR);
+      case 'COMPLETED':
+        return Colors.blue;
+      default:
+        return Colors.black;
+    }
   }
 }

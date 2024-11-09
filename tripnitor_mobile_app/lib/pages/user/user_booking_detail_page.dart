@@ -94,7 +94,7 @@ class BookingDetailsContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final DateFormat dateTimeFormat = DateFormat('MMM d, yyyy h:mm a');
+    final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
 
     return SingleChildScrollView(
       child: Column(

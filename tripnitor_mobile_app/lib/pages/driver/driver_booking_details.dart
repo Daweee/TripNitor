@@ -4,8 +4,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/booking_model.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_itinerary_details_page.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_payment_details_page.dart';
 import '../../providers/booking_provider.dart';
 import '../../widgets/custom_modal_dialogue.dart';
+import 'driver_driver_details_page.dart';
 
 class DriverBookingDetails extends ConsumerStatefulWidget {
   final String bookingId;
@@ -126,7 +129,16 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DriverItineraryDetailsPage(
+                                        package: bookingState.booking!.package),
+                              ),
+                            );
+                          },
                           child: FaIcon(
                             FontAwesomeIcons.angleRight,
                             color: Colors.black,
@@ -201,7 +213,16 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                             ),
                             const SizedBox(width: 8),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DriverPaymentDetailsPage(
+                                            booking: bookingState.booking!),
+                                  ),
+                                );
+                              },
                               child: FaIcon(
                                 FontAwesomeIcons.angleRight,
                                 color: Colors.black,
@@ -241,7 +262,16 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DriverDriverDetailsPage(
+                                  driverList: bookingState.booking!.drivers,
+                                ),
+                              ),
+                            );
+                          },
                           child: FaIcon(
                             FontAwesomeIcons.angleRight,
                             color: Colors.black,

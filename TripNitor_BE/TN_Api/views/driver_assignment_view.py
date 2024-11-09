@@ -5,7 +5,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView
 )
-from ..models import DriverAssignment, Driver
+from ..models import DriverAssignment, Driver, Booking
 from ..serializers import DriverAssignmentSerializer
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
@@ -55,6 +55,46 @@ class DriverAssignmentByDriverList(CustomResponseMixin, ListAPIView):
                 status.HTTP_200_OK,
                 serializer.data,
                 'Driver booking list retrieved successfully'
+            )
+        except NotFound as e:
+            return self.get_custom_response(
+                status.HTTP_404_NOT_FOUND,
+                None,
+                str(e)
+            )
+        
+@extend_schema(tags=['driver assignments'])
+class DriverActiveBookingsList(CustomResponseMixin, ListAPIView):
+    serializer_class = DriverAssignmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        try:
+            driver = Driver.objects.get(user=self.request.user)
+            return DriverAssignment.objects.filter(
+                driver=driver,
+                booking__status__in=[
+                    Booking.BookingStatus.CONFIRMED,
+                    Booking.BookingStatus.ONGOING
+                ]
+            )
+        except Driver.DoesNotExist:
+            raise NotFound(detail="No driver profile found for the current user.")
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            if not queryset.exists():
+                return self.get_custom_response(
+                    status.HTTP_200_OK,
+                    None,
+                    'No active bookings found for the current user'
+                )
+            serializer = self.get_serializer(queryset, many=True)
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                serializer.data,
+                'Active bookings list retrieved successfully'
             )
         except NotFound as e:
             return self.get_custom_response(

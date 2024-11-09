@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/user/home_page.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import '../providers/auth_provider.dart';
-import 'admin/admin_homepage.dart';
+import 'admin/admin_driver_schedule_page.dart';
 import 'driver/driver_homepage.dart';
 import 'login_page.dart';
 
@@ -26,7 +26,7 @@ class AuthPage extends ConsumerWidget {
         return HomePage(); // previously HomePage() for user
       case 'DRIVER':
         print(authState.user?.role);
-        return DriverPage();
+        return DriverHomePage();
       default:
         return LoginPage();
     }

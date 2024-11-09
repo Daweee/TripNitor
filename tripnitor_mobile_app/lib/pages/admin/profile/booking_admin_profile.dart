@@ -6,6 +6,9 @@ import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
 import '../../../../models/booking_model.dart';
 import '../../../widgets/custom_modal_dialogue.dart';
+import '../admin_driver_details_page.dart';
+import '../admin_itinerary_details_page.dart';
+import '../admin_payment_details_page.dart';
 
 class BookingAdminProfile extends ConsumerStatefulWidget {
   final String bookingId;
@@ -125,7 +128,15 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AdminItineraryDetailsPage(
+                                    package: bookingState.booking!.package),
+                              ),
+                            );
+                          },
                           child: FaIcon(
                             FontAwesomeIcons.angleRight,
                             color: Colors.black,
@@ -139,10 +150,13 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Starting Location: "),
-                        Text(bookingState.booking!.package.startLocation.name,
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
+                        Text(
+                          bookingState.booking!.package.startLocation.name,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 10),
@@ -151,10 +165,12 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       children: [
                         Text("Final Location: "),
                         Text(
-                            bookingState.booking!.package.finalDestination.name,
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
+                          bookingState.booking!.package.finalDestination.name,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -200,7 +216,16 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                             ),
                             const SizedBox(width: 8),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AdminPaymentDetailsPage(
+                                            booking: bookingState.booking!),
+                                  ),
+                                );
+                              },
                               child: FaIcon(
                                 FontAwesomeIcons.angleRight,
                                 color: Colors.black,
@@ -241,7 +266,16 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AdminDriverDetailsPage(
+                                      driverList:
+                                          bookingState.booking!.drivers),
+                                ),
+                              );
+                            },
                             child: FaIcon(
                               FontAwesomeIcons.angleRight,
                               color: Colors.black,
