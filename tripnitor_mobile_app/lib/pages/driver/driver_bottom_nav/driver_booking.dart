@@ -20,7 +20,6 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   ref.read(driverStateProvider.notifier).getUserDriverDetail();
       ref.read(driverAssignmentStateProvider.notifier).getDriverBookings();
     });
   }
@@ -39,7 +38,6 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
   }
 
   Future<void> _refreshData() async {
-    // await ref.read(driverStateProvider.notifier).getUserDriverDetail();
     await ref.read(driverAssignmentStateProvider.notifier).getDriverBookings();
   }
 
@@ -120,7 +118,11 @@ class _DriverBookingPageState extends ConsumerState<DriverBookingPage> {
 
   Widget _buildTaskCard(BuildContext context) {
     final driverBookingState = ref.watch(driverAssignmentStateProvider);
-    final driverBookingList = driverBookingState.driverAssignmentList;
+    final driverBookingList = driverBookingState.driverAssignmentList
+        ?.where((booking) =>
+            booking.booking.status != "CONFIRMED" &&
+            booking.booking.status != "ONGOING")
+        .toList();
 
     if (driverBookingList == null || driverBookingList.isEmpty) {
       return Center(child: Text("No bookings available"));
