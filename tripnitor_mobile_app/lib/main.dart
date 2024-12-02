@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/login_page.dart';
 import 'pages/auth_page.dart';
 import 'providers/auth_provider.dart';
 
 void main() async {
+  await dotenv.load(fileName: '.env');
   runApp(
     ProviderScope(
       child: MyApp(),
