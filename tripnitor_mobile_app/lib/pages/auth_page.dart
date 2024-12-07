@@ -15,17 +15,15 @@ class AuthPage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     if (authState.user == null) {
-      return LoginPage(); // Fallback in case user is null
+      return LoginPage();
     }
 
     switch (authState.user?.role) {
       case 'ADMIN':
         return DriverSchedulePage();
       case 'USER':
-        print(authState.user?.role);
-        return HomePage(); // previously HomePage() for user
+        return HomePage();
       case 'DRIVER':
-        print(authState.user?.role);
         return DriverHomePage();
       default:
         return LoginPage();
