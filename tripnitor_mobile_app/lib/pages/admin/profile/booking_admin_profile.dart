@@ -32,170 +32,53 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
     final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
-    // bool isBookingPending = bookingState.status?.toUpperCase() == 'PENDING';
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
       appBar: AppBar(
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
         scrolledUnderElevation: 0.0,
-        title: Text(
-          dateTimeFormat.format(bookingState.booking!.createdAt),
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: bookingState.booking != null
+            ? Text(
+                dateTimeFormat.format(bookingState.booking!.createdAt),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            : Container(),
         centerTitle: true,
+        leading: IconButton(
+          icon: FaIcon(
+            FontAwesomeIcons.angleLeft,
+            color: Colors.black,
+            size: 20.0,
+          ),
+          onPressed: () {
+            ref.read(bookingStateProvider.notifier).clearState();
+            Navigator.pop(context);
+          },
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Booking ID: ",
-                    style: TextStyle(color: Colors.black, fontSize: 24),
-                  ),
-                  Text(bookingState.booking!.id,
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Booking Status: "),
-                  Text(bookingState.booking!.status,
-                      style: TextStyle(
-                          color: _getStatusColor(bookingState.booking!.status),
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Booked By: "),
-                  Text(bookingState.booking!.user.name,
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Number of Passengers: "),
-                  Text("${bookingState.booking!.numberOfPassengers}",
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+      body: bookingState.booking == null
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Itinerary Details',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          "Booking ID: ",
+                          style: TextStyle(color: Colors.black, fontSize: 24),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AdminItineraryDetailsPage(
-                                    package: bookingState.booking!.package),
-                              ),
-                            );
-                          },
-                          child: FaIcon(
-                            FontAwesomeIcons.angleRight,
-                            color: Colors.black,
-                            size: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Starting Location: "),
-                        Text(
-                          bookingState.booking!.package.startLocation.name,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Final Location: "),
-                        Text(
-                          bookingState.booking!.package.finalDestination.name,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Payment Method: "),
-                        Text(bookingState.booking!.modeOfPayment,
+                        Text(bookingState.booking!.id,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -205,117 +88,291 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Total Price:"),
-                        Row(
-                          children: [
-                            Text(
-                              "₱${bookingState.booking!.totalPrice}",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        AdminPaymentDetailsPage(
-                                            booking: bookingState.booking!),
-                                  ),
-                                );
-                              },
-                              child: FaIcon(
-                                FontAwesomeIcons.angleRight,
-                                color: Colors.black,
-                                size: 16,
-                              ),
-                            ),
-                          ],
-                        ),
+                        Text("Booking Status: "),
+                        Text(bookingState.booking!.status,
+                            style: TextStyle(
+                                color: _getStatusColor(
+                                    bookingState.booking!.status),
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              if (bookingState.booking!.drivers.isNotEmpty)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Driver Details',
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Booked By: "),
+                        Text(bookingState.booking!.user.name,
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AdminDriverDetailsPage(
-                                      driverList:
-                                          bookingState.booking!.drivers),
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Starts on: "),
+                        Text(
+                            dateTimeFormat
+                                .format(bookingState.booking!.startDate),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Ends on: "),
+                        Text(
+                            dateTimeFormat
+                                .format(bookingState.booking!.endDate),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Number of Passengers: "),
+                        Text("${bookingState.booking!.numberOfPassengers}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Itinerary Details',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            },
-                            child: FaIcon(
-                              FontAwesomeIcons.angleRight,
-                              color: Colors.black,
-                              size: 16,
-                            ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AdminItineraryDetailsPage(
+                                              package: bookingState
+                                                  .booking!.package),
+                                    ),
+                                  );
+                                },
+                                child: FaIcon(
+                                  FontAwesomeIcons.angleRight,
+                                  color: Colors.black,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Starting Location: "),
+                              Text(
+                                bookingState
+                                    .booking!.package.startLocation.name,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Final Location: "),
+                              Text(
+                                bookingState
+                                    .booking!.package.finalDestination.name,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      Divider(),
-                      Column(
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: bookingState.booking!.drivers
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                          final index = entry.key;
-                          final driver = entry.value;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Text(driver.user.name),
-                          );
-                        }).toList(),
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Payment Method: "),
+                              Text(bookingState.booking!.modeOfPayment,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Total Price:"),
+                              Row(
+                                children: [
+                                  Text(
+                                    "₱${bookingState.booking!.totalPrice}",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AdminPaymentDetailsPage(
+                                                  booking:
+                                                      bookingState.booking!),
+                                        ),
+                                      );
+                                    },
+                                    child: FaIcon(
+                                      FontAwesomeIcons.angleRight,
+                                      color: Colors.black,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    if (bookingState.booking!.drivers.isNotEmpty)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey, width: 1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Driver Details',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AdminDriverDetailsPage(
+                                                driverList: bookingState
+                                                    .booking!.drivers),
+                                      ),
+                                    );
+                                  },
+                                  child: FaIcon(
+                                    FontAwesomeIcons.angleRight,
+                                    color: Colors.black,
+                                    size: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Divider(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: bookingState.booking!.drivers
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final index = entry.key;
+                                final driver = entry.value;
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  child: Text(driver.user.name),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    if (bookingState.booking!.status == 'PENDING') ...[
+                      _confirmBookingButton(bookingState.booking!),
+                      SizedBox(
+                        height: 20,
                       ),
                     ],
-                  ),
+                    _cancelBookingButton(bookingState.booking!),
+                  ],
                 ),
-              SizedBox(
-                height: 40,
               ),
-              if (bookingState.booking!.status == 'PENDING') ...[
-                _confirmBookingButton(bookingState.booking!),
-                SizedBox(
-                  height: 20,
-                ),
-              ],
-              _cancelBookingButton(bookingState.booking!),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 

@@ -128,13 +128,16 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
   }
 
   Widget _buildUI(BuildContext context) {
-    return Column(
-      children: [
-        _header(context),
-        Expanded(
-          child: _body(),
-        ),
-      ],
+    return Container(
+      color: Color(ColorConstants.BACKGROUND_COLOR),
+      child: Column(
+        children: [
+          _header(context),
+          Expanded(
+            child: _body(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -196,10 +199,10 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
   }
 
   Widget _body() {
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Container(
-        color: Color(ColorConstants.BACKGROUND_COLOR),
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
