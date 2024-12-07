@@ -1,5 +1,6 @@
 import 'location_model.dart';
 import 'leg_model.dart';
+import 'location_service_data_model.dart';
 
 class Package {
   final String id;
@@ -61,6 +62,56 @@ class Package {
       'package_name': packageName,
       'description': description,
       'base_price': basePrice,
+      'package_type': packageType,
+      'visibility': visibility,
+      'start_location': startLocation.toJson(),
+      'final_destination': finalDestination.toJson(),
+      'legs': List<dynamic>.from(legs.map((x) => x.toJson())),
+      'max_participants': maxParticipants,
+      'current_participants': currentParticipants,
+      'start_date': startDate?.toIso8601String(),
+      'end_date': endDate?.toIso8601String(),
+      "total_distance": totalDistance,
+    };
+  }
+}
+
+class PackageCreate {
+  final String packageName;
+  final String description;
+//   final String basePrice;
+  final String packageType;
+  final String visibility;
+  final LocationCreate startLocation;
+  final LocationCreate finalDestination;
+  final List<LegCreate> legs;
+  final int? maxParticipants;
+  final int? currentParticipants;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? totalDistance;
+
+  PackageCreate({
+    required this.packageName,
+    required this.description,
+    // required this.basePrice,
+    required this.packageType,
+    required this.visibility,
+    required this.startLocation,
+    required this.finalDestination,
+    required this.legs,
+    this.maxParticipants,
+    this.currentParticipants,
+    this.startDate,
+    this.endDate,
+    this.totalDistance,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'package_name': packageName,
+      'description': description,
+      //   'base_price': basePrice,
       'package_type': packageType,
       'visibility': visibility,
       'start_location': startLocation.toJson(),

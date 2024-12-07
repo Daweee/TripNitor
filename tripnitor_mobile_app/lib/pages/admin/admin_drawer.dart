@@ -12,6 +12,9 @@ import 'package:tripnitor_mobile_app/pages/login_page.dart';
 import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
 import 'package:tripnitor_mobile_app/services/token_service.dart';
 
+import '../../providers/driver_assignment_provider.dart';
+import '../../providers/driver_provider.dart';
+
 class AdminDrawer extends ConsumerWidget {
   const AdminDrawer({Key? key}) : super(key: key);
 
@@ -75,6 +78,8 @@ class AdminDrawer extends ConsumerWidget {
               ),
               title: const Text('Driver Schedules'),
               onTap: () {
+                ref.read(driverStateProvider.notifier).clearState();
+                ref.read(driverAssignmentStateProvider.notifier).clearState();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => DriverSchedulePage()),

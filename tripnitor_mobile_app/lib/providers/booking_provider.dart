@@ -128,6 +128,10 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  void clearState() {
+    state = BookingState();
+  }
 }
 
 final bookingServiceProvider = Provider<BookingService>((ref) {

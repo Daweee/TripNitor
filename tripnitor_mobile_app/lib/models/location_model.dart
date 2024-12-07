@@ -29,3 +29,25 @@ class Location {
     };
   }
 }
+
+class LocationCreate {
+  final String name;
+  final String? address;
+  final double? latitude;
+  final double? longitude;
+
+  LocationCreate({
+    required this.name,
+    this.address,
+    this.latitude,
+    this.longitude,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+  }
+}

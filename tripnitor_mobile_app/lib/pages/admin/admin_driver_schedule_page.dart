@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:tripnitor_mobile_app/providers/driver_assignment_provider.dart';
@@ -62,40 +63,76 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
         children: [
           const SizedBox(height: 10),
           _buildDriverDropdown(drivers),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: FaIcon(
+                  FontAwesomeIcons.angleLeft,
+                  color: Colors.black.withOpacity(.5),
+                ),
+                onPressed: () {
+                  DateTime currentDate = _datePickerController.displayDate!;
+                  _datePickerController.displayDate = DateTime(
+                    currentDate.year,
+                    currentDate.month - 1,
+                    currentDate.day,
+                  );
+                },
+              ),
+              IconButton(
+                icon: FaIcon(
+                  FontAwesomeIcons.angleRight,
+                  color: Colors.black.withOpacity(.5),
+                ),
+                onPressed: () {
+                  DateTime currentDate = _datePickerController.displayDate!;
+                  _datePickerController.displayDate = DateTime(
+                    currentDate.year,
+                    currentDate.month + 1,
+                    currentDate.day,
+                  );
+                },
+              ),
+            ],
+          ),
           Expanded(
-            child: SfDateRangePicker(
-              controller: _datePickerController,
-              view: DateRangePickerView.month,
-              selectionMode: DateRangePickerSelectionMode.multiRange,
-              monthViewSettings: DateRangePickerMonthViewSettings(
-                showTrailingAndLeadingDates: true,
-              ),
-              showNavigationArrow: true,
-              enablePastDates: true,
-              allowViewNavigation: false,
-              onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
-                _datePickerController.selectedRanges =
-                    _datePickerController.selectedRanges;
-              },
-              selectionTextStyle:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              rangeTextStyle: TextStyle(
-                  color: Color(ColorConstants.PRIMARY_COLOR),
-                  fontWeight: FontWeight.bold),
-              startRangeSelectionColor: Color(ColorConstants.PRIMARY_COLOR),
-              endRangeSelectionColor: Color(ColorConstants.PRIMARY_COLOR),
-              rangeSelectionColor:
-                  Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.1),
-              backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-              headerStyle: DateRangePickerHeaderStyle(
+            child: IgnorePointer(
+              ignoring: true,
+              child: SfDateRangePicker(
+                controller: _datePickerController,
+                view: DateRangePickerView.month,
+                selectionMode: DateRangePickerSelectionMode.multiRange,
+                monthViewSettings: DateRangePickerMonthViewSettings(
+                  enableSwipeSelection: false,
+                  showTrailingAndLeadingDates: true,
+                ),
+                showNavigationArrow: false,
+                enablePastDates: true,
+                allowViewNavigation: false,
+                onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                  return;
+                },
+                selectionTextStyle:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                rangeTextStyle: TextStyle(
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                    fontWeight: FontWeight.bold),
+                startRangeSelectionColor: Color(ColorConstants.PRIMARY_COLOR),
+                endRangeSelectionColor: Color(ColorConstants.PRIMARY_COLOR),
+                rangeSelectionColor:
+                    Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.1),
                 backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-                textStyle: TextStyle(color: Colors.black),
-              ),
-              monthCellStyle: DateRangePickerMonthCellStyle(
-                textStyle: TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.normal),
-                todayTextStyle: TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.normal),
+                headerStyle: DateRangePickerHeaderStyle(
+                  backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+                  textStyle: TextStyle(color: Colors.black),
+                ),
+                monthCellStyle: DateRangePickerMonthCellStyle(
+                  textStyle: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.normal),
+                  todayTextStyle: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.normal),
+                ),
               ),
             ),
           ),
@@ -155,7 +192,7 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
           if (newValue != null) {
             await _fetchDriverBookings(newValue.id);
           } else {
-            ref.read(driverAssignmentStateProvider.notifier).clearBookings();
+            ref.read(driverAssignmentStateProvider.notifier).clearState();
           }
         },
       ),

@@ -68,8 +68,8 @@ class DriverAssignmentStateNotifier
     }
   }
 
-  void clearBookings() {
-    state = state.copyWith(driverAssignmentList: []);
+  void clearState() {
+    state = DriverAssignmentState();
   }
 }
 

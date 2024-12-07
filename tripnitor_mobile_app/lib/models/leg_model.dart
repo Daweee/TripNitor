@@ -1,4 +1,5 @@
 import 'location_model.dart';
+import 'location_service_data_model.dart';
 
 class Leg {
   final int id;
@@ -37,6 +38,32 @@ class Leg {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'leg_number': legNumber,
+      'start_location': startLocation.toJson(),
+      'end_location': endLocation.toJson(),
+      'departure_time': departureTime?.toIso8601String(),
+      'arrival_time': arrivalTime?.toIso8601String(),
+    };
+  }
+}
+
+class LegCreate {
+  final int legNumber;
+  final LocationCreate startLocation;
+  final LocationCreate endLocation;
+  final DateTime? departureTime;
+  final DateTime? arrivalTime;
+
+  LegCreate({
+    required this.legNumber,
+    required this.startLocation,
+    required this.endLocation,
+    this.departureTime,
+    this.arrivalTime,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
       'leg_number': legNumber,
       'start_location': startLocation.toJson(),
       'end_location': endLocation.toJson(),

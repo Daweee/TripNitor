@@ -33,6 +33,8 @@ class CustomeFormField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
+          fillColor: Colors.white,
+          filled: true,
           labelText: labelText,
           labelStyle: TextStyle(
             color: Colors.black.withOpacity(.5),

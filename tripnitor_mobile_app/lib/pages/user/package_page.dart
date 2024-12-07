@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/widgets/package_card.dart';
 import '../../providers/package_provider.dart';
+import '../../widgets/package_creation_widgets/package_type_visibility_selection.dart';
 
 class PackagePage extends ConsumerStatefulWidget {
   const PackagePage({Key? key}) : super(key: key);
@@ -184,6 +185,21 @@ class _PackagePageState extends ConsumerState<PackagePage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return PackageTypeVisibilitySelection();
+            },
+          );
+        },
+        child: FaIcon(
+          FontAwesomeIcons.boxOpen,
+          color: Color(ColorConstants.BACKGROUND_COLOR),
+        ),
       ),
     );
   }

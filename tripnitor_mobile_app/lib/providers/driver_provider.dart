@@ -96,7 +96,7 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
         isLoading: false,
         error: 'Failed to delete driver account. $e',
       );
-      throw e; // Re-throw the exception
+      throw e;
     }
   }
 
@@ -136,6 +136,10 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
       );
       rethrow;
     }
+  }
+
+  void clearState() {
+    state = DriverState();
   }
 }
 

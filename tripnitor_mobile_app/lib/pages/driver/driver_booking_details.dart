@@ -31,9 +31,24 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
   @override
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
+
+    if (bookingState.booking == null) {
+      return Scaffold(
+        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        appBar: AppBar(
+          backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+          scrolledUnderElevation: 0.0,
+        ),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color(ColorConstants.PRIMARY_COLOR),
+          ),
+        ),
+      );
+    }
+
     final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
-    bool isBookingPending =
-        bookingState.booking!.status.toUpperCase() == 'PENDING';
+    final booking = bookingState.booking!;
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -41,13 +56,24 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
         scrolledUnderElevation: 0.0,
         title: Text(
-          dateTimeFormat.format(bookingState.booking!.createdAt),
+          dateTimeFormat.format(booking.createdAt),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: FaIcon(
+            FontAwesomeIcons.angleLeft,
+            color: Colors.black,
+            size: 20.0,
+          ),
+          onPressed: () {
+            ref.read(bookingStateProvider.notifier).clearState();
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -63,7 +89,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                     "Booking ID:",
                     style: TextStyle(color: Colors.black, fontSize: 24),
                   ),
-                  Text(bookingState.booking!.id,
+                  Text(booking.id,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -73,7 +99,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Booking Status:"),
-                  Text(bookingState.booking!.status,
+                  Text(booking.status,
                       style: TextStyle(
                           color: _getStatusColor(bookingState.booking!.status),
                           fontWeight: FontWeight.bold)),
@@ -86,7 +112,31 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Booked By:"),
-                  Text(bookingState.booking!.user.name,
+                  Text(booking.user.name,
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Starts on:"),
+                  Text(dateTimeFormat.format(booking.startDate),
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Ends on:"),
+                  Text(dateTimeFormat.format(booking.endDate),
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -98,7 +148,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Number of Passengers:"),
-                  Text("${bookingState.booking!.numberOfPassengers}",
+                  Text("${booking.numberOfPassengers}",
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ],
@@ -135,7 +185,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                               MaterialPageRoute(
                                 builder: (context) =>
                                     DriverItineraryDetailsPage(
-                                        package: bookingState.booking!.package),
+                                        package: booking.package),
                               ),
                             );
                           },
@@ -152,7 +202,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Starting Location: "),
-                        Text(bookingState.booking!.package.startLocation.name,
+                        Text(booking.package.startLocation.name,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -163,8 +213,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Final Location: "),
-                        Text(
-                            bookingState.booking!.package.finalDestination.name,
+                        Text(booking.package.finalDestination.name,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -192,7 +241,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Payment Method: "),
-                        Text(bookingState.booking!.modeOfPayment,
+                        Text(booking.modeOfPayment,
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold)),
@@ -206,7 +255,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                         Row(
                           children: [
                             Text(
-                              "₱${bookingState.booking!.totalPrice}",
+                              "₱${booking.totalPrice}",
                               style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold),
@@ -219,7 +268,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         DriverPaymentDetailsPage(
-                                            booking: bookingState.booking!),
+                                            booking: booking),
                                   ),
                                 );
                               },
@@ -267,7 +316,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => DriverDriverDetailsPage(
-                                  driverList: bookingState.booking!.drivers,
+                                  driverList: booking.drivers,
                                 ),
                               ),
                             );
@@ -283,10 +332,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
                     Divider(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: bookingState.booking!.drivers
-                          .asMap()
-                          .entries
-                          .map((entry) {
+                      children: booking.drivers.asMap().entries.map((entry) {
                         final index = entry.key;
                         final driver = entry.value;
                         return Padding(
@@ -301,7 +347,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
               SizedBox(
                 height: 40,
               ),
-              _startBookingButton(bookingState.booking!),
+              _startBookingButton(booking),
             ],
           ),
         ),
@@ -310,47 +356,136 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
   }
 
   Widget _startBookingButton(Booking booking) {
+    final now = DateTime.now();
+    final startDate = booking.startDate;
     final bool isEnabled = booking.status == "CONFIRMED";
+    final bool isOngoing = booking.status == "ONGOING";
+    final bool isWithinStartWindow =
+        startDate.difference(now).inHours <= 6 && now.isBefore(startDate);
+    final bool isOverdue = now.isAfter(startDate);
 
     void _showStartBookingDialogue(BuildContext context) {
+      if (now.isBefore(startDate) && !isWithinStartWindow) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Cannot Start Booking'),
+              content: Text(
+                  'This booking cannot be started yet. Please wait until 6 hours before the scheduled start time.'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            );
+          },
+        );
+        return;
+      }
+
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return CustomModalDialog(
-              title: 'Start Booking',
-              content: 'Are you sure you want to start this booking now?',
-              onConfirm: () async {
-                await ref
-                    .read(bookingStateProvider.notifier)
-                    .startBooking(booking.id);
-              },
-              color: Color(ColorConstants.SUCCESS_COLOR),
-              buttonText: 'Start');
+            title: 'Start Booking',
+            content: 'Are you sure you want to start this booking now?',
+            onConfirm: () async {
+              await ref
+                  .read(bookingStateProvider.notifier)
+                  .startBooking(booking.id);
+            },
+            color: Color(ColorConstants.SUCCESS_COLOR),
+            buttonText: 'Start',
+          );
         },
       );
     }
 
-    return SizedBox(
-      width: double.infinity,
-      height: 45,
-      child: ElevatedButton(
-        onPressed: isEnabled ? () => _showStartBookingDialogue(context) : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(ColorConstants.SUCCESS_COLOR),
-          disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+    String getOverdueText() {
+      final difference = now.difference(startDate);
+      if (difference.inDays > 0) {
+        return 'Overdue by ${difference.inDays} days';
+      } else if (difference.inHours > 0) {
+        return 'Overdue by ${difference.inHours} hours';
+      } else {
+        return 'Overdue by ${difference.inMinutes} minutes';
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isOverdue && !isOngoing)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: [
+                Icon(Icons.info, color: Colors.red, size: 16),
+                SizedBox(width: 4),
+                Text(
+                  getOverdueText(),
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        child: Text(
-          'Start Booking',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+        if (isOngoing)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: SizedBox(
+              width: double.infinity,
+              height: 45,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: Text(
+                  'View Itinerary',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        if (!isOngoing)
+          SizedBox(
+            width: double.infinity,
+            height: 45,
+            child: ElevatedButton(
+              onPressed: isEnabled && (isWithinStartWindow || isOverdue)
+                  ? () => _showStartBookingDialogue(context)
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(ColorConstants.SUCCESS_COLOR),
+                disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: Text(
+                'Start Booking',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
