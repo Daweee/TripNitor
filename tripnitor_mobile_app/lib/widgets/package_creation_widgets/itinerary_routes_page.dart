@@ -146,7 +146,7 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
       startLocation: startLocation,
       finalDestination: finalLocation,
       legs: widget.itineraries,
-      totalDistance: routeState.totalDistance?.toStringAsFixed(2),
+      totalDistance: routeState.totalDistance ?? 0,
     );
 
     Navigator.push(

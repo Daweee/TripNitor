@@ -79,7 +79,7 @@ class Package {
 class PackageCreate {
   final String packageName;
   final String description;
-//   final String basePrice;
+  final String? basePrice;
   final String packageType;
   final String visibility;
   final LocationCreate startLocation;
@@ -89,12 +89,12 @@ class PackageCreate {
   final int? currentParticipants;
   final DateTime? startDate;
   final DateTime? endDate;
-  final String? totalDistance;
+  final num totalDistance;
 
   PackageCreate({
     required this.packageName,
     required this.description,
-    // required this.basePrice,
+    this.basePrice,
     required this.packageType,
     required this.visibility,
     required this.startLocation,
@@ -104,14 +104,14 @@ class PackageCreate {
     this.currentParticipants,
     this.startDate,
     this.endDate,
-    this.totalDistance,
+    required this.totalDistance,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'package_name': packageName,
       'description': description,
-      //   'base_price': basePrice,
+      'base_price': basePrice,
       'package_type': packageType,
       'visibility': visibility,
       'start_location': startLocation.toJson(),
@@ -123,6 +123,38 @@ class PackageCreate {
       'end_date': endDate?.toIso8601String(),
       "total_distance": totalDistance,
     };
+  }
+
+  PackageCreate copyWith({
+    String? packageName,
+    String? description,
+    String? basePrice,
+    String? packageType,
+    String? visibility,
+    LocationCreate? startLocation,
+    LocationCreate? finalDestination,
+    List<LegCreate>? legs,
+    int? maxParticipants,
+    int? currentParticipants,
+    DateTime? startDate,
+    DateTime? endDate,
+    num? totalDistance,
+  }) {
+    return PackageCreate(
+      packageName: packageName ?? this.packageName,
+      description: description ?? this.description,
+      basePrice: basePrice ?? this.basePrice,
+      packageType: packageType ?? this.packageType,
+      visibility: visibility ?? this.visibility,
+      startLocation: startLocation ?? this.startLocation,
+      finalDestination: finalDestination ?? this.finalDestination,
+      legs: legs ?? this.legs,
+      maxParticipants: maxParticipants ?? this.maxParticipants,
+      currentParticipants: currentParticipants ?? this.currentParticipants,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      totalDistance: totalDistance ?? this.totalDistance,
+    );
   }
 }
 
@@ -180,6 +212,35 @@ class PackageState {
       selectedPackage: Package.fromJson(json['data']),
       isLoading: false,
       error: null,
+    );
+  }
+}
+
+class PackageFareCalculationState {
+  final double? calculatedPackageFare;
+  final bool isLoading;
+  final String? error;
+  final PackageCreate? updatedPackage;
+
+  PackageFareCalculationState({
+    this.calculatedPackageFare,
+    this.isLoading = false,
+    this.error,
+    this.updatedPackage,
+  });
+
+  PackageFareCalculationState copyWith({
+    double? calculatedPackageFare,
+    bool? isLoading,
+    String? error,
+    PackageCreate? updatedPackage,
+  }) {
+    return PackageFareCalculationState(
+      calculatedPackageFare:
+          calculatedPackageFare ?? this.calculatedPackageFare,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      updatedPackage: updatedPackage ?? this.updatedPackage,
     );
   }
 }
