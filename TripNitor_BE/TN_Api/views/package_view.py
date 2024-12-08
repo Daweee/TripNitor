@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
@@ -7,11 +7,12 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView
 )
-from ..serializers import PackageSerializer
+from ..serializers import PackageSerializer, FareCalculationSerializer
 from TN_Api.models import Package
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
+from ..services import PackageService
 
 @extend_schema(tags=['packages'])
 class PackageCreateView(CustomResponseMixin, CreateAPIView):
@@ -63,6 +64,37 @@ class PackageDetailView(CustomResponseMixin, RetrieveAPIView):
              serializer.data, 
              'Package details retrieved successfully.'
         )
+
+@extend_schema(tags=['packages'])
+class CalculatePackageFareView(CustomResponseMixin, APIView):
+    serializer_class = FareCalculationSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = FareCalculationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            total_distance = serializer.validated_data['total_distance']
+
+            package_service = PackageService()
+            calculated_fare = package_service.calculate_fare(total_distance)
+
+            response_data = {
+                'fare': calculated_fare,
+                'total_distance': total_distance
+            }
+
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                response_data,
+                'Package fare calculated successfully'
+            )
+        except Exception as e:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                f'Fare calculation failed: {str(e)}'
+            )
 
 @extend_schema(tags=['packages'])
 class PackageUpdateView(CustomResponseMixin, UpdateAPIView):

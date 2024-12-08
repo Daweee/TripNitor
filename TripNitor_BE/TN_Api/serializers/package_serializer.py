@@ -119,3 +119,6 @@ class PackageSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['legs'] = LegSerializer(instance.legs.all(), many=True).data
         return representation
+
+class FareCalculationSerializer(serializers.Serializer):
+    total_distance = serializers.DecimalField(max_digits=10, decimal_places=2)
