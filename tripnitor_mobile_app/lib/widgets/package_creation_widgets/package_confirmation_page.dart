@@ -1,15 +1,16 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../constants/constant.dart';
-import '../../providers/package_provider.dart';
+import '../../pages/user/package_detail_page.dart';
+import '../../providers/package_fare_calculation_provider.dart';
 import '../../models/package_model.dart';
 import '../../models/leg_model.dart';
 import '../../models/location_model.dart';
+import '../../providers/package_provider.dart';
 import '../../widgets/custom_modal_dialogue.dart';
 
 class PackageConfirmationPage extends ConsumerStatefulWidget {
@@ -30,6 +31,13 @@ class _PackageConfirmationPageState
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(packageFareCalculationProvider.notifier).calculatePackageFare(
+            widget.package.totalDistance.toDouble(),
+            widget.package,
+          );
+    });
   }
 
   @override
@@ -116,7 +124,7 @@ class _PackageConfirmationPageState
                 ),
                 _buildLocationEndInfo(package.finalDestination),
               ],
-              totalDistance: '${package.totalDistance}km'),
+              totalDistance: '${package.totalDistance.toStringAsFixed(2)}km'),
           SizedBox(height: 20),
           _buildSection('Itinerary', [_buildItineraryList(package)]),
         ],
@@ -510,13 +518,46 @@ class _PackageConfirmationPageState
                   ),
                 ],
               ),
-              Text(
-                'API call to calc fare',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
+              Consumer(
+                builder: (context, ref, child) {
+                  final fareState = ref.watch(packageFareCalculationProvider);
+
+                  if (fareState.isLoading) {
+                    return Shimmer.fromColors(
+                      baseColor:
+                          Color(ColorConstants.SECONDARY_COLOR).withOpacity(.3),
+                      highlightColor: Color(ColorConstants.BACKGROUND_COLOR)
+                          .withOpacity(.3),
+                      child: Container(
+                        width: 120,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (fareState.error != null) {
+                    return Text(
+                      'Error calculating fare',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    );
+                  }
+
+                  return Text(
+                    '₱${fareState.calculatedPackageFare?.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  );
+                },
+              )
             ],
           ),
           ElevatedButton(
@@ -526,7 +567,12 @@ class _PackageConfirmationPageState
                 borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              final fareState = ref.read(packageFareCalculationProvider);
+              if (fareState.updatedPackage != null) {
+                _createPackage(fareState.updatedPackage!);
+              }
+            },
             child: Text(
               'Create Package',
               style: TextStyle(
@@ -553,5 +599,65 @@ class _PackageConfirmationPageState
         );
       },
     );
+  }
+
+  void _createPackage(PackageCreate package) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Color(ColorConstants.PRIMARY_COLOR),
+            ),
+          );
+        },
+      );
+
+      await ref.read(packageProvider.notifier).createPackage(package);
+
+      final packageState = ref.read(packageProvider);
+
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (packageState.error != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create package: ${packageState.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (mounted && packageState.selectedPackage != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PackageDetailPage(
+              packageId: packageState.selectedPackage!.id,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create package: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

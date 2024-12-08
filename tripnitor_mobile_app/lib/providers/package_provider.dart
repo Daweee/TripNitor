@@ -31,6 +31,23 @@ class PackageNotifier extends StateNotifier<PackageState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<void> createPackage(PackageCreate package) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final createdPackage = await _packageService.createPackage(package);
+      state = state.copyWith(
+        isLoading: false,
+        selectedPackage: createdPackage,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
 }
 
 final packageProvider =

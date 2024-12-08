@@ -63,4 +63,48 @@ class PackageService {
       throw Exception('Failed to load package details: ${e.message}');
     }
   }
+
+  Future<Package> createPackage(PackageCreate package) async {
+    try {
+      final data = package.toJson();
+
+      final response = await _dio
+          .post('${HTTPConstants.BASE_URL}api/packages/register/', data: data);
+
+      if (response.statusCode == 201) {
+        return Package.fromJson(response.data['data']);
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error: 'Failed to create package. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<double> calculatePackageFare(double totalDistance) async {
+    try {
+      final data = {'total_distance': totalDistance};
+
+      final response = await _dio.post(
+          '${HTTPConstants.BASE_URL}api/packages/calculate-fare/',
+          data: data);
+
+      if (response.statusCode == 200) {
+        return response.data['data']['fare'];
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error:
+              'Failed to calculate package fare. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
 }
