@@ -6,3 +6,4 @@ from .package_view import PackageCreateView, PackageListView, PackageDetailView,
 from .booking_view import (BookingListView, BookingCreateView, BookingDetailView, BookingUpdateView, BookingDeleteView, 
 BookingPreviewView, UserBookingListView, GetBookingStatusListView, ConfirmBookingView, CancelBookingView, StartBookingView)
 from .driver_assignment_view import DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList
+from .location_view import LocationValidationView

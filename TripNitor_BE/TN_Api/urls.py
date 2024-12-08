@@ -7,7 +7,8 @@ from .views import (
     BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView, 
     ConfirmBookingView, CancelBookingView, StartBookingView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView,
-    DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList
+    DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList,
+    LocationValidationView,
 )
 
 urlpatterns = [
@@ -59,4 +60,6 @@ urlpatterns = [
     path('packages/<str:pk>/', PackageDetailView.as_view(), name='get_package'),
     path('packages/<str:pk>/update/', PackageUpdateView.as_view(), name='update_package'),
     path('packages/<str:pk>/delete/', PackageDeleteView.as_view(), name='delete_package'),
+
+    path('locations/check-coordinates/', LocationValidationView.as_view(), name='check-coordinates'),
 ]
