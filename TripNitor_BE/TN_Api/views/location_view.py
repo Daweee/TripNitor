@@ -14,7 +14,7 @@ from .mixins import CustomResponseMixin
 
 @extend_schema(
     tags=['locations'],
-    description='Search for locations with various filters',
+    description='Validate if a location is within a specified region boundary',
     parameters=[
         OpenApiParameter(
             name='lat',
@@ -30,11 +30,24 @@ from .mixins import CustomResponseMixin
             description='Longitude coordinate (-180 to 180)',
             required=True
         ),
+        OpenApiParameter(
+            name='region',
+            type=str,
+            location=OpenApiParameter.QUERY,
+            description='Region to check (NORTH, SOUTH, CITY). If not specified, checks against entire CEBU province.',
+            required=False
+        ),
     ],
     responses={
         200: {"type": "object", "properties": {
             "status": {"type": "string"},
-            "data": {"type": "boolean"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "is_within_boundary": {"type": "boolean"},
+                    "region": {"type": "string", "nullable": True}
+                }
+            },
             "message": {"type": "string"}
         }},
         400: {"type": "object", "properties": {
@@ -54,29 +67,33 @@ class LocationValidationView(CustomResponseMixin, APIView):
             return self.get_custom_response(
                 status.HTTP_400_BAD_REQUEST,
                 None,
-                "Invalid coordinates",
+                "Invalid parameters: " + str(query_serializer.errors),
             )
                 
         try:
             lat = query_serializer.validated_data['lat']
             lng = query_serializer.validated_data['lng']
+            region = query_serializer.validated_data.get('region')
             
-            if self.location_service.is_point_within_boundary(lat, lng):
-                return self.get_custom_response(
-                    status.HTTP_200_OK,
-                    True,
-                    "Location is within boundary",
-                )
+            is_within = self.location_service.is_point_within_boundary(lat, lng, region)
+            
+            response_data = {
+                "is_within_boundary": is_within,
+                "region": region
+            }
+            
+            region_name = region if region else "Cebu Province"
+            message = f"Location is {'within' if is_within else 'outside'} {region_name}"
             
             return self.get_custom_response(
                 status.HTTP_200_OK,
-                False,
-                "Location is outside boundary",
+                response_data,
+                message,
             )
             
         except Exception as e:
             return self.get_custom_response(
                 status.HTTP_400_BAD_REQUEST,
                 None,
-                 str(e),
+                str(e),
             )
