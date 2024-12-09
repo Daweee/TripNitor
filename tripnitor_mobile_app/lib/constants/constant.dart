@@ -59,6 +59,11 @@ class CebuProvince {
   static const LatLng CEBU_CITY_CENTER = LatLng(10.3301, 123.8837);
 }
 
+class NoBounds {
+  static const LatLng WORLD_SOUTHWEST_CORNER = LatLng(-90, -180);
+  static const LatLng WORLD_NORTHEAST_CORNER = LatLng(90, 180);
+}
+
 class SearchConfig {
   static const String LANGUAGE = 'en';
   static const String COUNTRY = 'ph';
