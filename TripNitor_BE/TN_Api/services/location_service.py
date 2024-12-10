@@ -72,3 +72,13 @@ class LocationService:
     def list_available_regions(self):
         """List all available regions (excluding the default None case)."""
         return [region for region in self.REGION_FILES.keys() if region is not None]
+    
+    def are_points_within_boundary(self, coordinates, region=None):
+        """Check if multiple points are within the specified region's boundary."""
+        boundary = self.get_boundary(region)
+        
+        for lat, lng in coordinates:
+            point = Point(lng, lat, srid=4326)
+            if not boundary.contains(point):
+                return False
+        return True
