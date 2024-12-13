@@ -68,10 +68,8 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           : Stack(
               children: [
                 _buildScrollableContent(packageState),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
+                Align(
+                  alignment: Alignment.bottomCenter,
                   child: _buildBottomBar(packageState),
                 ),
               ],
@@ -82,8 +80,6 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
   Widget _buildScrollableContent(PackageState packageState) {
     if (packageState.isLoading) {
       return PackageDetailShimmer();
-    } else if (packageState.error != null) {
-      return Center(child: Text('Error: ${packageState.error}'));
     } else if (packageState.selectedPackage == null) {
       return Center(child: Text('No package data available'));
     }
@@ -203,9 +199,12 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               color: Color(0xFFFB0000),
             ),
             SizedBox(width: 15),
-            Text(
-              location.name,
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name,
+                style: TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -225,9 +224,12 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               color: Colors.black,
             ),
             SizedBox(width: 15),
-            Text(
-              location.name,
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name,
+                style: TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -245,8 +247,11 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Itinerary ${leg.legNumber}',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Itinerary ${leg.legNumber}',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+            ),
             SizedBox(height: 8),
             _buildLocationStartInfo(leg.startLocation),
             Padding(

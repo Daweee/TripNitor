@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
@@ -6,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../constants/constant.dart';
 import '../../pages/user/package_detail_page.dart';
+import '../../pages/user/package_page.dart';
 import '../../providers/package_fare_calculation_provider.dart';
 import '../../models/package_model.dart';
 import '../../models/leg_model.dart';
@@ -265,6 +269,7 @@ class _PackageConfirmationPageState
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: isMiniStop ? null : FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -273,6 +278,7 @@ class _PackageConfirmationPageState
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 14,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -379,11 +385,16 @@ class _PackageConfirmationPageState
               color: Color(0xFFFB0000),
             ),
             SizedBox(width: 15),
-            Text(
-              location.name.trim().isNotEmpty
-                  ? location.name
-                  : location.address ?? 'No address',
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name.trim().isNotEmpty
+                    ? location.name
+                    : location.address ?? 'No address',
+                style: TextStyle(
+                  fontSize: 16,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
@@ -392,11 +403,14 @@ class _PackageConfirmationPageState
           SizedBox(width: 15),
           Padding(
             padding: const EdgeInsets.only(left: 31),
-            child: Text(
-              location.address ?? 'No address',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
+            child: Expanded(
+              child: Text(
+                location.address ?? 'No address',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
@@ -417,11 +431,16 @@ class _PackageConfirmationPageState
               color: Colors.black,
             ),
             SizedBox(width: 15),
-            Text(
-              location.name.trim().isNotEmpty
-                  ? location.name
-                  : location.address ?? 'No address',
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name.trim().isNotEmpty
+                    ? location.name
+                    : location.address ?? 'No address',
+                style: TextStyle(
+                  fontSize: 16,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
@@ -430,11 +449,14 @@ class _PackageConfirmationPageState
           SizedBox(width: 15),
           Padding(
             padding: const EdgeInsets.only(left: 31),
-            child: Text(
-              location.address ?? 'No address',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
+            child: Expanded(
+              child: Text(
+                location.address ?? 'No address',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
@@ -616,14 +638,14 @@ class _PackageConfirmationPageState
       );
 
       await ref.read(packageProvider.notifier).createPackage(package);
-
       final packageState = ref.read(packageProvider);
 
       if (mounted && Navigator.canPop(context)) {
         Navigator.pop(context);
       }
 
-      if (packageState.error != null) {
+      // Only show error if we don't have a selected package
+      if (packageState.error != null && packageState.selectedPackage == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -636,13 +658,15 @@ class _PackageConfirmationPageState
       }
 
       if (mounted && packageState.selectedPackage != null) {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => PackageDetailPage(
               packageId: packageState.selectedPackage!.id,
             ),
           ),
+          (Route<dynamic> route) =>
+              route.runtimeType == PackagePage || route.isFirst,
         );
       }
     } catch (e) {
@@ -659,5 +683,28 @@ class _PackageConfirmationPageState
         );
       }
     }
+  }
+
+  void _printPackageJson(PackageCreate package) {
+    final Map<String, dynamic> packageJson = {
+      'package_name': package.packageName,
+      'description': package.description,
+      'base_price': package.basePrice,
+      'package_type': package.packageType,
+      'visibility': package.visibility,
+      'start_location': package.startLocation.toJson(),
+      'final_destination': package.finalDestination.toJson(),
+      'legs': List<dynamic>.from(package.legs.map((x) => x.toJson())),
+      'max_participants': package.maxParticipants,
+      'current_participants': package.currentParticipants,
+      'start_date': package.startDate?.toIso8601String(),
+      'end_date': package.endDate?.toIso8601String(),
+      'total_distance': package.totalDistance,
+    };
+
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    final String prettyJson = encoder.convert(packageJson);
+
+    log('Package JSON Format:\n$prettyJson', name: 'PackageInfo');
   }
 }
