@@ -46,12 +46,12 @@ class CebuProvince {
   static const LatLng CEBU_SOUTHWEST_CORNER = LatLng(9.2399, 123.2473);
   static const LatLng CEBU_NORTHEAST_CORNER = LatLng(11.4215, 124.1614);
 
-  static const LatLng CEBU_NORTH_SOUTHWEST_CORNER = LatLng(10.2833, 123.5044);
-  static const LatLng CEBU_NORTH_NORTHEAST_CORNER = LatLng(11.3673, 124.1549);
+  static const LatLng CEBU_NORTH_SOUTHWEST_CORNER = LatLng(10.2301, 123.4794);
+  static const LatLng CEBU_NORTH_NORTHEAST_CORNER = LatLng(11.3709, 124.3941);
   static const LatLng CEBU_NORTH_CENTER = LatLng(10.5916, 124.0181);
 
-  static const LatLng CEBU_SOUTH_SOUTHWEST_CORNER = LatLng(9.4288, 123.3465);
-  static const LatLng CEBU_SOUTH_NORTHEAST_CORNER = LatLng(10.3213, 123.7845);
+  static const LatLng CEBU_SOUTH_SOUTHWEST_CORNER = LatLng(9.1767, 123.0595);
+  static const LatLng CEBU_SOUTH_NORTHEAST_CORNER = LatLng(10.3536, 123.9815);
   static const LatLng CEBU_SOUTH_CENTER = LatLng(9.8816, 123.6054);
 
   static const LatLng CEBU_CITY_SOUTHWEST_CORNER = LatLng(10.2688, 123.8159);
