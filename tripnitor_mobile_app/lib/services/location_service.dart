@@ -35,7 +35,88 @@ class LocationService {
           });
 
       if (response.statusCode == 200) {
-        return response.data['data'];
+        return response.data['data']['is_within_boundary'];
+      }
+      return false;
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> isWithinNorthCebuBoundary(
+      LatLng coordinates, String region) async {
+    try {
+      final response = await _dio.get(
+          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
+          queryParameters: {
+            'lat': coordinates.latitude,
+            'lng': coordinates.longitude,
+            'region': region,
+          });
+
+      if (response.statusCode == 200) {
+        return response.data['data']['is_within_boundary'];
+      }
+      return false;
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> isWithinSouthCebuBoundary(
+      LatLng coordinates, String region) async {
+    try {
+      final response = await _dio.get(
+          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
+          queryParameters: {
+            'lat': coordinates.latitude,
+            'lng': coordinates.longitude,
+            'region': region,
+          });
+
+      if (response.statusCode == 200) {
+        return response.data['data']['is_within_boundary'];
+      }
+      return false;
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> isWithinCityCebuBoundary(
+      LatLng coordinates, String region) async {
+    try {
+      final response = await _dio.get(
+          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
+          queryParameters: {
+            'lat': coordinates.latitude,
+            'lng': coordinates.longitude,
+            'region': region,
+          });
+
+      if (response.statusCode == 200) {
+        return response.data['data']['is_within_boundary'];
+      }
+      return false;
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> isAllMarkersInRegion(List<LatLng> markers, String region) async {
+    final data = {
+      'coordinates':
+          markers.map((marker) => [marker.latitude, marker.longitude]).toList(),
+      'region': region
+    };
+    print(data);
+    try {
+      final response = await _dio.post(
+          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
+          data: data);
+
+      if (response.statusCode == 200) {
+        return response.data['data']['all_within_boundary'] ?? false;
       }
       return false;
     } on DioException catch (e) {

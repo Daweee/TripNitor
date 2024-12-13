@@ -220,26 +220,41 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
       _showingDelayedShimmer = true;
     });
 
+    bool isWithinBoundary = false;
+
     if (widget.locationType == LocationType.stop) {
-      if (!CebuBoundsHelper.isWithinRegion(center, widget.packageType)) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Please select a location within ${widget.packageType} Cebu')),
-        );
-        return;
+      bool isWithinProperRegion = false;
+
+      switch (widget.packageType) {
+        case 'NORTH':
+          isWithinProperRegion = await _locationService
+              .isWithinNorthCebuBoundary(center, widget.packageType);
+          break;
+        case 'SOUTH':
+          isWithinProperRegion = await _locationService
+              .isWithinSouthCebuBoundary(center, widget.packageType);
+          break;
+        case 'CITY':
+          isWithinProperRegion = await _locationService
+              .isWithinCityCebuBoundary(center, widget.packageType);
+          break;
+        default:
+          isWithinProperRegion = false;
       }
+
+      //   isWithinBoundary = true;
+      if (isWithinProperRegion) {
+        isWithinBoundary = true;
+      }
+    } else {
+      isWithinBoundary = await _locationService.isWithinBoundary(center);
     }
 
-    final bool isWithinBoundary =
-        await _locationService.isWithinBoundary(center);
+    if (!mounted) return;
 
-    if (mounted) {
-      setState(() {
-        _isWithinBoundary = isWithinBoundary;
-      });
-    }
+    setState(() {
+      _isWithinBoundary = isWithinBoundary;
+    });
 
     if (mounted && isWithinBoundary) {
       await ref.read(isWaterProvider.notifier).checkLocation(center);

@@ -9,6 +9,7 @@ import 'package:tripnitor_mobile_app/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/location_service_data_model.dart';
 import 'package:tripnitor_mobile_app/models/package_model.dart';
 import 'package:tripnitor_mobile_app/providers/route_polyline_provider.dart';
+import 'package:tripnitor_mobile_app/services/location_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../helpers/location_transformation_help.dart';
 import '../../models/leg_model.dart';
@@ -52,6 +53,8 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
   final LatLng _currentLocation = LatLng(10.3119, 123.8854);
   late AnimationController _animationController;
   bool _mapReady = false;
+  late bool isAllWithinRegion = false;
+  final _location = LocationService();
 
   @override
   void initState() {
@@ -89,7 +92,28 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
           .add(LatLng(leg.endLocation.latitude!, leg.endLocation.longitude!));
     }
 
-    Future.microtask(() => _fetchRoute());
+    Future.microtask(() async {
+      final isInRegion = await _isAllMarkersInRegion();
+      if (isInRegion && mounted) {
+        await _fetchRoute();
+      }
+    });
+  }
+
+  Future<bool> _isAllMarkersInRegion() async {
+    if (markerCoordinates.length <= 2) return true;
+
+    final intermediateCoordinates =
+        markerCoordinates.sublist(1, markerCoordinates.length - 1);
+
+    final result = await _location.isAllMarkersInRegion(
+        intermediateCoordinates, widget.packageType);
+
+    setState(() {
+      isAllWithinRegion = result;
+    });
+
+    return result;
   }
 
   List<LatLng> _calculateAnimatedPoints(double progress) {
@@ -180,6 +204,8 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
   }
 
   void _fitCameraToRoute() {
+    if (markerCoordinates.isEmpty) return;
+
     final routeState = ref.read(routeStateProvider);
     if (routeState.route?.coordinates == null ||
         routeState.route!.coordinates.isEmpty) {
@@ -316,17 +342,21 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
               children: [
                 Text(
                   name.trim().isNotEmpty ? name : address,
+                  maxLines: 1,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: isMiniStop ? null : FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   name.trim().isNotEmpty ? address : '',
+                  maxLines: 1,
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 14,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -418,7 +448,9 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _currentLocation,
+              initialZoom: 13.0,
               minZoom: MapConfig.MIN_ZOOM,
+              maxZoom: 18.0,
               interactionOptions: const InteractionOptions(
                   flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag),
               onMapReady: () {
@@ -565,7 +597,10 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(40),
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    ref.read(routeStateProvider.notifier).clearRoute();
+                    Navigator.pop(context);
+                  },
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     child: const FaIcon(
@@ -681,6 +716,15 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                                                   color: Colors.grey[600],
                                                 ),
                                               ),
+                                            if (!isAllWithinRegion)
+                                              TextSpan(
+                                                text: 'ERROR',
+                                                style: TextStyle(
+                                                  color: Color(ColorConstants
+                                                      .ERROR_COLOR),
+                                                  fontSize: 14,
+                                                ),
+                                              )
                                           ],
                                         ),
                                       ),
@@ -688,6 +732,21 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                                   ),
                                   const SizedBox(height: 12),
                                   ..._buildItineraryList(),
+                                  if (!isAllWithinRegion)
+                                    Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 36.0),
+                                        child: Text(
+                                          'Some of the itineraries are outside the ${widget.packageType} region',
+                                          style: TextStyle(
+                                            color: Color(
+                                                ColorConstants.ERROR_COLOR),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -695,7 +754,8 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                               child: SafeArea(
                                 child: ElevatedButton(
-                                  onPressed: _createPackage,
+                                  onPressed:
+                                      isAllWithinRegion ? _createPackage : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(
                                         ColorConstants.PRIMARY_COLOR),
@@ -705,6 +765,10 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 2,
+                                    disabledBackgroundColor:
+                                        Color(ColorConstants.PRIMARY_COLOR)
+                                            .withOpacity(0.5),
+                                    disabledForegroundColor: Colors.white,
                                   ),
                                   child: const Text(
                                     'Proceed',
