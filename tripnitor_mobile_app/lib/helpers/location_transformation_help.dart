@@ -4,8 +4,11 @@ import '../models/location_service_data_model.dart';
 
 class LocationTransformations {
   static LocationCreate serviceDataToLocationCreate(LocationServiceData data) {
+    final String name =
+        data.name?.trim().isEmpty ?? true ? data.address ?? '' : data.name!;
+
     return LocationCreate(
-      name: data.name,
+      name: name,
       address: data.address ?? '',
       latitude: data.latitude!,
       longitude: data.longitude!,

@@ -199,16 +199,12 @@ class _SearchLocationPageState extends ConsumerState<SearchLocationPage> {
                           location.address,
                           FontAwesomeIcons.locationDot),
                     ),
-                  ] else if (widget.packageType == null &&
-                      _searchController.text.isEmpty &&
-                      mapState.locationServiceList.isEmpty)
-                    ...[]
-                  else if (_searchController.text.isNotEmpty &&
+                  ] else if (_searchController.text.isNotEmpty &&
                       mapState.locationServiceList.isEmpty) ...[
                     Center(
                       child: Text('No results found.'),
                     ),
-                  ] else ...[
+                  ] else if (widget.packageType != null) ...[
                     Center(
                       child: Text.rich(
                         TextSpan(

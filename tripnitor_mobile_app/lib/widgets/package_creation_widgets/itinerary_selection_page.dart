@@ -44,6 +44,7 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
   }
 
   void addStop() {
+    if (!mounted) return;
     if (stops.length < maxStops) {
       setState(() {
         stops.add(null);
@@ -52,12 +53,14 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
   }
 
   void removeStop(int index) {
+    if (!mounted) return;
     setState(() {
       stops.removeAt(index);
     });
   }
 
   void updateStop(int index, LocationServiceData location) {
+    if (!mounted) return;
     setState(() {
       stops[index] = location;
       if (stops.length < maxStops && index == stops.length - 1) {
@@ -131,8 +134,6 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(stops.length);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Add your itinerary',
