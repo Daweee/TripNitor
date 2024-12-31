@@ -1,34 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import '../core/constants/constant.dart';
 import '../models/driver_model.dart';
-import 'token_service.dart';
 
 class DriverService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  DriverService() {
-    _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<Driver> getDriverDetail(String driverId) async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/drivers/$driverId/');
+      final response = await _dio.get('api/drivers/$driverId/');
 
       if (response.statusCode == 200) {
         final driverData = response.data['data'];
@@ -48,7 +28,7 @@ class DriverService {
 
   Future<List<Driver>> getDriverList() async {
     try {
-      final response = await _dio.get('${HTTPConstants.BASE_URL}api/drivers/');
+      final response = await _dio.get('api/drivers/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
         final dynamicData = responseData?['data'] as List<dynamic>;
@@ -73,26 +53,26 @@ class DriverService {
     String username,
     String name,
     String email,
-    String phone_number,
+    String phoneNumber,
     String password,
-    String license_number,
-    String? date_hired,
-    String? van_id,
+    String licenseNumber,
+    String? dateHired,
+    String? vanId,
   ) async {
     try {
       final data = {
         'username': username,
         'name': name,
         'email': email,
-        'phone_number': phone_number,
+        'phone_number': phoneNumber,
         'password': password,
-        'license_number': license_number,
-        'date_hired': date_hired,
-        'van_id': van_id,
+        'license_number': licenseNumber,
+        'date_hired': dateHired,
+        'van_id': vanId,
       };
 
       final response = await _dio.post(
-        '${HTTPConstants.BASE_URL}api/drivers/register/',
+        'api/drivers/register/',
         data: data,
       );
 
@@ -112,8 +92,7 @@ class DriverService {
 
   Future<void> deleteDriver(String driverId) async {
     try {
-      final response = await _dio.delete(
-          '${HTTPConstants.BASE_URL}api/drivers/$driverId/delete/',
+      final response = await _dio.delete('api/drivers/$driverId/delete/',
           options: Options(
             followRedirects: false,
             validateStatus: (status) {
@@ -135,7 +114,7 @@ class DriverService {
   Future<Driver> updateDriver(String driverId, DriverPatch driver) async {
     try {
       final response = await _dio.patch(
-        '${HTTPConstants.BASE_URL}api/drivers/$driverId/update/',
+        'api/drivers/$driverId/update/',
         data: driver.toJson(),
       );
 
@@ -151,8 +130,7 @@ class DriverService {
 
   Future<Driver> getUserDriverDetail() async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/user-info/');
+      final response = await _dio.get('api/user-info/');
 
       if (response.statusCode == 200) {
         return Driver.fromJson(response.data['data']);

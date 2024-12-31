@@ -1,36 +1,16 @@
 import 'package:dio/dio.dart';
-import '../core/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import '../models/booking_model.dart';
 import '../models/preview_boking_model.dart';
-import 'token_service.dart';
 
 class BookingService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  BookingService() {
-    _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<PreviewBookingResponse> previewBooking(
       PreviewBookingRequest request) async {
     try {
       final response = await _dio.post(
-        '${HTTPConstants.BASE_URL}api/bookings/preview-booking/',
+        'api/bookings/preview-booking/',
         data: request.toJson(),
       );
 
@@ -51,7 +31,7 @@ class BookingService {
   Future<Booking> createBooking(BookingCreationRequest bookingRequest) async {
     try {
       final response = await _dio.post(
-        '${HTTPConstants.BASE_URL}api/bookings/create/',
+        'api/bookings/create/',
         data: bookingRequest.toJson(),
       );
 
@@ -74,7 +54,7 @@ class BookingService {
   Future<List<Booking>> getUserBookings(String bookingStatus) async {
     try {
       final response = await _dio.get(
-        '${HTTPConstants.BASE_URL}api/bookings/user-bookings/',
+        'api/bookings/user-bookings/',
         queryParameters: {'status': bookingStatus},
       );
 
@@ -112,8 +92,7 @@ class BookingService {
 
   Future<Booking> getBookingDetails(String bookingId) async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/bookings/$bookingId/');
+      final response = await _dio.get('api/bookings/$bookingId/');
 
       if (response.statusCode == 200) {
         return Booking.fromJson(response.data['data']);
@@ -132,7 +111,7 @@ class BookingService {
 
   Future<List<Booking>> getAllBookings() async {
     try {
-      final response = await _dio.get('${HTTPConstants.BASE_URL}api/bookings/');
+      final response = await _dio.get('api/bookings/');
 
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
@@ -156,8 +135,7 @@ class BookingService {
 
   Future<Booking> confirmBooking(String bookingId) async {
     try {
-      final response = await _dio
-          .patch('${HTTPConstants.BASE_URL}api/bookings/$bookingId/confirm/');
+      final response = await _dio.patch('api/bookings/$bookingId/confirm/');
 
       if (response.statusCode == 200) {
         return Booking.fromJson(response.data['data']);
@@ -171,8 +149,7 @@ class BookingService {
 
   Future<Booking> cancelBooking(String bookingId) async {
     try {
-      final response = await _dio
-          .patch('${HTTPConstants.BASE_URL}api/bookings/$bookingId/cancel/');
+      final response = await _dio.patch('api/bookings/$bookingId/cancel/');
       if (response.statusCode == 200) {
         return Booking.fromJson(response.data['data']);
       } else {
@@ -185,8 +162,7 @@ class BookingService {
 
   Future<Booking> startBooking(String bookingId) async {
     try {
-      final response = await _dio
-          .patch('${HTTPConstants.BASE_URL}api/bookings/$bookingId/start/');
+      final response = await _dio.patch('api/bookings/$bookingId/start/');
       if (response.statusCode == 200) {
         return Booking.fromJson(response.data['data']);
       } else {

@@ -1,34 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import 'package:tripnitor_mobile_app/models/driver_assignment.dart';
-import 'token_service.dart';
 
 class DriverAssignmentService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  DriverAssignmentService() {
-    _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<List<DriverAssignment>> getAllDriverAssignedBookings() async {
     try {
-      final response = await _dio
-          .get('${HTTPConstants.BASE_URL}api/drivers-assignment/by-driver/');
+      final response = await _dio.get('api/drivers-assignment/by-driver/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
         final dynamicData = responseData?['data'];
@@ -61,8 +41,7 @@ class DriverAssignmentService {
   Future<List<DriverAssignment>> getAllSpecificDriverBookings(
       String driverId) async {
     try {
-      final response = await _dio
-          .get('${HTTPConstants.BASE_URL}api/driver-assignments/$driverId/');
+      final response = await _dio.get('api/driver-assignments/$driverId/');
 
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
@@ -86,8 +65,8 @@ class DriverAssignmentService {
 
   Future<List<DriverAssignment>> getActiveDriverBookingsList() async {
     try {
-      final response = await _dio.get(
-          '${HTTPConstants.BASE_URL}api/drivers-assignment/by-driver/active/');
+      final response =
+          await _dio.get('api/drivers-assignment/by-driver/active/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
         final dynamicData = responseData?['data'];

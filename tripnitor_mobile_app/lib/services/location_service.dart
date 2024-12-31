@@ -1,38 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:tripnitor_mobile_app/core/constants/constant.dart';
-import 'token_service.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 
 class LocationService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  LocationService() {
-    _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<bool> isWithinBoundary(LatLng coordinates) async {
     try {
-      final response = await _dio.get(
-          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
-          queryParameters: {
-            'lat': coordinates.latitude,
-            'lng': coordinates.longitude,
-          });
+      final response =
+          await _dio.get('api/locations/check-coordinates/', queryParameters: {
+        'lat': coordinates.latitude,
+        'lng': coordinates.longitude,
+      });
 
       if (response.statusCode == 200) {
         return response.data['data']['is_within_boundary'];
@@ -46,13 +25,12 @@ class LocationService {
   Future<bool> isWithinNorthCebuBoundary(
       LatLng coordinates, String region) async {
     try {
-      final response = await _dio.get(
-          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
-          queryParameters: {
-            'lat': coordinates.latitude,
-            'lng': coordinates.longitude,
-            'region': region,
-          });
+      final response =
+          await _dio.get('api/locations/check-coordinates/', queryParameters: {
+        'lat': coordinates.latitude,
+        'lng': coordinates.longitude,
+        'region': region,
+      });
 
       if (response.statusCode == 200) {
         return response.data['data']['is_within_boundary'];
@@ -66,13 +44,12 @@ class LocationService {
   Future<bool> isWithinSouthCebuBoundary(
       LatLng coordinates, String region) async {
     try {
-      final response = await _dio.get(
-          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
-          queryParameters: {
-            'lat': coordinates.latitude,
-            'lng': coordinates.longitude,
-            'region': region,
-          });
+      final response =
+          await _dio.get('api/locations/check-coordinates/', queryParameters: {
+        'lat': coordinates.latitude,
+        'lng': coordinates.longitude,
+        'region': region,
+      });
 
       if (response.statusCode == 200) {
         return response.data['data']['is_within_boundary'];
@@ -86,13 +63,12 @@ class LocationService {
   Future<bool> isWithinCityCebuBoundary(
       LatLng coordinates, String region) async {
     try {
-      final response = await _dio.get(
-          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
-          queryParameters: {
-            'lat': coordinates.latitude,
-            'lng': coordinates.longitude,
-            'region': region,
-          });
+      final response =
+          await _dio.get('api/locations/check-coordinates/', queryParameters: {
+        'lat': coordinates.latitude,
+        'lng': coordinates.longitude,
+        'region': region,
+      });
 
       if (response.statusCode == 200) {
         return response.data['data']['is_within_boundary'];
@@ -110,9 +86,8 @@ class LocationService {
       'region': region
     };
     try {
-      final response = await _dio.post(
-          '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',
-          data: data);
+      final response =
+          await _dio.post('api/locations/check-coordinates/', data: data);
 
       if (response.statusCode == 200) {
         return response.data['data']['all_within_boundary'] ?? false;

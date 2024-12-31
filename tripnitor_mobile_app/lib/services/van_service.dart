@@ -1,33 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:tripnitor_mobile_app/core/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import '../models/van_model.dart';
-import 'token_service.dart';
 
 class VanService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  VanService() {
-    _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<List<Van>> getVanList() async {
     try {
-      final response = await _dio.get('${HTTPConstants.BASE_URL}api/vans/');
+      final response = await _dio.get('api/vans/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
         final dynamicData = responseData?['data'] as List<dynamic>;
@@ -51,8 +31,7 @@ class VanService {
 
   Future<List<Van>> getUnassignedVanList() async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/vans/unassigned/');
+      final response = await _dio.get('api/vans/unassigned/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
         final dynamicData = responseData?['data'] as List<dynamic>;
@@ -76,8 +55,7 @@ class VanService {
 
   Future<Van> getVanDetail(String vanId) async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/vans/$vanId/');
+      final response = await _dio.get('api/vans/$vanId/');
 
       if (response.statusCode == 200) {
         final vanData = response.data['data'];
@@ -98,7 +76,7 @@ class VanService {
   Future<Van> createVan(VanPatch vanPatch) async {
     try {
       final response = await _dio.post(
-        '${HTTPConstants.BASE_URL}api/vans/register/',
+        'api/vans/register/',
         data: vanPatch.toJson(),
       );
 
@@ -118,8 +96,7 @@ class VanService {
 
   Future<void> deleteVan(String vanId) async {
     try {
-      final response =
-          await _dio.delete('${HTTPConstants.BASE_URL}api/vans/$vanId/delete/');
+      final response = await _dio.delete('api/vans/$vanId/delete/');
 
       if (response.statusCode == 204) {
         return;
@@ -135,7 +112,7 @@ class VanService {
   Future<Van> updateVan(String vanId, VanPatch van) async {
     try {
       final response = await _dio.put(
-        '${HTTPConstants.BASE_URL}api/vans/$vanId/update/',
+        'api/vans/$vanId/update/',
         data: van.toJson(),
       );
 
