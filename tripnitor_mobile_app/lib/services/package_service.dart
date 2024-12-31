@@ -1,46 +1,18 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
-import '../core/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import '../models/package_model.dart';
-import 'token_service.dart';
 
 class PackageService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  PackageService() {
-    _setupInterceptors();
-    _setupDioConfig();
-  }
-
-  void _setupDioConfig() {
-    _dio.options.validateStatus = (status) {
-      return status != null && status >= 200 && status < 300;
-    };
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<List<Package>> getAllPackages() async {
     try {
-      final response = await _dio.get('${HTTPConstants.BASE_URL}api/packages/');
+      final response = await _dio.get('api/packages/');
 
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data'];
-        return data.map((json) => Package.fromJson(json)).toList();
+        return (response.data['data'] as List)
+            .map((json) => Package.fromJson(json))
+            .toList();
       } else {
         throw DioException(
           requestOptions: response.requestOptions,
@@ -55,11 +27,9 @@ class PackageService {
 
   Future<Package> fetchPackageDetails(String packageId) async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/packages/$packageId/');
+      final response = await _dio.get('api/packages/$packageId/');
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = response.data['data'];
-        return Package.fromJson(data);
+        return Package.fromJson(response.data['data']);
       } else {
         throw DioException(
           requestOptions: response.requestOptions,
@@ -75,9 +45,10 @@ class PackageService {
 
   Future<Package> createPackage(PackageCreate package) async {
     try {
-      final data = package.toJson();
-      final response = await _dio
-          .post('${HTTPConstants.BASE_URL}api/packages/register/', data: data);
+      final response = await _dio.post(
+        'api/packages/register/',
+        data: package.toJson(),
+      );
 
       if (response.data['data'] != null) {
         final createdPackage = Package.fromJson(response.data['data']);
@@ -105,11 +76,10 @@ class PackageService {
 
   Future<double> calculatePackageFare(double totalDistance) async {
     try {
-      final data = {'total_distance': totalDistance};
-
       final response = await _dio.post(
-          '${HTTPConstants.BASE_URL}api/packages/calculate-fare/',
-          data: data);
+        'api/packages/calculate-fare/',
+        data: {'total_distance': totalDistance},
+      );
 
       if (response.statusCode == 200) {
         return response.data['data']['fare'];
@@ -127,16 +97,14 @@ class PackageService {
   }
 
   Future<Package> updatePackage(PackageCreate package, String packageId) async {
-    final data = package.toJson();
-
     try {
       final response = await _dio.patch(
-          '${HTTPConstants.BASE_URL}api/packages/$packageId/update/',
-          data: data);
+        'api/packages/$packageId/update/',
+        data: package.toJson(),
+      );
 
       if (response.data['data'] != null) {
-        final updatedPackage = Package.fromJson(response.data['data']);
-        return updatedPackage;
+        return Package.fromJson(response.data['data']);
       } else {
         throw Exception('Failed to update package: ${response.statusCode}');
       }
