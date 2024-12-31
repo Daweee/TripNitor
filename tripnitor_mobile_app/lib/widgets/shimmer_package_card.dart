@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 
 class ShimmerPackageCard extends StatelessWidget {
   const ShimmerPackageCard({Key? key}) : super(key: key);

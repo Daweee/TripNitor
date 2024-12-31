@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 
 class DriverBookingNotifications extends StatefulWidget {
   const DriverBookingNotifications({super.key});

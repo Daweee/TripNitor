@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../providers/booking_provider.dart';
 import 'admin_drawer.dart';
 import 'profile/booking_admin_profile.dart';

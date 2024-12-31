@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 
 class CustomModalDialog extends StatelessWidget {
   final String title;

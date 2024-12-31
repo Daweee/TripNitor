@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 import '../models/package_model.dart';
 import 'token_service.dart';
 
@@ -76,19 +76,11 @@ class PackageService {
   Future<Package> createPackage(PackageCreate package) async {
     try {
       final data = package.toJson();
-      log('Sending create package request', name: 'PackageService');
-
       final response = await _dio
           .post('${HTTPConstants.BASE_URL}api/packages/register/', data: data);
 
-      log('Response status: ${response.statusCode}', name: 'PackageService');
-      log('Response data: ${response.data}', name: 'PackageService');
-
-      // If we have package data, consider it successful regardless of status code
       if (response.data['data'] != null) {
         final createdPackage = Package.fromJson(response.data['data']);
-        log('Successfully created package: ${createdPackage.id}',
-            name: 'PackageService');
         return createdPackage;
       }
 
@@ -98,19 +90,16 @@ class PackageService {
         error: 'Failed to create package. No data in response.',
       );
     } on DioException catch (e) {
-      // If we have data despite the error, try to use it
       if (e.response?.data?['data'] != null) {
         try {
           final createdPackage = Package.fromJson(e.response!.data['data']);
-          log('Created package despite error: ${createdPackage.id}',
-              name: 'PackageService');
+
           return createdPackage;
         } catch (parseError) {
-          log('Failed to parse response data: $parseError',
-              name: 'PackageService');
+          rethrow;
         }
       }
-      throw e;
+      rethrow;
     }
   }
 
@@ -134,6 +123,25 @@ class PackageService {
       }
     } on DioException catch (e) {
       throw Exception(e);
+    }
+  }
+
+  Future<Package> updatePackage(PackageCreate package, String packageId) async {
+    final data = package.toJson();
+
+    try {
+      final response = await _dio.patch(
+          '${HTTPConstants.BASE_URL}api/packages/$packageId/update/',
+          data: data);
+
+      if (response.data['data'] != null) {
+        final updatedPackage = Package.fromJson(response.data['data']);
+        return updatedPackage;
+      } else {
+        throw Exception('Failed to update package: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to update package: ${e.message}');
     }
   }
 }

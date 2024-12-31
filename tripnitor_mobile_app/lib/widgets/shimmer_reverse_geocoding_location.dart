@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 
 class ShimmerReverseGeocodingLocation extends StatelessWidget {
   const ShimmerReverseGeocodingLocation({Key? key}) : super(key: key);

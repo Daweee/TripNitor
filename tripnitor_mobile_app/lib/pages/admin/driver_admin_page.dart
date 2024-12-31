@@ -4,7 +4,7 @@ import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/driver_admin_profile.dart';
 import 'package:tripnitor_mobile_app/pages/admin/forms/drivers_form.dart';
 import 'package:tripnitor_mobile_app/providers/driver_provider.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import 'admin_drawer.dart';
 
 class DriverAdminPage extends ConsumerStatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 

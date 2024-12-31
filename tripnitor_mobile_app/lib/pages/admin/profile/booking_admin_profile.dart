@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
 import '../../../../models/booking_model.dart';
 import '../../../widgets/custom_modal_dialogue.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/widgets/package_card.dart';
 import '../../providers/package_provider.dart';
 import '../../widgets/package_creation_widgets/package_type_visibility_selection.dart';

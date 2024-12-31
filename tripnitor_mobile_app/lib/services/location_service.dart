@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'token_service.dart';
 
 class LocationService {
@@ -109,7 +109,6 @@ class LocationService {
           markers.map((marker) => [marker.latitude, marker.longitude]).toList(),
       'region': region
     };
-    print(data);
     try {
       final response = await _dio.post(
           '${HTTPConstants.BASE_URL}api/locations/check-coordinates/',

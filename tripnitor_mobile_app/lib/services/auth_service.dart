@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 import '../models/auth_model.dart';
 import '../providers/auth_provider.dart';
 import 'token_service.dart';

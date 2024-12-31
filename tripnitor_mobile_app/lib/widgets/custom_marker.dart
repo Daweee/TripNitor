@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 
 class CustomMarker {
   final LatLng point;

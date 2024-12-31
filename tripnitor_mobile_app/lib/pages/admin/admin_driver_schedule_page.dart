@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:tripnitor_mobile_app/providers/driver_assignment_provider.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../models/driver_assignment.dart';
 import '../../models/driver_model.dart';
 import '../../providers/driver_provider.dart';

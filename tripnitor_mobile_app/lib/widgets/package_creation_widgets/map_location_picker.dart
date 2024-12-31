@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:tripnitor_mobile_app/models/reverse_geocode_response_model_extension.dart';
 import 'package:tripnitor_mobile_app/providers/geoapify_provider.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../helpers/cebu_bounding_box_helper.dart';
 import '../../models/location_service_data_model.dart';
 import '../../models/reverse_geocode_response_model.dart';

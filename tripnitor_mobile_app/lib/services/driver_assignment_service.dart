@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_assignment.dart';
 import 'token_service.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 
 class LocationTileShimmer extends StatelessWidget {
   final int count;

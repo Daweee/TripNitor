@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import 'admin_drawer.dart';
 
 class PackageAdminPage extends StatefulWidget {

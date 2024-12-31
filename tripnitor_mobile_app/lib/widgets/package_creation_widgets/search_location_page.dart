@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/helpers/cebu_bounding_box_helper.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../models/location_service_data_model.dart';
 import '../../providers/map_provider.dart';
 import '../location_tile_shimmer.dart';

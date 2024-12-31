@@ -3,7 +3,7 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/models/leg_model.dart';
 import 'package:tripnitor_mobile_app/models/package_model.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 
 class AdminItineraryDetailsPage extends StatefulWidget {
   final Package package;

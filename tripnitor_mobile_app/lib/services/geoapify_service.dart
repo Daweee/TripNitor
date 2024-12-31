@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:latlong2/latlong.dart';
-import '../../constants/constant.dart';
+import '../core/constants/constant.dart';
 import '../models/reverse_geocode_response_model.dart';
 import '../models/route_response_model.dart';
 
@@ -8,8 +8,8 @@ class GeoapifyService {
   static final GeoapifyService _instance = GeoapifyService._internal();
   factory GeoapifyService() => _instance;
   late final Dio _dio;
-  static const int _connectTimeout = 5;
-  static const int _receiveTimeout = 3;
+  static const int _connectTimeout = 15;
+  static const int _receiveTimeout = 10;
 
   GeoapifyService._internal() {
     _initializeDio();

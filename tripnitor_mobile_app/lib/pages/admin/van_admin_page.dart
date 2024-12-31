@@ -6,7 +6,7 @@ import 'package:tripnitor_mobile_app/pages/admin/forms/van_form.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/gas_admin_profile.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/van_admin_profile.dart';
 import 'package:tripnitor_mobile_app/providers/van_provider.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import 'admin_drawer.dart';
 
 class VanAdminPage extends ConsumerStatefulWidget {

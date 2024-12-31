@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../../constants/constant.dart';
+import '../core/constants/constant.dart';
 import '../models/location_service_data_model.dart';
 
 class MapService {
