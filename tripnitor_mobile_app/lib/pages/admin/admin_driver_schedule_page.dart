@@ -168,12 +168,51 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
 
   Widget _buildDriverDropdown(List<Driver>? drivers) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.10,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: MediaQuery.of(context).size.height * 0.15,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          bottomRight: Radius.circular(30.0),
+          bottomLeft: Radius.circular(30.0),
+        ),
+        color: Color(ColorConstants.BACKGROUND_COLOR),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Color(0xFF000000).withOpacity(.1),
+            offset: Offset(0, 4),
+            blurRadius: 4,
+          ),
+        ],
+      ),
       child: DropdownButtonFormField<Driver>(
+        style: TextStyle(
+          color: Colors.black87,
+        ),
+        isExpanded: true,
         decoration: InputDecoration(
-          labelText: "Select Driver",
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          labelText: 'Select Driver',
+          labelStyle: TextStyle(color: Colors.black.withOpacity(.5)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.PRIMARY_COLOR),
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 2,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.PRIMARY_COLOR),
+              width: 2,
+            ),
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
         value: drivers != null && drivers.contains(_selectedDriver)
             ? _selectedDriver
@@ -181,7 +220,10 @@ class _DriverSchedulePageState extends ConsumerState<DriverSchedulePage> {
         items: drivers?.map<DropdownMenuItem<Driver>>((Driver driver) {
               return DropdownMenuItem<Driver>(
                 value: driver,
-                child: Text(driver.user.name),
+                child: Text(
+                  driver.user.name,
+                  style: TextStyle(color: Colors.black.withOpacity(.5)),
+                ),
               );
             }).toList() ??
             [],
