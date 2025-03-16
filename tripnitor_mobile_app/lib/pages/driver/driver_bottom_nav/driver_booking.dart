@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driver_booking_details.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driver_booking_notifications.dart';
 import 'package:tripnitor_mobile_app/providers/driver_provider.dart';

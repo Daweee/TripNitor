@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/gas_model.dart';
 
 import '../gas_admin_page.dart';

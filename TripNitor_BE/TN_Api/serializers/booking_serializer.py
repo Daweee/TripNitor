@@ -1,18 +1,24 @@
 from django.conf import settings
 from django.forms import ValidationError
 from rest_framework import serializers
-from ..models import Booking, Package, User, Driver  
-from .package_serializer import PackageSerializer
+from ..models import Booking, Package, User, Driver, BookingLeg  
+from .package_serializer import PackageSerializer, PackageBasicSerializer
 from .user_serializer import UserSerializer
 from .driver_serializer import DriverSerializer
+from .booking_leg_serializer import BookingLegSerializer
+from .location_serializer import LocationSerializer
 from dateutil.parser import parse
 from django.utils.timezone import is_aware, make_aware
 from pytz import timezone
+from django.db import transaction
 
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    package = PackageSerializer(read_only=True)
+    package = PackageBasicSerializer(read_only=True)
     drivers = DriverSerializer(many=True, read_only=True)
+    booking_legs = BookingLegSerializer(many=True, read_only=True)
+    start_location = LocationSerializer(read_only=True)
+    final_destination = LocationSerializer(read_only=True)  
 
     class Meta:
         model = Booking
@@ -37,12 +43,28 @@ class BookingCreationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         from ..models import DriverAssignment
         drivers_data = validated_data.pop('drivers', [])
-        booking = super().create(validated_data)
+        package = validated_data.pop('package')
 
-        for driver in drivers_data:
-            DriverAssignment.objects.create(booking=booking, driver=driver)
+        validated_data['package'] = package
 
-        return booking
+        with transaction.atomic():
+            booking = super().create(validated_data)
+
+            for driver in drivers_data:
+                DriverAssignment.objects.create(booking=booking, driver=driver)
+
+            if package:
+                for leg in package.legs.all().order_by('leg_number'):
+                    BookingLeg.objects.create(
+                        booking=booking,
+                        leg_number=leg.leg_number,
+                        start_location=leg.start_location,
+                        end_location=leg.end_location,
+                        departure_time=None,
+                        arrival_time=None,
+                        original_leg_id=leg.id
+                    )
+            return booking
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)

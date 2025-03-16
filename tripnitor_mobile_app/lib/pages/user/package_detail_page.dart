@@ -4,13 +4,16 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import '../../constants/constant.dart';
+import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
+import '../../core/constants/constant.dart';
+import '../../helpers/location_transformation_help.dart';
 import '../../providers/package_provider.dart';
 import '../../models/package_model.dart';
 import '../../models/leg_model.dart';
 import '../../models/location_model.dart';
 import '../../widgets/booking_bottom_sheet.dart';
 import '../../widgets/custom_modal_dialogue.dart';
+import '../../widgets/package_creation_widgets/package_start_final_location.dart';
 import '../../widgets/shimmer_package_detail_page.dart';
 
 class PackageDetailPage extends ConsumerStatefulWidget {
@@ -44,7 +47,10 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
             color: Colors.black,
             size: 20.0,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            ref.read(bookingStateProvider.notifier).clearState();
+            Navigator.of(context).pop();
+          },
         ),
         title: Text(
           'Package Details',
@@ -68,10 +74,8 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           : Stack(
               children: [
                 _buildScrollableContent(packageState),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
+                Align(
+                  alignment: Alignment.bottomCenter,
                   child: _buildBottomBar(packageState),
                 ),
               ],
@@ -82,8 +86,6 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
   Widget _buildScrollableContent(PackageState packageState) {
     if (packageState.isLoading) {
       return PackageDetailShimmer();
-    } else if (packageState.error != null) {
-      return Center(child: Text('Error: ${packageState.error}'));
     } else if (packageState.selectedPackage == null) {
       return Center(child: Text('No package data available'));
     }
@@ -132,9 +134,13 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               ],
               totalDistance: '${package.totalDistance}km'),
           SizedBox(height: 20),
-          _buildSection('Itinerary', [
-            for (var leg in package.legs) _buildLegInfo(leg),
-          ]),
+          _buildItinerarySection(
+            'Itinerary',
+            [
+              for (var leg in package.legs) _buildLegInfo(leg),
+            ],
+            package,
+          ),
         ],
       ),
     );
@@ -164,18 +170,7 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ],
             ),
-            if (title == 'Itinerary')
-              GestureDetector(
-                onTap: () {},
-                child: Text(
-                  'Change',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue,
-                  ),
-                ),
-              )
-            else if (totalDistance != null)
+            if (totalDistance != null)
               Text(
                 'Total distance: $totalDistance',
                 style: TextStyle(
@@ -183,6 +178,69 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
                   color: Colors.grey[600],
                 ),
               ),
+          ],
+        ),
+        SizedBox(height: 10),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildItinerarySection(
+      String title, List<Widget> children, Package package) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                  height: 20,
+                  width: 5,
+                ),
+                SizedBox(width: 10),
+                Text(title,
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PackageStartFinalLocation(
+                      packageId: package.id,
+                      packageName: package.packageName,
+                      packageType: package.packageType,
+                      packageDescription: package.description,
+                      packageVisibility: package.visibility,
+                      isEditing: true,
+                      initialStartLocation:
+                          LocationTransformations.locationToLocationServiceData(
+                              package.startLocation),
+                      initialEndLocation:
+                          LocationTransformations.locationToLocationServiceData(
+                              package.finalDestination),
+                      initialLegs: package.legs,
+                    ),
+                  ),
+                );
+              },
+              child: Text(
+                'Change',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
           ],
         ),
         SizedBox(height: 10),
@@ -203,12 +261,36 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               color: Color(0xFFFB0000),
             ),
             SizedBox(width: 15),
-            Text(
-              location.name,
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name.trim().isNotEmpty
+                    ? location.name
+                    : location.address ?? 'No address',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
+        if (location.name.trim().isNotEmpty &&
+            location.address != null &&
+            location.address!.isNotEmpty) ...[
+          SizedBox(width: 15),
+          Padding(
+            padding: const EdgeInsets.only(left: 31),
+            child: Text(
+              location.address!,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -225,12 +307,36 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               color: Colors.black,
             ),
             SizedBox(width: 15),
-            Text(
-              location.name,
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name.trim().isNotEmpty
+                    ? location.name
+                    : location.address ?? 'No address',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
+        if (location.name.trim().isNotEmpty &&
+            location.address != null &&
+            location.address!.isNotEmpty) ...[
+          SizedBox(width: 15),
+          Padding(
+            padding: const EdgeInsets.only(left: 31),
+            child: Text(
+              location.address!,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
         SizedBox(height: 10),
       ],
     );
@@ -245,8 +351,11 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Itinerary ${leg.legNumber}',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Itinerary ${leg.legNumber}',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+            ),
             SizedBox(height: 8),
             _buildLocationStartInfo(leg.startLocation),
             Padding(

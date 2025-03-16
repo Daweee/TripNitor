@@ -7,3 +7,4 @@ from .booking_model import Booking
 from .location_model import Location
 from .leg_model import Leg
 from .driver_assignment_model import DriverAssignment
+from .booking_legs_model import BookingLeg

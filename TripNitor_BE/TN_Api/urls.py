@@ -6,8 +6,9 @@ from .views import (
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
     BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView, 
     ConfirmBookingView, CancelBookingView, StartBookingView,
-    PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView,
-    DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList
+    PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView,
+    DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList,
+    LocationValidationView,
 )
 
 urlpatterns = [
@@ -53,9 +54,12 @@ urlpatterns = [
     path('bookings/<str:pk>/cancel/', CancelBookingView.as_view(), name='booking-cancel'),
     path('bookings/<str:pk>/start/', StartBookingView.as_view(), name='booking-start'),
 
+    path('packages/calculate-fare/', CalculatePackageFareView.as_view(), name='calculate-package-fare'),
     path('packages/register/', PackageCreateView.as_view(), name='register_package'),
     path('packages/', PackageListView.as_view(), name='package_list'),
     path('packages/<str:pk>/', PackageDetailView.as_view(), name='get_package'),
     path('packages/<str:pk>/update/', PackageUpdateView.as_view(), name='update_package'),
-    path('packages/<str:pk>/delete', PackageDeleteView.as_view(), name='delete_package'),
+    path('packages/<str:pk>/delete/', PackageDeleteView.as_view(), name='delete_package'),
+
+    path('locations/check-coordinates/', LocationValidationView.as_view(), name='check-coordinates'),
 ]

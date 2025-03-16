@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../models/booking_model.dart';
 
 class AdminPaymentDetailsPage extends StatefulWidget {

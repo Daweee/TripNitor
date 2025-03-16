@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import 'package_details_creation_page.dart';
 import 'package_start_final_location.dart';
 

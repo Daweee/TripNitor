@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
 import '../../../../models/booking_model.dart';
 import '../../../widgets/custom_modal_dialogue.dart';
@@ -202,12 +202,16 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Starting Location: "),
-                              Text(
-                                bookingState
-                                    .booking!.package.startLocation.name,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  bookingState.booking?.startLocation?.name ??
+                                      "",
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -217,12 +221,17 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Final Location: "),
-                              Text(
-                                bookingState
-                                    .booking!.package.finalDestination.name,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  bookingState
+                                          .booking?.finalDestination?.name ??
+                                      "",
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],

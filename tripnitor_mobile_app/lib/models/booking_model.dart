@@ -4,13 +4,18 @@ import 'package:flutter/foundation.dart';
 import 'package:tripnitor_mobile_app/models/preview_boking_model.dart';
 
 import 'auth_model.dart';
+import 'booking_leg_model.dart';
 import 'driver_model.dart';
+import 'location_model.dart';
 import 'package_model.dart';
 
 class Booking {
   final String id;
   final User user;
   final Package package;
+  final List<BookingLeg> bookingLeg;
+  final Location? startLocation;
+  final Location? finalDestination;
   final List<Driver> drivers;
   final String status;
   final String baseFare;
@@ -28,6 +33,9 @@ class Booking {
     required this.id,
     required this.user,
     required this.package,
+    required this.bookingLeg,
+    this.startLocation,
+    this.finalDestination,
     required this.drivers,
     required this.status,
     required this.baseFare,
@@ -46,6 +54,16 @@ class Booking {
         id: json["id"],
         user: User.fromJson(json["user"]),
         package: Package.fromJson(json["package"]),
+        bookingLeg: json['booking_legs'] != null
+            ? List<BookingLeg>.from(
+                json["booking_legs"].map((x) => BookingLeg.fromJson(x)))
+            : [],
+        startLocation: json['start_location'] != null
+            ? Location.fromJson(json['start_location'])
+            : null,
+        finalDestination: json['final_destination'] != null
+            ? Location.fromJson(json['final_destination'])
+            : null,
         status: json["status"],
         baseFare: json["base_fare"],
         updatedPackageFare: json["updated_package_fare"],

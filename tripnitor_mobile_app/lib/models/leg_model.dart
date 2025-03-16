@@ -6,16 +6,12 @@ class Leg {
   final int legNumber;
   final Location startLocation;
   final Location endLocation;
-  final DateTime? departureTime;
-  final DateTime? arrivalTime;
 
   Leg({
     required this.id,
     required this.legNumber,
     required this.startLocation,
     required this.endLocation,
-    this.departureTime,
-    this.arrivalTime,
   });
 
   factory Leg.fromJson(Map<String, dynamic> json) {
@@ -26,12 +22,6 @@ class Leg {
           Location.fromJson(json['start_location'] as Map<String, dynamic>),
       endLocation:
           Location.fromJson(json['end_location'] as Map<String, dynamic>),
-      departureTime: json['departure_time'] != null
-          ? DateTime.parse(json['departure_time'] as String)
-          : null,
-      arrivalTime: json['arrival_time'] != null
-          ? DateTime.parse(json['arrival_time'] as String)
-          : null,
     );
   }
 
@@ -41,34 +31,29 @@ class Leg {
       'leg_number': legNumber,
       'start_location': startLocation.toJson(),
       'end_location': endLocation.toJson(),
-      'departure_time': departureTime?.toIso8601String(),
-      'arrival_time': arrivalTime?.toIso8601String(),
     };
   }
 }
 
 class LegCreate {
+  final int? legId;
   final int legNumber;
   final LocationCreate startLocation;
   final LocationCreate endLocation;
-  final DateTime? departureTime;
-  final DateTime? arrivalTime;
 
   LegCreate({
+    this.legId,
     required this.legNumber,
     required this.startLocation,
     required this.endLocation,
-    this.departureTime,
-    this.arrivalTime,
   });
 
   Map<String, dynamic> toJson() {
     return {
+      if (legId != null) 'id': legId,
       'leg_number': legNumber,
       'start_location': startLocation.toJson(),
       'end_location': endLocation.toJson(),
-      'departure_time': departureTime?.toIso8601String(),
-      'arrival_time': arrivalTime?.toIso8601String(),
     };
   }
 }

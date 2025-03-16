@@ -4,9 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
-
-import '../constants/constant.dart';
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
 import 'user/home_page.dart';

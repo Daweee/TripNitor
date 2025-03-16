@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/user/user_bottom_nav/booking_page.dart';
 import 'package:tripnitor_mobile_app/pages/user/user_bottom_nav/message_page.dart';
 import 'package:tripnitor_mobile_app/pages/user/user_bottom_nav/profile_page.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/helpers/cebu_bounding_box_helper.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../models/location_service_data_model.dart';
 import '../../providers/map_provider.dart';
 import '../location_tile_shimmer.dart';
@@ -199,16 +199,12 @@ class _SearchLocationPageState extends ConsumerState<SearchLocationPage> {
                           location.address,
                           FontAwesomeIcons.locationDot),
                     ),
-                  ] else if (widget.packageType == null &&
-                      _searchController.text.isEmpty &&
-                      mapState.locationServiceList.isEmpty)
-                    ...[]
-                  else if (_searchController.text.isNotEmpty &&
+                  ] else if (_searchController.text.isNotEmpty &&
                       mapState.locationServiceList.isEmpty) ...[
                     Center(
                       child: Text('No results found.'),
                     ),
-                  ] else ...[
+                  ] else if (widget.packageType != null) ...[
                     Center(
                       child: Text.rich(
                         TextSpan(

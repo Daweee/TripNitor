@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -5,19 +6,28 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../constants/constant.dart';
-import '../../providers/package_provider.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:tripnitor_mobile_app/providers/route_polyline_provider.dart';
+import '../../core/constants/constant.dart';
+import '../../pages/user/package_detail_page.dart';
+import '../../pages/user/package_page.dart';
+import '../../providers/package_fare_calculation_provider.dart';
 import '../../models/package_model.dart';
 import '../../models/leg_model.dart';
 import '../../models/location_model.dart';
+import '../../providers/package_provider.dart';
 import '../../widgets/custom_modal_dialogue.dart';
 
 class PackageConfirmationPage extends ConsumerStatefulWidget {
   final PackageCreate package;
+  final bool isEditing;
+  final String? packageId;
 
   const PackageConfirmationPage({
     Key? key,
     required this.package,
+    this.isEditing = false,
+    this.packageId,
   }) : super(key: key);
 
   @override
@@ -30,6 +40,13 @@ class _PackageConfirmationPageState
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(packageFareCalculationProvider.notifier).calculatePackageFare(
+            widget.package.totalDistance.toDouble(),
+            widget.package,
+          );
+    });
   }
 
   @override
@@ -116,7 +133,7 @@ class _PackageConfirmationPageState
                 ),
                 _buildLocationEndInfo(package.finalDestination),
               ],
-              totalDistance: '${package.totalDistance}km'),
+              totalDistance: '${package.totalDistance.toStringAsFixed(2)}km'),
           SizedBox(height: 20),
           _buildSection('Itinerary', [_buildItineraryList(package)]),
         ],
@@ -257,6 +274,7 @@ class _PackageConfirmationPageState
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: isMiniStop ? null : FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -265,6 +283,7 @@ class _PackageConfirmationPageState
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 14,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -314,7 +333,8 @@ class _PackageConfirmationPageState
 
     itineraryWidgets.add(_verticalDashLines());
 
-    if (package.legs.length == 1) {
+    // Handle case where we only have start and end (no intermediate legs)
+    if (package.legs.isEmpty || package.legs.length == 1) {
       itineraryWidgets.add(
         _locationPoint(
           name: package.finalDestination.name,
@@ -371,24 +391,32 @@ class _PackageConfirmationPageState
               color: Color(0xFFFB0000),
             ),
             SizedBox(width: 15),
-            Text(
-              location.name.trim().isNotEmpty
-                  ? location.name
-                  : location.address ?? 'No address',
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name.trim().isNotEmpty
+                    ? location.name
+                    : location.address ?? 'No address',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
         if (location.name.trim().isNotEmpty &&
+            location.address != null &&
             location.address!.isNotEmpty) ...[
           SizedBox(width: 15),
           Padding(
             padding: const EdgeInsets.only(left: 31),
             child: Text(
-              location.address ?? 'No address',
+              location.address!,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -409,11 +437,16 @@ class _PackageConfirmationPageState
               color: Colors.black,
             ),
             SizedBox(width: 15),
-            Text(
-              location.name.trim().isNotEmpty
-                  ? location.name
-                  : location.address ?? 'No address',
-              style: TextStyle(fontSize: 16),
+            Expanded(
+              child: Text(
+                location.name.trim().isNotEmpty
+                    ? location.name
+                    : location.address ?? 'No address',
+                style: TextStyle(
+                  fontSize: 16,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
@@ -427,6 +460,7 @@ class _PackageConfirmationPageState
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -510,30 +544,84 @@ class _PackageConfirmationPageState
                   ),
                 ],
               ),
-              Text(
-                'API call to calc fare',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
+              Consumer(
+                builder: (context, ref, child) {
+                  final fareState = ref.watch(packageFareCalculationProvider);
+
+                  if (fareState.isLoading) {
+                    return Shimmer.fromColors(
+                      baseColor:
+                          Color(ColorConstants.SECONDARY_COLOR).withOpacity(.3),
+                      highlightColor: Color(ColorConstants.BACKGROUND_COLOR)
+                          .withOpacity(.3),
+                      child: Container(
+                        width: 120,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (fareState.error != null) {
+                    return Text(
+                      'Error calculating fare',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    );
+                  }
+
+                  return Text(
+                    '₱${fareState.calculatedPackageFare?.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  );
+                },
+              )
             ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-            ),
-            onPressed: () {},
-            child: Text(
-              'Create Package',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final fareState = ref.watch(packageFareCalculationProvider);
+              final isReady =
+                  !fareState.isLoading && fareState.updatedPackage != null;
+
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isReady
+                      ? Color(ColorConstants.PRIMARY_COLOR)
+                      : Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                onPressed: isReady
+                    ? () {
+                        if (widget.isEditing) {
+                          _updatePackage(fareState.updatedPackage!);
+                        } else {
+                          _createPackage(fareState.updatedPackage!);
+                        }
+                      }
+                    : null,
+                child: Text(
+                  widget.isEditing
+                      ? (isReady ? 'Update Package' : 'Calculating fare...')
+                      : (isReady ? 'Create Package' : 'Calculating fare...'),
+                  style: TextStyle(
+                    color:
+                        isReady ? Colors.white : Colors.white.withOpacity(0.7),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -553,5 +641,194 @@ class _PackageConfirmationPageState
         );
       },
     );
+  }
+
+  void _updatePackage(PackageCreate package) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Color(ColorConstants.PRIMARY_COLOR),
+            ),
+          );
+        },
+      );
+
+      if (widget.packageId == null) {
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Something went wrong.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      await ref
+          .read(packageProvider.notifier)
+          .updatePackage(package, widget.packageId!);
+      final packageState = ref.read(packageProvider);
+
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (packageState.error != null && packageState.selectedPackage == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update package: ${packageState.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (mounted && packageState.selectedPackage != null) {
+        ref.read(packageProvider.notifier).clearState();
+        // Navigate back to package detail
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PackageDetailPage(
+              packageId: packageState.selectedPackage!.id,
+            ),
+          ),
+          (Route<dynamic> route) =>
+              route.runtimeType == PackagePage || route.isFirst,
+        );
+      }
+    } catch (e) {
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update package: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _createPackage(PackageCreate package) async {
+    // Ensure we have the latest calculated fare
+    final fareState = ref.read(packageFareCalculationProvider);
+    if (fareState.isLoading || fareState.calculatedPackageFare == null) {
+      // Wait for fare calculation to complete
+      await ref
+          .read(packageFareCalculationProvider.notifier)
+          .calculatePackageFare(
+            package.totalDistance.toDouble(),
+            package,
+          );
+    }
+
+    try {
+      // Show loading indicator
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+            );
+          },
+        );
+      }
+
+      // Get the latest package state with calculated fare
+      final updatedPackage =
+          ref.read(packageFareCalculationProvider).updatedPackage;
+      if (updatedPackage == null) {
+        throw Exception('Package data not ready');
+      }
+
+      // Create the package
+      await ref.read(packageProvider.notifier).createPackage(updatedPackage);
+      final packageState = ref.read(packageProvider);
+
+      // Handle loading indicator
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      // Handle errors
+      if (packageState.error != null && packageState.selectedPackage == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create package: ${packageState.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Handle success
+      if (mounted && packageState.selectedPackage != null) {
+        ref.read(routeStateProvider.notifier).clearRoute();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PackageDetailPage(
+              packageId: packageState.selectedPackage!.id,
+            ),
+          ),
+          (Route<dynamic> route) =>
+              route.runtimeType == PackagePage || route.isFirst,
+        );
+      }
+    } catch (e) {
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create package: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _printPackageJson(PackageCreate package) {
+    final Map<String, dynamic> packageJson = {
+      'package_name': package.packageName,
+      'description': package.description,
+      'base_price': package.basePrice,
+      'package_type': package.packageType,
+      'visibility': package.visibility,
+      'start_location': package.startLocation.toJson(),
+      'final_destination': package.finalDestination.toJson(),
+      'legs': List<dynamic>.from(package.legs.map((x) => x.toJson())),
+      'max_participants': package.maxParticipants,
+      'current_participants': package.currentParticipants,
+      'start_date': package.startDate?.toIso8601String(),
+      'end_date': package.endDate?.toIso8601String(),
+      'total_distance': package.totalDistance,
+    };
+
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    final String prettyJson = encoder.convert(packageJson);
+
+    log('Package JSON Format:\n$prettyJson', name: 'PackageInfo');
   }
 }

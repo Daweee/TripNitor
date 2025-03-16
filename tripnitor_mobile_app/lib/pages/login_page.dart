@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/registration_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custome_form_field.dart';
 
-import '../constants/constant.dart';
+import '../core/constants/constant.dart';
 import '../providers/auth_provider.dart';
 import 'auth_page.dart';
 

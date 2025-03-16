@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/widgets/package_creation_widgets/itinerary_selection_page.dart';
 
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
+import '../../helpers/location_transformation_help.dart';
+import '../../models/leg_model.dart';
 import '../../models/location_service_data_model.dart';
 import 'location_selection_button.dart';
 import 'search_location_page.dart';
@@ -13,6 +15,12 @@ class PackageStartFinalLocation extends StatefulWidget {
   final String packageVisibility;
   final String packageName;
   final String packageDescription;
+  final bool isEditing;
+  final LocationServiceData? initialStartLocation;
+  final LocationServiceData? initialEndLocation;
+  final List<Leg>? initialLegs;
+  final String? packageId;
+  // add a List of Leg here but it wont be LegCreate
 
   const PackageStartFinalLocation({
     super.key,
@@ -20,6 +28,11 @@ class PackageStartFinalLocation extends StatefulWidget {
     required this.packageVisibility,
     required this.packageName,
     required this.packageDescription,
+    this.isEditing = false,
+    this.initialStartLocation,
+    this.initialEndLocation,
+    this.initialLegs,
+    this.packageId,
   });
 
   @override
@@ -33,13 +46,26 @@ class _PackageStartFinalLocationState extends State<PackageStartFinalLocation> {
   bool get _isFormValid => _startLocation != null && _endLocation != null;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.isEditing) {
+      _startLocation = widget.initialStartLocation;
+      _endLocation = widget.initialEndLocation;
+
+      //maybe do an api call for the package instance and extract Package legs from there?
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight + 1),
         child: AppBar(
           title: Text(
-            '${widget.packageType} • ${widget.packageVisibility}',
+            widget.isEditing
+                ? 'Edit Package Location'
+                : '${widget.packageType} • ${widget.packageVisibility}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20.0,
@@ -77,7 +103,7 @@ class _PackageStartFinalLocationState extends State<PackageStartFinalLocation> {
               hint: (_startLocation?.name.trim().isNotEmpty == true)
                   ? _startLocation!.name
                   : (_startLocation?.address ?? 'Enter your starting point'),
-              subtitle: (_startLocation?.name.trim().isNotEmpty == true)
+              subtitle: (_startLocation?.address?.trim().isNotEmpty == true)
                   ? _startLocation?.address
                   : null,
               icon: FontAwesomeIcons.solidCircleDot,
@@ -129,16 +155,40 @@ class _PackageStartFinalLocationState extends State<PackageStartFinalLocation> {
             ElevatedButton(
               onPressed: _isFormValid
                   ? () {
+                      List<LegCreate>? initialLegs;
+                      if (widget.isEditing && widget.initialLegs != null) {
+                        // Transform Leg to LegCreate
+                        initialLegs = widget.initialLegs!.map((leg) {
+                          return LegCreate(
+                            legId: leg.id,
+                            legNumber: leg.legNumber,
+                            startLocation: LocationTransformations
+                                .serviceDataToLocationCreate(
+                                    LocationTransformations
+                                        .locationToLocationServiceData(
+                                            leg.startLocation)),
+                            endLocation: LocationTransformations
+                                .serviceDataToLocationCreate(
+                                    LocationTransformations
+                                        .locationToLocationServiceData(
+                                            leg.endLocation)),
+                          );
+                        }).toList();
+                      }
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ItinerarySelectionPage(
+                            packageId: widget.packageId,
                             packageType: widget.packageType,
                             packageVisibility: widget.packageVisibility,
                             packageName: widget.packageName,
                             packageDescription: widget.packageDescription,
                             startLocation: _startLocation!,
                             finalLocation: _endLocation!,
+                            isEditing: widget.isEditing,
+                            initialLegs: initialLegs,
                           ),
                         ),
                       );

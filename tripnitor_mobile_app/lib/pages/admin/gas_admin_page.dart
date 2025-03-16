@@ -4,7 +4,7 @@ import 'package:tripnitor_mobile_app/models/gas_model.dart';
 import 'package:tripnitor_mobile_app/pages/admin/forms/gas_form.dart';
 import 'package:tripnitor_mobile_app/pages/admin/profile/gas_admin_profile.dart';
 import 'package:tripnitor_mobile_app/providers/gas_provider.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import 'admin_drawer.dart';
 
 class GasAdminPage extends ConsumerStatefulWidget {

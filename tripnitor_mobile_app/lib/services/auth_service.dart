@@ -1,31 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/constant.dart';
-import '../models/auth_model.dart';
-import '../providers/auth_provider.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import 'token_service.dart';
 
 class AuthService {
-  final Dio _dio = Dio();
-
-  AuthService() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      final response =
-          await _dio.post('${HTTPConstants.BASE_URL}api/users/login/', data: {
+      final response = await _dio.post('api/users/login/', data: {
         'username': username,
         'password': password,
       });
@@ -49,8 +31,7 @@ class AuthService {
   Future<Map<String, dynamic>> register(String username, String name,
       String email, String phoneNumber, String password) async {
     try {
-      final response = await _dio
-          .post('${HTTPConstants.BASE_URL}api/users/register/', data: {
+      final response = await _dio.post('api/users/register/', data: {
         'username': username,
         'name': name,
         'email': email,
@@ -70,8 +51,7 @@ class AuthService {
 
   Future<Map<String, dynamic>> logout(String refreshToken) async {
     try {
-      final response =
-          await _dio.post('${HTTPConstants.BASE_URL}api/users/logout/', data: {
+      await _dio.post('api/users/logout/', data: {
         'refresh': refreshToken,
       });
       await tokenService.deleteTokens();
@@ -83,8 +63,7 @@ class AuthService {
 
   Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/users/$userId/');
+      final response = await _dio.get('api/users/$userId/');
       if (response.statusCode == 200) {
         return response.data['data'];
       } else {

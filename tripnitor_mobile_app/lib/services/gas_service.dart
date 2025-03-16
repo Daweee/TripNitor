@@ -1,33 +1,14 @@
 import 'package:dio/dio.dart';
-import '../constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
+import '../core/constants/constant.dart';
 import '../models/gas_model.dart';
-import 'token_service.dart';
 
 class GasService {
-  final Dio _dio = Dio();
-  final TokenService _tokenService = TokenService();
-
-  GasService() {
-    _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenService.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
+  final Dio _dio = DioClient.instance;
 
   Future<List<Gas>> getGasList() async {
     try {
-      final response = await _dio.get('${HTTPConstants.BASE_URL}api/gas/');
+      final response = await _dio.get('api/gas/');
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>?;
         final dynamicData = responseData?['data'] as List<dynamic>;
@@ -50,8 +31,7 @@ class GasService {
 
   Future<Gas> getGasDetail(String gasId) async {
     try {
-      final response =
-          await _dio.get('${HTTPConstants.BASE_URL}api/gas/$gasId/');
+      final response = await _dio.get('api/gas/$gasId/');
 
       if (response.statusCode == 200) {
         final gasData = response.data['data'];
@@ -71,7 +51,7 @@ class GasService {
   Future<Gas> createGas(Gas gas) async {
     try {
       final response = await _dio.post(
-        '${HTTPConstants.BASE_URL}api/gas/register/',
+        'api/gas/register/',
         data: gas.toJson(),
       );
 
@@ -91,11 +71,7 @@ class GasService {
 
   Future<void> deleteGas(String? gasId) async {
     try {
-      final response = await _dio
-          .delete<dynamic>('${HTTPConstants.BASE_URL}api/gas/$gasId/delete/');
-
-      print(
-          'Response: ${response.statusCode}, Data: ${response.data}'); // Logging response
+      final response = await _dio.delete<dynamic>('api/gas/$gasId/delete/');
 
       if (response.statusCode == 204) {
         return;
@@ -104,7 +80,6 @@ class GasService {
             'Failed to delete gas with status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('Dio error: ${e.message}');
       if (e.response != null) {
       } else {
         print('Error type: ${e.type}');
@@ -116,7 +91,7 @@ class GasService {
   Future<Gas> updateGas(String? gasId, GasPatch gasPatch) async {
     try {
       final response = await _dio.patch(
-        '${HTTPConstants.BASE_URL}api/gas/$gasId/update/',
+        'api/gas/$gasId/update/',
         data: gasPatch.toJson(),
       );
 

@@ -1,5 +1,5 @@
 import 'package:latlong2/latlong.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import '../widgets/package_creation_widgets/search_location_page.dart';
 
 class CebuBoundsHelper {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../constants/constant.dart';
+import '../../../core/constants/constant.dart';
 import '../../../providers/booking_provider.dart';
 import '../booking_detail_page.dart';
 import '../user_booking_detail_page.dart';
@@ -43,41 +43,74 @@ class _BookingPageState extends ConsumerState<BookingPage> {
         centerTitle: true,
         scrolledUnderElevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: Column(
-            children: [
-              Container(
-                color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(.3),
-                height: 1.0,
-              ),
-              Container(
-                padding: const EdgeInsets.only(right: 16.0),
-                alignment: Alignment.centerRight,
-                child: DropdownButton<String>(
-                  value: _selectedFilter,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedFilter = newValue!;
-                    });
-
-                    ref
-                        .read(bookingStateProvider.notifier)
-                        .getUserBookings(_selectedFilter);
-                  },
-                  items: const <String>[
-                    'ALL',
-                    'PENDING',
-                    'CONFIRMED',
-                    'ONGOING',
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+          preferredSize: const Size.fromHeight(100.0),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Color(ColorConstants.BACKGROUND_COLOR),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Color(0xFF000000).withOpacity(.1),
+                  offset: Offset(0, 4),
+                  blurRadius: 4,
                 ),
+              ],
+            ),
+            child: DropdownButtonFormField<String>(
+              style: TextStyle(
+                color: Colors.black87,
               ),
-            ],
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: 'Filter Status',
+                labelStyle: TextStyle(color: Colors.black.withOpacity(.5)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Color(ColorConstants.SECONDARY_COLOR),
+                    width: 2,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                    width: 2,
+                  ),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              value: _selectedFilter,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedFilter = newValue!;
+                });
+                ref
+                    .read(bookingStateProvider.notifier)
+                    .getUserBookings(_selectedFilter);
+              },
+              items: const <String>[
+                'ALL',
+                'PENDING',
+                'CONFIRMED',
+                'ONGOING',
+              ].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: TextStyle(color: Colors.black.withOpacity(.5)),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),
@@ -118,9 +151,9 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${booking.package.startLocation.name} -> '
-                                      '${booking.package.legs.length - 1 > 0 ? '${booking.package.legs.length - 1} itineraries -> ' : ''}'
-                                      '${booking.package.finalDestination.name}',
+                                      '${booking.startLocation?.name} -> '
+                                      '${booking.bookingLeg.length - 1 > 0 ? '${booking.bookingLeg.length - 1} itineraries -> ' : ''}'
+                                      '${booking.finalDestination?.name}',
                                       style: const TextStyle(
                                         color: Colors.black54,
                                         fontSize: 12,

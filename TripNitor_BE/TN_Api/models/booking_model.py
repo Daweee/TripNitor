@@ -3,8 +3,8 @@ from random import shuffle
 from django.db import models
 from django.forms import ValidationError
 from .base_model import CustomPrimaryKeyModel
-from .package_model import Package
-from .user_model import User
+from ..models import Package, User
+from .location_model import Location
 from django.db.models import Q
 
 class Booking(CustomPrimaryKeyModel):
@@ -21,6 +21,8 @@ class Booking(CustomPrimaryKeyModel):
 
     drivers = models.ManyToManyField('Driver', through='DriverAssignment', related_name='bookings')  # Use string reference
     package = models.ForeignKey(Package, related_name='bookings', on_delete=models.CASCADE)
+    start_location = models.ForeignKey(Location, related_name='booking_starting_location', on_delete=models.SET_NULL, null=True, blank=True)
+    final_destination = models.ForeignKey(Location, related_name='booking_final_location', on_delete=models.SET_NULL, null=True, blank=True)
     user = models.ForeignKey('User', related_name='bookings', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=BookingStatus.choices, default=BookingStatus.PENDING)
     base_fare = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -48,6 +50,7 @@ class Booking(CustomPrimaryKeyModel):
     def save(self, *args, **kwargs):
         self.clean()
         self.calculate_number_of_nights()
+        self.set_booking_start_and_final_locations()
         super().save(*args, **kwargs)
 
     def get_nights(self):
@@ -103,3 +106,8 @@ class Booking(CustomPrimaryKeyModel):
         shuffle(available_drivers)  
 
         return available_drivers[:required_vans]
+    
+    def set_booking_start_and_final_locations(self):
+        package_instance = self.package
+        self.start_location = package_instance.start_location
+        self.final_destination = package_instance.final_destination

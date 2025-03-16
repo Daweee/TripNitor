@@ -21,7 +21,8 @@ class RoutePolylineNotifier extends StateNotifier<RouteState> {
       state = state.copyWith(
         isLoading: false,
         route: route,
-        totalDistance: route.totalDistance / 1000,
+        totalDistance:
+            double.parse((route.totalDistance / 1000).toStringAsFixed(2)),
         error: null,
       );
     } catch (e) {

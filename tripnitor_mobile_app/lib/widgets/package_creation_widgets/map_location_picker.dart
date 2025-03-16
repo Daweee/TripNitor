@@ -6,12 +6,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:tripnitor_mobile_app/models/reverse_geocode_response_model_extension.dart';
 import 'package:tripnitor_mobile_app/providers/geoapify_provider.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../helpers/cebu_bounding_box_helper.dart';
 import '../../models/location_service_data_model.dart';
 import '../../models/reverse_geocode_response_model.dart';
 import '../../providers/geolocator_provider.dart';
 import '../../providers/is_water_provider.dart';
+import '../../services/location_service.dart';
 import '../shimmer_reverse_geocoding_location.dart';
 import 'search_location_page.dart';
 
@@ -34,10 +35,13 @@ class MapLocationPicker extends ConsumerStatefulWidget {
 class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
   Timer? _debounceTimer;
   final MapController _mapController = MapController();
+  final LocationService _locationService = LocationService();
   late LatLng _currentLocation;
   final double _currentZoom = 15.0;
   bool _isMapReady = false;
   late final LatLngBounds _bounds;
+  bool _isWithinBoundary = false;
+  bool _showingDelayedShimmer = false;
 
   String get _getTitle {
     switch (widget.locationType) {
@@ -89,8 +93,8 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
       });
     } else {
       _bounds = LatLngBounds(
-        CebuProvince.CEBU_SOUTHWEST_CORNER,
-        CebuProvince.CEBU_NORTHEAST_CORNER,
+        NoBounds.WORLD_SOUTHWEST_CORNER,
+        NoBounds.WORLD_NORTHEAST_CORNER,
       );
 
       _initializeUserLocation();
@@ -106,15 +110,24 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
             ? _currentLocation
             : await _getInitialLocation();
 
-        if (mounted && CebuBoundsHelper.isWithinProvince(initialLocation)) {
-          await Future.wait([
-            ref
-                .read(geoapifyStateProvider.notifier)
-                .getAddressFromLatLng(initialLocation),
-            ref.read(isWaterProvider.notifier).checkLocation(initialLocation)
-          ]);
+        final isWithinBoundary =
+            await _locationService.isWithinBoundary(initialLocation);
 
-          _mapController.move(initialLocation, _currentZoom);
+        if (mounted) {
+          setState(() {
+            _isWithinBoundary = isWithinBoundary;
+          });
+
+          if (isWithinBoundary) {
+            await Future.wait([
+              ref
+                  .read(geoapifyStateProvider.notifier)
+                  .getAddressFromLatLng(initialLocation),
+              ref.read(isWaterProvider.notifier).checkLocation(initialLocation)
+            ]);
+
+            _mapController.move(initialLocation, _currentZoom);
+          }
         }
       }
     });
@@ -157,12 +170,39 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
       final geolocatorState = ref.watch(geolocatorStateProvider);
 
       if (geolocatorState.position != null) {
-        _currentLocation = LatLng(geolocatorState.position!.latitude,
-            geolocatorState.position!.longitude);
-        _mapController.move(_currentLocation, _currentZoom);
-        await ref.read(geoapifyStateProvider.notifier).getAddressFromLatLng(
-              LatLng(_currentLocation.latitude, _currentLocation.longitude),
-            );
+        final newLocation = LatLng(
+          geolocatorState.position!.latitude,
+          geolocatorState.position!.longitude,
+        );
+
+        final isWithinBoundary =
+            await _locationService.isWithinBoundary(newLocation);
+
+        if (!mounted) return;
+
+        setState(() {
+          _currentLocation = newLocation;
+          _isWithinBoundary = isWithinBoundary;
+        });
+
+        if (isWithinBoundary) {
+          _mapController.move(_currentLocation, _currentZoom);
+
+          await ref.read(isWaterProvider.notifier).checkLocation(newLocation);
+
+          final waterState = ref.read(isWaterProvider);
+
+          if (waterState.isWater != null && !waterState.isWater!) {
+            await ref
+                .read(geoapifyStateProvider.notifier)
+                .getAddressFromLatLng(newLocation);
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Selected location is outside the service area')),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -176,33 +216,64 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
     if (!mounted) return;
     LatLng center = _mapController.camera.center;
 
+    setState(() {
+      _showingDelayedShimmer = true;
+    });
+
+    bool isWithinBoundary = false;
+
     if (widget.locationType == LocationType.stop) {
-      if (!CebuBoundsHelper.isWithinRegion(center, widget.packageType)) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Please select a location within ${widget.packageType} Cebu')),
-        );
-        return;
+      bool isWithinProperRegion = false;
+
+      switch (widget.packageType) {
+        case 'NORTH':
+          isWithinProperRegion = await _locationService
+              .isWithinNorthCebuBoundary(center, widget.packageType);
+          break;
+        case 'SOUTH':
+          isWithinProperRegion = await _locationService
+              .isWithinSouthCebuBoundary(center, widget.packageType);
+          break;
+        case 'CITY':
+          isWithinProperRegion = await _locationService
+              .isWithinCityCebuBoundary(center, widget.packageType);
+          break;
+        default:
+          isWithinProperRegion = false;
       }
-    } else if (!CebuBoundsHelper.isWithinProvince(center)) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Please select a location within Cebu province')),
-      );
-      return;
+
+      //   isWithinBoundary = true;
+      if (isWithinProperRegion) {
+        isWithinBoundary = true;
+      }
+    } else {
+      isWithinBoundary = await _locationService.isWithinBoundary(center);
     }
 
-    await ref.read(isWaterProvider.notifier).checkLocation(center);
+    if (!mounted) return;
 
-    final waterState = ref.read(isWaterProvider);
+    setState(() {
+      _isWithinBoundary = isWithinBoundary;
+    });
 
-    if (waterState.isWater != null && !waterState.isWater!) {
-      await ref
-          .read(geoapifyStateProvider.notifier)
-          .getAddressFromLatLng(center);
+    if (mounted && isWithinBoundary) {
+      await ref.read(isWaterProvider.notifier).checkLocation(center);
+
+      final waterState = ref.read(isWaterProvider);
+
+      if (waterState.isWater != null && !waterState.isWater!) {
+        await ref
+            .read(geoapifyStateProvider.notifier)
+            .getAddressFromLatLng(center);
+      }
+    }
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (mounted) {
+      setState(() {
+        _showingDelayedShimmer = false;
+      });
     }
   }
 
@@ -210,6 +281,15 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
   Widget build(BuildContext context) {
     final geoapifyState = ref.watch(geoapifyStateProvider);
     final waterState = ref.watch(isWaterProvider);
+
+    final bool isLoading = geoapifyState.isLoading ||
+        waterState.isLoading ||
+        _showingDelayedShimmer;
+
+    final bool isLocationValid = !isLoading &&
+        geoapifyState.reverseGeocodeResponse != null &&
+        waterState.isWater == false &&
+        _isWithinBoundary;
 
     return Scaffold(
       appBar: AppBar(
@@ -297,9 +377,12 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (geoapifyState.isLoading)
-                    Center(child: ShimmerReverseGeocodingLocation())
-                  else if (waterState.isWater == true)
+                  if (isLoading)
+                    Center(
+                      child: ShimmerReverseGeocodingLocation(),
+                    )
+                  else if (waterState.isWater == true ||
+                      _isWithinBoundary == false)
                     Text(
                       'This location is unserviceable',
                       style: TextStyle(
@@ -320,10 +403,7 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
                     ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: (!geoapifyState.isLoading &&
-                            geoapifyState.reverseGeocodeResponse != null &&
-                            !waterState.isLoading &&
-                            waterState.isWater == false)
+                    onPressed: isLocationValid
                         ? () {
                             final geocodeResponse =
                                 geoapifyState.reverseGeocodeResponse!;
@@ -343,7 +423,7 @@ class _MapLocationPickerState extends ConsumerState<MapLocationPicker> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    child: geoapifyState.isLoading
+                    child: isLoading
                         ? SizedBox(
                             height: 20,
                             width: 20,

@@ -37,7 +37,7 @@ class RouteState {
     RouteResponseModel? route,
     bool? isLoading,
     String? error,
-    double? totalDistance,
+    num? totalDistance,
   }) {
     return RouteState(
       route: route ?? this.route,
