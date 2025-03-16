@@ -5,7 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:tripnitor_mobile_app/constants/constant.dart';
+import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/location_service_data_model.dart';
 import 'package:tripnitor_mobile_app/models/package_model.dart';
 import 'package:tripnitor_mobile_app/providers/route_polyline_provider.dart';
@@ -26,6 +26,8 @@ class ItineraryRoutesPage extends ConsumerStatefulWidget {
   final LocationServiceData startLocation;
   final LocationServiceData finalLocation;
   final List<LegCreate> itineraries;
+  final bool isEditing;
+  final String? packageId;
 
   const ItineraryRoutesPage({
     super.key,
@@ -36,6 +38,8 @@ class ItineraryRoutesPage extends ConsumerStatefulWidget {
     required this.startLocation,
     required this.finalLocation,
     required this.itineraries,
+    this.isEditing = false,
+    this.packageId,
   });
 
   @override
@@ -101,7 +105,12 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
   }
 
   Future<bool> _isAllMarkersInRegion() async {
-    if (markerCoordinates.length <= 2) return true;
+    if (markerCoordinates.length <= 2) {
+      setState(() {
+        isAllWithinRegion = true;
+      });
+      return true;
+    }
 
     final intermediateCoordinates =
         markerCoordinates.sublist(1, markerCoordinates.length - 1);
@@ -152,7 +161,7 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
     return widget.itineraries[index - 1].endLocation.address ?? 'No address';
   }
 
-  void _createPackage() {
+  void _handlePackage() {
     final routeState = ref.read(routeStateProvider);
 
     final LocationCreate startLocation =
@@ -177,6 +186,8 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
       context,
       MaterialPageRoute(
         builder: (context) => PackageConfirmationPage(
+          packageId: widget.packageId,
+          isEditing: widget.isEditing,
           package: package,
         ),
       ),
@@ -755,7 +766,7 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                               child: SafeArea(
                                 child: ElevatedButton(
                                   onPressed:
-                                      isAllWithinRegion ? _createPackage : null,
+                                      isAllWithinRegion ? _handlePackage : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(
                                         ColorConstants.PRIMARY_COLOR),
@@ -770,8 +781,8 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                                             .withOpacity(0.5),
                                     disabledForegroundColor: Colors.white,
                                   ),
-                                  child: const Text(
-                                    'Proceed',
+                                  child: Text(
+                                    widget.isEditing ? 'Update' : 'Proceed',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,

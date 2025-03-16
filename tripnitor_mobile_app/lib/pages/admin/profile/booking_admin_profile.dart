@@ -202,12 +202,16 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Starting Location: "),
-                              Text(
-                                bookingState
-                                    .booking!.package.startLocation.name,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  bookingState.booking?.startLocation?.name ??
+                                      "",
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -217,12 +221,17 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Final Location: "),
-                              Text(
-                                bookingState
-                                    .booking!.package.finalDestination.name,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  bookingState
+                                          .booking?.finalDestination?.name ??
+                                      "",
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],

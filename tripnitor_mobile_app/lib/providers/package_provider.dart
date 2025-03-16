@@ -39,7 +39,6 @@ class PackageNotifier extends StateNotifier<PackageState> {
   }
 
   Future<void> createPackage(PackageCreate package) async {
-    log('Starting package creation...', name: 'PackageNotifier');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -72,6 +71,31 @@ class PackageNotifier extends StateNotifier<PackageState> {
         error: e.toString(),
       );
     }
+  }
+
+  Future<void> updatePackage(PackageCreate package, String packageId) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final updatePackage =
+          await _packageService.updatePackage(package, packageId);
+
+      state = state.copyWith(
+        isLoading: false,
+        selectedPackage: updatePackage,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to update package. $e',
+      );
+      rethrow;
+    }
+  }
+
+  void clearState() {
+    state = PackageState();
   }
 }
 

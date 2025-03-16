@@ -151,9 +151,9 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${booking.package.startLocation.name} -> '
-                                      '${booking.package.legs.length - 1 > 0 ? '${booking.package.legs.length - 1} itineraries -> ' : ''}'
-                                      '${booking.package.finalDestination.name}',
+                                      '${booking.startLocation?.name} -> '
+                                      '${booking.bookingLeg.length - 1 > 0 ? '${booking.bookingLeg.length - 1} itineraries -> ' : ''}'
+                                      '${booking.finalDestination?.name}',
                                       style: const TextStyle(
                                         color: Colors.black54,
                                         fontSize: 12,

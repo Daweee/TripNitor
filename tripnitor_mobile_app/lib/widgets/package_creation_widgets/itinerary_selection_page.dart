@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong2/latlong.dart';
-import '../../constants/constant.dart';
+import '../../core/constants/constant.dart';
 import '../../helpers/location_transformation_help.dart';
+import '../../models/leg_model.dart';
 import '../../models/location_service_data_model.dart';
 import '../../services/map_service.dart';
 import '../location_display_widget.dart';
@@ -16,6 +17,9 @@ class ItinerarySelectionPage extends StatefulWidget {
   final String packageDescription;
   LocationServiceData startLocation;
   LocationServiceData finalLocation;
+  final bool isEditing;
+  final List<LegCreate>? initialLegs;
+  final String? packageId;
 
   ItinerarySelectionPage({
     super.key,
@@ -25,6 +29,9 @@ class ItinerarySelectionPage extends StatefulWidget {
     required this.packageDescription,
     required this.startLocation,
     required this.finalLocation,
+    this.isEditing = false,
+    this.initialLegs,
+    this.packageId,
   });
 
   @override
@@ -98,6 +105,7 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
         startLocation: widget.startLocation,
         stops: validStops,
         finalLocation: widget.finalLocation,
+        initialLegs: widget.isEditing ? widget.initialLegs : null,
       );
 
       if (mounted) {
@@ -105,6 +113,7 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
           context,
           MaterialPageRoute(
             builder: (context) => ItineraryRoutesPage(
+              packageId: widget.packageId,
               packageType: widget.packageType,
               packageVisibility: widget.packageVisibility,
               packageName: widget.packageName,
@@ -112,6 +121,7 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
               startLocation: widget.startLocation,
               finalLocation: widget.finalLocation,
               itineraries: legs,
+              isEditing: widget.isEditing,
             ),
           ),
         );
@@ -133,10 +143,44 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.isEditing && widget.initialLegs != null) {
+      stops.clear();
+      if (widget.initialLegs!.isNotEmpty) {
+        // For multiple legs, we need to get all intermediate stops
+        // Skip the first leg's start location (it's the package start location)
+        // Skip the last leg's end location (it's the package final location)
+        // Take only the end locations of intermediate legs
+        for (int i = 0; i < widget.initialLegs!.length - 1; i++) {
+          final endLocation = widget.initialLegs![i].endLocation;
+          final locationData = LocationServiceData(
+            mapboxId:
+                '', // Since we already have coordinates, empty mapboxId is fine
+            name: endLocation.name,
+            address: endLocation.address,
+            latitude: endLocation.latitude,
+            longitude: endLocation.longitude,
+          );
+          stops.add(locationData);
+        }
+
+        // Add empty stop if not at max
+        if (stops.length < maxStops) {
+          stops.add(null);
+        }
+      } else {
+        // If no legs, just add initial null stop
+        stops.add(null);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add your itinerary',
+        title: Text(widget.isEditing ? 'Edit Itinerary' : 'Add your itinerary',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0)),
         centerTitle: true,
         leading: IconButton(

@@ -101,8 +101,6 @@ class _DriverItineraryDetailsPageState
             iconData: FontAwesomeIcons.solidCircleDot,
             iconColor: Color(ColorConstants.PRIMARY_COLOR),
             iconSize: 15.0,
-            departureTime: leg.departureTime,
-            arrivalTime: leg.arrivalTime,
           ),
         );
         itineraryWidgets.add(_verticalDashLines());

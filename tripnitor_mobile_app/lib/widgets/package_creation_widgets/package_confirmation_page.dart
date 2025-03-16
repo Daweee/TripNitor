@@ -7,7 +7,8 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../constants/constant.dart';
+import 'package:tripnitor_mobile_app/providers/route_polyline_provider.dart';
+import '../../core/constants/constant.dart';
 import '../../pages/user/package_detail_page.dart';
 import '../../pages/user/package_page.dart';
 import '../../providers/package_fare_calculation_provider.dart';
@@ -19,10 +20,14 @@ import '../../widgets/custom_modal_dialogue.dart';
 
 class PackageConfirmationPage extends ConsumerStatefulWidget {
   final PackageCreate package;
+  final bool isEditing;
+  final String? packageId;
 
   const PackageConfirmationPage({
     Key? key,
     required this.package,
+    this.isEditing = false,
+    this.packageId,
   }) : super(key: key);
 
   @override
@@ -328,7 +333,8 @@ class _PackageConfirmationPageState
 
     itineraryWidgets.add(_verticalDashLines());
 
-    if (package.legs.length == 1) {
+    // Handle case where we only have start and end (no intermediate legs)
+    if (package.legs.isEmpty || package.legs.length == 1) {
       itineraryWidgets.add(
         _locationPoint(
           name: package.finalDestination.name,
@@ -392,6 +398,7 @@ class _PackageConfirmationPageState
                     : location.address ?? 'No address',
                 style: TextStyle(
                   fontSize: 16,
+                  fontWeight: FontWeight.bold,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -399,18 +406,17 @@ class _PackageConfirmationPageState
           ],
         ),
         if (location.name.trim().isNotEmpty &&
+            location.address != null &&
             location.address!.isNotEmpty) ...[
           SizedBox(width: 15),
           Padding(
             padding: const EdgeInsets.only(left: 31),
-            child: Expanded(
-              child: Text(
-                location.address ?? 'No address',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                  overflow: TextOverflow.ellipsis,
-                ),
+            child: Text(
+              location.address!,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -449,14 +455,12 @@ class _PackageConfirmationPageState
           SizedBox(width: 15),
           Padding(
             padding: const EdgeInsets.only(left: 31),
-            child: Expanded(
-              child: Text(
-                location.address ?? 'No address',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                  overflow: TextOverflow.ellipsis,
-                ),
+            child: Text(
+              location.address ?? 'No address',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -582,26 +586,42 @@ class _PackageConfirmationPageState
               )
             ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-            ),
-            onPressed: () {
-              final fareState = ref.read(packageFareCalculationProvider);
-              if (fareState.updatedPackage != null) {
-                _createPackage(fareState.updatedPackage!);
-              }
+          Consumer(
+            builder: (context, ref, child) {
+              final fareState = ref.watch(packageFareCalculationProvider);
+              final isReady =
+                  !fareState.isLoading && fareState.updatedPackage != null;
+
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isReady
+                      ? Color(ColorConstants.PRIMARY_COLOR)
+                      : Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                onPressed: isReady
+                    ? () {
+                        if (widget.isEditing) {
+                          _updatePackage(fareState.updatedPackage!);
+                        } else {
+                          _createPackage(fareState.updatedPackage!);
+                        }
+                      }
+                    : null,
+                child: Text(
+                  widget.isEditing
+                      ? (isReady ? 'Update Package' : 'Calculating fare...')
+                      : (isReady ? 'Create Package' : 'Calculating fare...'),
+                  style: TextStyle(
+                    color:
+                        isReady ? Colors.white : Colors.white.withOpacity(0.7),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
             },
-            child: Text(
-              'Create Package',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
           ),
         ],
       ),
@@ -623,7 +643,7 @@ class _PackageConfirmationPageState
     );
   }
 
-  void _createPackage(PackageCreate package) async {
+  void _updatePackage(PackageCreate package) async {
     try {
       showDialog(
         context: context,
@@ -637,14 +657,116 @@ class _PackageConfirmationPageState
         },
       );
 
-      await ref.read(packageProvider.notifier).createPackage(package);
+      if (widget.packageId == null) {
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Something went wrong.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      await ref
+          .read(packageProvider.notifier)
+          .updatePackage(package, widget.packageId!);
       final packageState = ref.read(packageProvider);
 
       if (mounted && Navigator.canPop(context)) {
         Navigator.pop(context);
       }
 
-      // Only show error if we don't have a selected package
+      if (packageState.error != null && packageState.selectedPackage == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update package: ${packageState.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (mounted && packageState.selectedPackage != null) {
+        ref.read(packageProvider.notifier).clearState();
+        // Navigate back to package detail
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PackageDetailPage(
+              packageId: packageState.selectedPackage!.id,
+            ),
+          ),
+          (Route<dynamic> route) =>
+              route.runtimeType == PackagePage || route.isFirst,
+        );
+      }
+    } catch (e) {
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update package: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _createPackage(PackageCreate package) async {
+    // Ensure we have the latest calculated fare
+    final fareState = ref.read(packageFareCalculationProvider);
+    if (fareState.isLoading || fareState.calculatedPackageFare == null) {
+      // Wait for fare calculation to complete
+      await ref
+          .read(packageFareCalculationProvider.notifier)
+          .calculatePackageFare(
+            package.totalDistance.toDouble(),
+            package,
+          );
+    }
+
+    try {
+      // Show loading indicator
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+            );
+          },
+        );
+      }
+
+      // Get the latest package state with calculated fare
+      final updatedPackage =
+          ref.read(packageFareCalculationProvider).updatedPackage;
+      if (updatedPackage == null) {
+        throw Exception('Package data not ready');
+      }
+
+      // Create the package
+      await ref.read(packageProvider.notifier).createPackage(updatedPackage);
+      final packageState = ref.read(packageProvider);
+
+      // Handle loading indicator
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      // Handle errors
       if (packageState.error != null && packageState.selectedPackage == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -657,7 +779,9 @@ class _PackageConfirmationPageState
         return;
       }
 
+      // Handle success
       if (mounted && packageState.selectedPackage != null) {
+        ref.read(routeStateProvider.notifier).clearRoute();
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(

@@ -100,8 +100,6 @@ class _AdminItineraryDetailsPageState extends State<AdminItineraryDetailsPage> {
             iconData: FontAwesomeIcons.solidCircleDot,
             iconColor: Color(ColorConstants.PRIMARY_COLOR),
             iconSize: 15.0,
-            departureTime: leg.departureTime,
-            arrivalTime: leg.arrivalTime,
           ),
         );
         itineraryWidgets.add(_verticalDashLines());
@@ -154,11 +152,15 @@ class _AdminItineraryDetailsPageState extends State<AdminItineraryDetailsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  locationName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isMiniStop ? null : FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    locationName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: isMiniStop ? null : FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (departureTime != null || arrivalTime != null)

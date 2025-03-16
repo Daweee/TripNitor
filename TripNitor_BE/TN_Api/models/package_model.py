@@ -33,22 +33,26 @@ class Package(CustomPrimaryKeyModel):
     def __str__(self):
         return self.package_name
 
-    def calculate_base_price(self):
-        lowest_gas_price = Gas.objects.aggregate(Min('gas_price'))['gas_price__min']
-        if lowest_gas_price is not None:
-            price_per_km = Decimal(lowest_gas_price) / Decimal('10')
-            distance_cost = price_per_km * self.total_distance
-            return distance_cost.quantize(Decimal('0.01'))
-        return Decimal('0') 
+    def clean(self):
+        """Validate package data before saving."""
+        super().clean()
+        if self.visibility == self.PackageVisibility.JOINER:
+            if not self.max_participants:
+                raise ValidationError("Max participants is required for joiner packages")
+            if not self.start_date or not self.end_date:
+                raise ValidationError("Start and end dates are required for joiner packages")
+            if self.start_date >= self.end_date:
+                raise ValidationError("End date must be after start date")
+            if self.current_participants and self.current_participants > self.max_participants:
+                raise ValidationError("Current participants cannot exceed max participants")
+        
+        if not self.start_location or not self.final_destination:
+            raise ValidationError("Start location and final destination are required")
+        
+        if self.total_distance is not None and self.total_distance <= 0:
+            raise ValidationError("Total distance must be greater than 0")
 
     def save(self, *args, **kwargs):
-        # if self.visibility == self.PackageVisibility.PRIVATE:
-        #     self.max_participants = self.capacity
-
-        if not self.pk or not self.base_price:  
-            self.base_price = self.calculate_base_price()
-
+        """Save package with validation."""
         self.clean()
         super().save(*args, **kwargs)
-
-        

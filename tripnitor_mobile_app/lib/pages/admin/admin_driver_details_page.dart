@@ -100,11 +100,13 @@ class _AdminDriverDetailsPageState extends State<AdminDriverDetailsPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            '${driver.van.model} • ${driver.van.plateNumber}',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
+          Flexible(
+            child: Text(
+              '${driver.van.model} • ${driver.van.plateNumber}',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
             ),
           ),
         ],

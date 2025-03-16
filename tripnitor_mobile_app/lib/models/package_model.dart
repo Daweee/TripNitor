@@ -35,6 +35,25 @@ class Package {
       this.totalDistance});
 
   factory Package.fromJson(Map<String, dynamic> json) {
+    // Safely convert to int if the values are strings
+    int? maxParticipants;
+    if (json['max_participants'] != null) {
+      if (json['max_participants'] is String) {
+        maxParticipants = int.tryParse(json['max_participants']);
+      } else {
+        maxParticipants = json['max_participants'] as int;
+      }
+    }
+
+    int? currentParticipants;
+    if (json['current_participants'] != null) {
+      if (json['current_participants'] is String) {
+        currentParticipants = int.tryParse(json['current_participants']);
+      } else {
+        currentParticipants = json['current_participants'] as int;
+      }
+    }
+
     return Package(
       id: json['id'],
       packageName: json['package_name'],
@@ -44,9 +63,11 @@ class Package {
       visibility: json['visibility'],
       startLocation: Location.fromJson(json['start_location']),
       finalDestination: Location.fromJson(json['final_destination']),
-      legs: List<Leg>.from(json["legs"].map((x) => Leg.fromJson(x))),
-      maxParticipants: json['max_participants'],
-      currentParticipants: json['current_participants'],
+      legs: json['legs'] != null
+          ? List<Leg>.from(json["legs"].map((x) => Leg.fromJson(x)))
+          : [],
+      maxParticipants: maxParticipants,
+      currentParticipants: currentParticipants,
       startDate: json['start_date'] != null
           ? DateTime.parse(json['start_date'])
           : null,
@@ -108,7 +129,8 @@ class PackageCreate {
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    // Ensure numeric fields are properly formatted
+    final Map<String, dynamic> json = {
       'package_name': packageName,
       'description': description,
       'base_price': basePrice,
@@ -117,12 +139,20 @@ class PackageCreate {
       'start_location': startLocation.toJson(),
       'final_destination': finalDestination.toJson(),
       'legs': List<dynamic>.from(legs.map((x) => x.toJson())),
-      'max_participants': maxParticipants,
-      'current_participants': currentParticipants,
       'start_date': startDate?.toIso8601String(),
       'end_date': endDate?.toIso8601String(),
-      "total_distance": totalDistance,
+      'total_distance': totalDistance,
     };
+
+    // Only include participants if they are not null
+    if (maxParticipants != null) {
+      json['max_participants'] = maxParticipants;
+    }
+    if (currentParticipants != null) {
+      json['current_participants'] = currentParticipants;
+    }
+
+    return json;
   }
 
   PackageCreate copyWith({

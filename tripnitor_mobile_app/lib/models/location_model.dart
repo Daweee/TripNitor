@@ -1,12 +1,14 @@
 class Location {
   final int id;
   final String name;
-  final String latitude;
-  final String longitude;
+  final String? address;
+  final double latitude;
+  final double longitude;
 
   Location({
     required this.id,
     required this.name,
+    this.address,
     required this.latitude,
     required this.longitude,
   });
@@ -15,8 +17,9 @@ class Location {
     return Location(
       id: json['id'] as int,
       name: json['name'] as String,
-      latitude: json['latitude'] as String,
-      longitude: json['longitude'] as String,
+      address: json['address'] ?? '',
+      latitude: double.parse(json['latitude'].toString()),
+      longitude: double.parse(json['longitude'].toString()),
     );
   }
 
@@ -24,6 +27,7 @@ class Location {
     return {
       'id': id,
       'name': name,
+      'address': address,
       'latitude': latitude,
       'longitude': longitude,
     };
@@ -46,6 +50,7 @@ class LocationCreate {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'address': address,
       'latitude': latitude,
       'longitude': longitude,
     };

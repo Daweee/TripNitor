@@ -441,7 +441,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final driverIds = bookingState
                               .previewBooking!.assignedDrivers
                               .map((driver) => driver.id)
@@ -461,16 +461,26 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             totalPrice: bookingState.previewBooking!.totalPrice,
                           );
 
-                          ref
+                          await ref
                               .read(bookingStateProvider.notifier)
                               .createBooking(booking);
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookingDetailPage(),
-                            ),
-                          );
+                          if (ref.read(bookingStateProvider).booking != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookingDetailPage(),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Failed to create booking. Please try again.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
