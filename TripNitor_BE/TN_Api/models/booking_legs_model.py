@@ -9,7 +9,8 @@ class BookingLeg(models.Model):
     departure_time = models.DateTimeField(null=True, blank=True) 
     arrival_time = models.DateTimeField(null=True, blank=True)
     original_leg_id = models.PositiveIntegerField(null=True, blank=True)  # For reference/analytics
-    
+    is_active = models.BooleanField(default=False)
+
     class Meta:
         ordering = ['leg_number']
         unique_together = ['booking', 'leg_number']
