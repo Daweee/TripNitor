@@ -7,3 +7,4 @@ from .booking_view import (BookingListView, BookingCreateView, BookingDetailView
 BookingPreviewView, UserBookingListView, GetBookingStatusListView, ConfirmBookingView, CancelBookingView, StartBookingView)
 from .driver_assignment_view import DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList
 from .location_view import LocationValidationView
+from .booking_leg_view import SetBookingLegActiveView, CompleteBookingLegView

@@ -8,7 +8,7 @@ from .views import (
     ConfirmBookingView, CancelBookingView, StartBookingView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView,
     DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList,
-    LocationValidationView,
+    LocationValidationView, SetBookingLegActiveView, CompleteBookingLegView
 )
 
 urlpatterns = [
@@ -62,4 +62,7 @@ urlpatterns = [
     path('packages/<str:pk>/delete/', PackageDeleteView.as_view(), name='delete_package'),
 
     path('locations/check-coordinates/', LocationValidationView.as_view(), name='check-coordinates'),
+
+    path('booking-legs/<int:pk>/to-active/', SetBookingLegActiveView.as_view(), name='activate-booking-leg'),
+    path('booking-legs/<int:pk>/to-complete/', CompleteBookingLegView.as_view(), name='complete-booking-leg')
 ]
