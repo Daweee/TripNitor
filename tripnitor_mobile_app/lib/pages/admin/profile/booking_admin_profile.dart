@@ -40,7 +40,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
         scrolledUnderElevation: 0.0,
         title: bookingState.booking != null
             ? Text(
-                dateTimeFormat.format(bookingState.booking!.createdAt),
+                dateTimeFormat.format(bookingState.booking!.localCreatedAt!),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

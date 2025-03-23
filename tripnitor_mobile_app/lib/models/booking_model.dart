@@ -1,8 +1,4 @@
-// ignore_for_file: non_constant_identifier_names
-
-import 'package:flutter/foundation.dart';
 import 'package:tripnitor_mobile_app/models/preview_boking_model.dart';
-
 import 'auth_model.dart';
 import 'booking_leg_model.dart';
 import 'driver_model.dart';
@@ -50,6 +46,8 @@ class Booking {
     required this.endDate,
   });
 
+  DateTime? get localCreatedAt => createdAt.toLocal();
+
   factory Booking.fromJson(Map<String, dynamic> json) => Booking(
         id: json["id"],
         user: User.fromJson(json["user"]),
@@ -91,10 +89,10 @@ class Booking {
         "total_price": totalPrice,
         "number_of_passengers": numberOfPassengers,
         "mode_of_payment": modeOfPayment,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "start_date": startDate.toIso8601String(),
-        "end_date": endDate.toIso8601String(),
+        "created_at": createdAt.toUtc().toIso8601String(),
+        "updated_at": updatedAt.toUtc().toIso8601String(),
+        "start_date": startDate.toUtc().toIso8601String(),
+        "end_date": endDate.toUtc().toIso8601String(),
       };
 }
 

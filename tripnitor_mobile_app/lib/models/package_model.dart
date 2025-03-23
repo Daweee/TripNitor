@@ -34,8 +34,10 @@ class Package {
       this.endDate,
       this.totalDistance});
 
+  DateTime? get locatStartDate => startDate?.toLocal();
+  DateTime? get localEndDate => endDate?.toLocal();
+
   factory Package.fromJson(Map<String, dynamic> json) {
-    // Safely convert to int if the values are strings
     int? maxParticipants;
     if (json['max_participants'] != null) {
       if (json['max_participants'] is String) {
@@ -90,8 +92,8 @@ class Package {
       'legs': List<dynamic>.from(legs.map((x) => x.toJson())),
       'max_participants': maxParticipants,
       'current_participants': currentParticipants,
-      'start_date': startDate?.toIso8601String(),
-      'end_date': endDate?.toIso8601String(),
+      'start_date': startDate?.toUtc().toIso8601String(),
+      'end_date': endDate?.toUtc().toIso8601String(),
       "total_distance": totalDistance,
     };
   }
