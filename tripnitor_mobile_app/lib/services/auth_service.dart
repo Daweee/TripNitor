@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
+import 'package:tripnitor_mobile_app/models/auth_model.dart';
 import 'token_service.dart';
 
 class AuthService {
@@ -75,6 +76,23 @@ class AuthService {
       }
     } catch (e) {
       throw Exception('Failed to fetch user details: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchAdminDetails() async {
+    try {
+      final response = await _dio.get('api/users/admin-user/');
+      if (response.statusCode == 200) {
+        return response.data['data'];
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error: 'Failed to load admin details. Status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch admin details: $e');
     }
   }
 
