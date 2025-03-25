@@ -19,6 +19,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
 from TN_Api.models import User
+from ..services import UserService
 
 @extend_schema(tags=['users'])
 class RegisterView(CustomResponseMixin, CreateAPIView):
@@ -122,4 +123,25 @@ class UserDetailView(CustomResponseMixin, RetrieveAPIView):
             status.HTTP_200_OK,
             serializer.data,
             'User details retrieved successfully'
+        )
+    
+@extend_schema(tags=['users'])
+class GetUserWithAdminRole(CustomResponseMixin, GenericAPIView):
+    serializer_class = UserSerializer
+    
+    def get(self, request, *args, **kwargs):
+        if not UserService.is_admin_exists():
+            return self.get_custom_response(
+                status.HTTP_404_NOT_FOUND,
+                None,
+                'Admin user does not exist'
+            )
+
+        admin_user = UserService.get_admin_user()
+        serializer = self.get_serializer(admin_user)
+        
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data, 
+            'Admin user details retrieved successfully'
         )

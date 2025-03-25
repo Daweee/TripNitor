@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    RegisterView, LoginView, LogoutView, UserDetailView, 
+    RegisterView, LoginView, LogoutView, UserDetailView, GetUserWithAdminRole,
     DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView, RetrieveDriverInstanceView,
     VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView, UnassignedVanListView,
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
@@ -15,6 +15,7 @@ urlpatterns = [
     path('users/register/', RegisterView.as_view(), name='register'),
     path('users/login/', LoginView.as_view(), name='login'),
     path('users/logout/', LogoutView.as_view(), name='logout'),
+    path('users/admin-user/', GetUserWithAdminRole.as_view(), name='admin-user'),
     path('users/<str:pk>/', UserDetailView.as_view(), name='get_user'),
 
     path('drivers/register/', DriverCreateView.as_view(), name='register_driver'),
