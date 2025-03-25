@@ -7,9 +7,10 @@ class TokenService {
   final FlutterSecureStorage _storage = FlutterSecureStorage();
   final Dio _dio = Dio();
 
-  Future<void> saveTokens(
-      String id, String accessToken, String refreshToken) async {
+  Future<void> saveTokens(String id, String userRole, String accessToken,
+      String refreshToken) async {
     await _storage.write(key: 'id', value: id);
+    await _storage.write(key: 'role', value: userRole);
     await _storage.write(key: 'access_token', value: accessToken);
     await _storage.write(key: 'refresh_token', value: refreshToken);
   }
@@ -26,8 +27,13 @@ class TokenService {
     return await _storage.read(key: 'id');
   }
 
+  Future<String?> getUserRole() async {
+    return await _storage.read(key: 'role');
+  }
+
   Future<void> deleteTokens() async {
     await _storage.delete(key: 'id');
+    await _storage.delete(key: 'role');
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
   }

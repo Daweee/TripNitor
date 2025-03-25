@@ -79,7 +79,7 @@ class AuthService {
   }
 
   Future<void> _saveTokens(Map<String, dynamic> data) async {
-    await tokenService.saveTokens(
-        data['id'], data['token']['access'], data['token']['refresh']);
+    await tokenService.saveTokens(data['id'], data['role'],
+        data['token']['access'], data['token']['refresh']);
   }
 }
