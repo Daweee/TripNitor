@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/constants/constant.dart';
 import '../../providers/booking_provider.dart';
 import '../../models/booking_model.dart';
+import '../../widgets/booking_itinerary_widgets/booking_itinerary_page.dart';
 import '../../widgets/custom_modal_dialogue.dart';
 import 'home_page.dart';
 
@@ -160,6 +161,7 @@ class BookingDetailsContent extends ConsumerWidget {
           SizedBox(
             height: 30,
           ),
+          _viewItineraryButton(booking, context, ref),
           _cancelBookingButton(booking, context, ref),
           SizedBox(
             height: 30,
@@ -533,9 +535,6 @@ class BookingDetailsContent extends ConsumerWidget {
             content:
                 'Are you sure you want to cancel this booking? This action cannot be undone.',
             onConfirm: () async {
-              // Add your cancel booking logic here
-              print('Booking cancelled');
-
               await ref
                   .read(bookingStateProvider.notifier)
                   .cancelBooking(booking.id);
@@ -563,6 +562,42 @@ class BookingDetailsContent extends ConsumerWidget {
           ),
           child: Text(
             'Cancel Booking',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _viewItineraryButton(
+      Booking booking, BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: 45,
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    BookingItineraryPage(bookingId: booking.id),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          child: Text(
+            'View Itinerary',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
