@@ -179,14 +179,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
-                                    booking.status,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: _getStatusColor(booking.status),
-                                      fontSize: 16,
-                                    ),
-                                  ),
+                                  _buildStatusTag(booking.status),
                                 ],
                               ),
                             ],
@@ -198,6 +191,67 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                     }
                   },
                 ),
+    );
+  }
+
+  Widget _buildStatusTag(String status) {
+    Color backgroundColor;
+    Color textColor = Colors.white;
+    IconData? iconData;
+
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        backgroundColor = Color(ColorConstants.ACCENT_COLOR);
+        iconData = Icons.hourglass_empty;
+        break;
+      case 'CONFIRMED':
+        backgroundColor = Color(ColorConstants.PRIMARY_COLOR);
+        iconData = Icons.check_circle_outline;
+        break;
+      case 'ONGOING':
+        backgroundColor = Color(ColorConstants.SUCCESS_COLOR);
+        iconData = Icons.directions_car;
+        break;
+      case 'CANCELLED':
+        backgroundColor = Color(ColorConstants.ERROR_COLOR);
+        iconData = Icons.cancel_outlined;
+        break;
+      case 'COMPLETED':
+        backgroundColor = Colors.blue;
+        iconData = Icons.task_alt;
+        break;
+      default:
+        backgroundColor = Colors.grey;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (iconData != null) ...[
+            Icon(
+              iconData,
+              color: textColor,
+              size: 14,
+            ),
+            SizedBox(width: 4),
+          ],
+          Text(
+            status,
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

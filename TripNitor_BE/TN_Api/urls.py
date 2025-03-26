@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    RegisterView, LoginView, LogoutView, UserDetailView, 
+    RegisterView, LoginView, LogoutView, UserDetailView, GetUserWithAdminRole,
     DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView, RetrieveDriverInstanceView,
     VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView, UnassignedVanListView,
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
@@ -8,13 +8,14 @@ from .views import (
     ConfirmBookingView, CancelBookingView, StartBookingView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView,
     DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList,
-    LocationValidationView,
+    LocationValidationView, SetBookingLegActiveView, CompleteBookingLegView
 )
 
 urlpatterns = [
     path('users/register/', RegisterView.as_view(), name='register'),
     path('users/login/', LoginView.as_view(), name='login'),
     path('users/logout/', LogoutView.as_view(), name='logout'),
+    path('users/admin-user/', GetUserWithAdminRole.as_view(), name='admin-user'),
     path('users/<str:pk>/', UserDetailView.as_view(), name='get_user'),
 
     path('drivers/register/', DriverCreateView.as_view(), name='register_driver'),
@@ -62,4 +63,7 @@ urlpatterns = [
     path('packages/<str:pk>/delete/', PackageDeleteView.as_view(), name='delete_package'),
 
     path('locations/check-coordinates/', LocationValidationView.as_view(), name='check-coordinates'),
+
+    path('booking-legs/<int:pk>/to-active/', SetBookingLegActiveView.as_view(), name='activate-booking-leg'),
+    path('booking-legs/<int:pk>/to-complete/', CompleteBookingLegView.as_view(), name='complete-booking-leg')
 ]

@@ -129,6 +129,12 @@ class BookingStateNotifier extends StateNotifier<BookingState> {
     }
   }
 
+  void updateBooking(Booking updatedBooking) {
+    state = state.copyWith(
+      booking: updatedBooking,
+    );
+  }
+
   void clearState() {
     state = BookingState();
   }

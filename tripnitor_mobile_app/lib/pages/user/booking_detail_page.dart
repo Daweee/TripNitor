@@ -145,8 +145,6 @@ class BookingDetailsContent extends StatelessWidget {
   }
 
   Widget _buildBookingDetails(DateFormat dateTimeFormat) {
-    DateTime localCreatedAt = booking.createdAt.toLocal();
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
@@ -189,7 +187,7 @@ class BookingDetailsContent extends StatelessWidget {
                   _buildInfoRow("Booking ID:", booking.id, isWhite: true),
                   _buildInfoRow(
                     "Booked On:",
-                    dateTimeFormat.format(localCreatedAt),
+                    dateTimeFormat.format(booking.localCreatedAt!),
                     isWhite: true,
                   ),
                 ],

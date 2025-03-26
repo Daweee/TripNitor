@@ -8,4 +8,8 @@ class BookingLegSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BookingLeg
-        fields = ['id', 'leg_number', 'start_location', 'end_location', 'departure_time', 'arrival_time']
+        fields = ['id', 'leg_number', 'is_active', 'is_completed', 'start_location', 'end_location', 'departure_time', 'arrival_time']
+
+class BookingLegStatusUpdateSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)        

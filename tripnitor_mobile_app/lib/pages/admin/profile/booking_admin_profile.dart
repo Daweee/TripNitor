@@ -4,10 +4,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
+import 'package:tripnitor_mobile_app/widgets/itinerary_details_page.dart';
 import '../../../../models/booking_model.dart';
+import '../../../widgets/booking_itinerary_widgets/booking_itinerary_page.dart';
 import '../../../widgets/custom_modal_dialogue.dart';
 import '../admin_driver_details_page.dart';
-import '../admin_itinerary_details_page.dart';
 import '../admin_payment_details_page.dart';
 
 class BookingAdminProfile extends ConsumerStatefulWidget {
@@ -40,7 +41,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
         scrolledUnderElevation: 0.0,
         title: bookingState.booking != null
             ? Text(
-                dateTimeFormat.format(bookingState.booking!.createdAt),
+                dateTimeFormat.format(bookingState.booking!.localCreatedAt!),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -62,7 +63,9 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
       ),
       body: bookingState.booking == null
           ? Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
             )
           : SingleChildScrollView(
               child: Padding(
@@ -75,7 +78,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Booking ID: ",
+                          "Booking ID:",
                           style: TextStyle(color: Colors.black, fontSize: 24),
                         ),
                         Text(bookingState.booking!.id,
@@ -88,12 +91,8 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Booking Status: "),
-                        Text(bookingState.booking!.status,
-                            style: TextStyle(
-                                color: _getStatusColor(
-                                    bookingState.booking!.status),
-                                fontWeight: FontWeight.bold)),
+                        Text("Booking Status:"),
+                        _buildStatusTag(bookingState.booking!.status),
                       ],
                     ),
                     SizedBox(
@@ -102,7 +101,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Booked By: "),
+                        Text("Booked By:"),
                         Text(bookingState.booking!.user.name,
                             style: TextStyle(
                                 color: Colors.black,
@@ -115,7 +114,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Starts on: "),
+                        Text("Starts on:"),
                         Text(
                             dateTimeFormat
                                 .format(bookingState.booking!.startDate),
@@ -130,7 +129,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Ends on: "),
+                        Text("Ends on:"),
                         Text(
                             dateTimeFormat
                                 .format(bookingState.booking!.endDate),
@@ -145,7 +144,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Number of Passengers: "),
+                        Text("Number of Passengers:"),
                         Text("${bookingState.booking!.numberOfPassengers}",
                             style: TextStyle(
                                 color: Colors.black,
@@ -183,9 +182,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          AdminItineraryDetailsPage(
-                                              package: bookingState
-                                                  .booking!.package),
+                                          ItineraryDetailsPage(),
                                     ),
                                   );
                                 },
@@ -371,6 +368,40 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                     SizedBox(
                       height: 40,
                     ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 45,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookingItineraryPage(
+                                  bookingId: widget.bookingId,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Color(ColorConstants.PRIMARY_COLOR),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: Text(
+                            'View Itinerary',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     if (bookingState.booking!.status == 'PENDING') ...[
                       _confirmBookingButton(bookingState.booking!),
                       SizedBox(
@@ -382,6 +413,67 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildStatusTag(String status) {
+    Color backgroundColor;
+    Color textColor = Colors.white;
+    IconData? iconData;
+
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        backgroundColor = Color(ColorConstants.ACCENT_COLOR);
+        iconData = Icons.hourglass_empty;
+        break;
+      case 'CONFIRMED':
+        backgroundColor = Color(ColorConstants.PRIMARY_COLOR);
+        iconData = Icons.check_circle_outline;
+        break;
+      case 'ONGOING':
+        backgroundColor = Color(ColorConstants.SUCCESS_COLOR);
+        iconData = Icons.directions_car;
+        break;
+      case 'CANCELLED':
+        backgroundColor = Color(ColorConstants.ERROR_COLOR);
+        iconData = Icons.cancel_outlined;
+        break;
+      case 'COMPLETED':
+        backgroundColor = Colors.green;
+        iconData = Icons.task_alt;
+        break;
+      default:
+        backgroundColor = Colors.grey;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (iconData != null) ...[
+            Icon(
+              iconData,
+              color: textColor,
+              size: 16,
+            ),
+            SizedBox(width: 4),
+          ],
+          Text(
+            status,
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -397,9 +489,6 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
             content:
                 'Are you sure you want to cancel this booking? This action cannot be undone.',
             onConfirm: () async {
-              // Add your cancel booking logic here
-              print('Booking cancelled');
-
               await ref
                   .read(bookingStateProvider.notifier)
                   .cancelBooking(booking.id);
@@ -444,9 +533,6 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
             title: 'Confirm Booking',
             content: 'Are you sure you want to confirm this booking?',
             onConfirm: () async {
-              // Add your confirm booking logic here
-              print('Booking confirmed: $booking.id');
-
               await ref
                   .read(bookingStateProvider.notifier)
                   .confirmBooking(booking.id);
@@ -480,22 +566,5 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return Color(ColorConstants.ACCENT_COLOR);
-      case 'CONFIRMED':
-        return Color(ColorConstants.PRIMARY_COLOR);
-      case 'ONGOING':
-        return Color(ColorConstants.SUCCESS_COLOR);
-      case 'CANCELLED':
-        return Color(ColorConstants.ERROR_COLOR);
-      case 'COMPLETED':
-        return Colors.blue;
-      default:
-        return Colors.black;
-    }
   }
 }
