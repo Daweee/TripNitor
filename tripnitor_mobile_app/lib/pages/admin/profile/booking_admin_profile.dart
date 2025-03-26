@@ -4,10 +4,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
+import 'package:tripnitor_mobile_app/widgets/itinerary_details_page.dart';
 import '../../../../models/booking_model.dart';
 import '../../../widgets/custom_modal_dialogue.dart';
 import '../admin_driver_details_page.dart';
-import '../admin_itinerary_details_page.dart';
 import '../admin_payment_details_page.dart';
 
 class BookingAdminProfile extends ConsumerStatefulWidget {
@@ -183,9 +183,7 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          AdminItineraryDetailsPage(
-                                              package: bookingState
-                                                  .booking!.package),
+                                          ItineraryDetailsPage(),
                                     ),
                                   );
                                 },
