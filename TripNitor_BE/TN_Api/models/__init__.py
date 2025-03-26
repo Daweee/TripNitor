@@ -8,3 +8,4 @@ from .location_model import Location
 from .leg_model import Leg
 from .driver_assignment_model import DriverAssignment
 from .booking_legs_model import BookingLeg
+from .rating_model import Rating

@@ -111,3 +111,6 @@ class Booking(CustomPrimaryKeyModel):
         package_instance = self.package
         self.start_location = package_instance.start_location
         self.final_destination = package_instance.final_destination
+
+    def can_be_rated(self):
+        return self.status == self.BookingStatus.COMPLETED and self.drivers.exists()
