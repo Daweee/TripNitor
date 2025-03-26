@@ -345,7 +345,15 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildInfoRow('Booking ID: ', driverBooking.booking.id),
-                      _buildStatusRow('Status: ', driverBooking.booking.status),
+                      Row(
+                        children: [
+                          Text(
+                            'Status:  ',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          _buildStatusTag(driverBooking.booking.status),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -409,39 +417,64 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
     );
   }
 
-  Widget _buildStatusRow(String label, String status) {
-    return Row(
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
-        ),
-        Text(
-          status,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-            color: _getStatusColor(status),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildStatusTag(String status) {
+    Color backgroundColor;
+    Color textColor = Colors.white;
+    IconData? iconData;
 
-  Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return Color(ColorConstants.ACCENT_COLOR);
+        backgroundColor = Color(ColorConstants.ACCENT_COLOR);
+        iconData = Icons.hourglass_empty;
+        break;
       case 'CONFIRMED':
-        return Color(ColorConstants.PRIMARY_COLOR);
+        backgroundColor = Color(ColorConstants.PRIMARY_COLOR);
+        iconData = Icons.check_circle_outline;
+        break;
       case 'ONGOING':
-        return Color(ColorConstants.SUCCESS_COLOR);
+        backgroundColor = Color(ColorConstants.SUCCESS_COLOR);
+        iconData = Icons.directions_car;
+        break;
       case 'CANCELLED':
-        return Color(ColorConstants.ERROR_COLOR);
+        backgroundColor = Color(ColorConstants.ERROR_COLOR);
+        iconData = Icons.cancel_outlined;
+        break;
       case 'COMPLETED':
-        return Colors.blue;
+        backgroundColor = Colors.green;
+        iconData = Icons.task_alt;
+        break;
       default:
-        return Colors.black;
+        backgroundColor = Colors.grey;
+        break;
     }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (iconData != null) ...[
+            Icon(
+              iconData,
+              color: textColor,
+              size: 10,
+            ),
+            SizedBox(width: 2),
+          ],
+          Text(
+            status,
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
