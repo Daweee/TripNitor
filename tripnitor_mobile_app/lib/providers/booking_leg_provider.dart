@@ -78,6 +78,7 @@ class BookingLegStateNotifier extends StateNotifier<BookingLegState> {
         totalPrice: currentBooking.totalPrice,
         numberOfPassengers: currentBooking.numberOfPassengers,
         modeOfPayment: currentBooking.modeOfPayment,
+        isRated: currentBooking.isRated,
         createdAt: currentBooking.createdAt,
         updatedAt: currentBooking.updatedAt,
         startDate: currentBooking.startDate,

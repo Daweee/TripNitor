@@ -20,6 +20,7 @@ class Booking {
   final String totalPrice;
   final int numberOfPassengers;
   final String modeOfPayment;
+  final bool isRated;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime startDate;
@@ -40,6 +41,7 @@ class Booking {
     required this.totalPrice,
     required this.numberOfPassengers,
     required this.modeOfPayment,
+    required this.isRated,
     required this.createdAt,
     required this.updatedAt,
     required this.startDate,
@@ -69,6 +71,7 @@ class Booking {
         totalPrice: json["total_price"],
         numberOfPassengers: json["number_of_passengers"],
         modeOfPayment: json["mode_of_payment"],
+        isRated: json["is_rated"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         startDate: DateTime.parse(json["start_date"]),
@@ -89,6 +92,7 @@ class Booking {
         "total_price": totalPrice,
         "number_of_passengers": numberOfPassengers,
         "mode_of_payment": modeOfPayment,
+        "is_rated": isRated,
         "created_at": createdAt.toUtc().toIso8601String(),
         "updated_at": updatedAt.toUtc().toIso8601String(),
         "start_date": startDate.toUtc().toIso8601String(),
