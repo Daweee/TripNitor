@@ -1,5 +1,6 @@
 from ..models import Rating, Booking, Driver
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from django.db import transaction
 
 class RatingService:
     
@@ -23,14 +24,18 @@ class RatingService:
         self.validate_can_rate(booking, user)
         self._validate_rating_value(rating, "rating")
 
-        rating_obj, created = Rating.objects.update_or_create(
-            booking=booking,
-            user=user,
-            defaults={
-                'rating': int(rating),
-                'comment': comment
-            }
-        )
+        with transaction.atomic():
+            rating_obj, created = Rating.objects.update_or_create(
+                booking=booking,
+                user=user,
+                defaults={
+                    'rating': int(rating),
+                    'comment': comment
+                }
+            )
+
+            booking.set_booking_ratings(int(rating))
+            booking.mark_as_rated()
 
         return rating_obj
 

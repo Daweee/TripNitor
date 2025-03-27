@@ -31,6 +31,8 @@ class Booking(CustomPrimaryKeyModel):
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_passengers = models.PositiveIntegerField()
     mode_of_payment = models.CharField(max_length=20, choices=PaymentMode.choices, default=PaymentMode.CASH)
+    is_rated = models.BooleanField(default=False)
+    ratings = models.PositiveIntegerField(null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     start_date = models.DateTimeField()
@@ -114,3 +116,13 @@ class Booking(CustomPrimaryKeyModel):
 
     def can_be_rated(self):
         return self.status == self.BookingStatus.COMPLETED and self.drivers.exists()
+    
+    def mark_as_rated(self):
+        self.is_rated = True
+        self.save()
+        return self
+    
+    def set_booking_ratings(self, ratings):
+        self.ratings = ratings
+        self.save()
+        return self

@@ -476,13 +476,43 @@ class BookingDetailsContent extends ConsumerWidget {
           ),
           Expanded(
             flex: 3,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: _getStatusColor(value),
-              ),
+            child: Row(
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: _getStatusColor(value),
+                  ),
+                ),
+                if (value.toUpperCase() == 'COMPLETED' &&
+                    booking.ratings != null) ...[
+                  SizedBox(width: 8),
+                  Container(
+                    width: 4,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  FaIcon(
+                    FontAwesomeIcons.solidStar,
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                    size: 12,
+                  ),
+                  SizedBox(width: 2),
+                  Text(
+                    "${booking.ratings}",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ],

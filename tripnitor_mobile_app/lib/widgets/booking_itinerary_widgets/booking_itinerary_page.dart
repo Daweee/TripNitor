@@ -13,6 +13,7 @@ import '../custom_modal_dialogue.dart';
 import 'booking_bottom_action.dart';
 import 'driver_booking_bottom_action.dart';
 import '../../providers/admin_provider.dart';
+import 'booking_rating_widget.dart';
 
 class BookingItineraryPage extends ConsumerStatefulWidget {
   final String bookingId;
@@ -187,10 +188,16 @@ class _BookingItineraryPageState extends ConsumerState<BookingItineraryPage> {
   }
 
   Widget _buildUI(BuildContext context) {
+    final bookingState = ref.watch(bookingStateProvider);
+    final isCompleted = bookingState.booking?.status == "COMPLETED";
+    final isRated = bookingState.booking?.isRated ?? false;
+
     return SingleChildScrollView(
       physics: AlwaysScrollableScrollPhysics(),
       child: Column(
         children: [
+          if (isCompleted && bookingState.booking != null && !isRated)
+            BookingRatingWidget(bookingId: widget.bookingId),
           _itineraryList(context),
           SizedBox(height: 80),
         ],
