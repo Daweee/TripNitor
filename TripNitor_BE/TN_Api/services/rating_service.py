@@ -32,6 +32,8 @@ class RatingService:
             }
         )
 
+        booking.mark_as_rated()
+
         return rating_obj
 
     def _validate_rating_value(self, rating, field_name):
