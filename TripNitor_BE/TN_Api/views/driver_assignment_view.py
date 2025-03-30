@@ -3,10 +3,10 @@ from rest_framework.generics import (
     RetrieveAPIView,
     CreateAPIView,
     UpdateAPIView,
-    DestroyAPIView
+    DestroyAPIView,
 )
 from ..models import DriverAssignment, Driver, Booking
-from ..serializers import DriverAssignmentSerializer, DriverSerializer
+from ..serializers import DriverAssignmentSerializer, DriverSerializer, DriverSwapSerializer
 from ..services import DriverAssignmentService
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
@@ -206,3 +206,48 @@ class AvailableDriversForSwapView(CustomResponseMixin, ListAPIView):
             'Available drivers for swap retrieved successfully'
         )
 
+@extend_schema(tags=['driver assignments'])
+class SwapDriverView(CustomResponseMixin, UpdateAPIView):
+    serializer_class = DriverSwapSerializer
+    queryset = DriverAssignment.objects.all()
+
+    def get_object(self):
+        assignment_id = self.kwargs.get('id')
+        try:
+            obj = DriverAssignment.objects.get(id=assignment_id)
+            self.check_object_permissions(self.request, obj)
+            return obj
+        except DriverAssignment.DoesNotExist:
+            raise NotFound("Assignment not found")
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        new_driver_id = request.data.get('new_driver_id')
+        if not new_driver_id:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                "new_driver_id is required"
+            )
+        
+        booking_id = instance.booking_id
+        old_driver_id = instance.driver_id
+        
+        updated_assignment, error = DriverAssignmentService.swap_driver(
+            booking_id, old_driver_id, new_driver_id
+        )
+        
+        if error:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                error
+            )
+            
+        serializer = DriverAssignmentSerializer(updated_assignment)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Driver swapped successfully'
+        )

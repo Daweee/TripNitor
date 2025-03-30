@@ -44,3 +44,43 @@ class DriverAssignmentService:
             
         except Exception as e:
             return None, str(e)
+        
+    @staticmethod
+    def swap_driver(booking_id, old_driver_id, new_driver_id):
+        if not all([booking_id, old_driver_id, new_driver_id]):
+            return None, "booking_id, old_driver_id, and new_driver_id are required"
+            
+        try:
+            with transaction.atomic():
+                booking = Booking.objects.get(id=booking_id, status=Booking.BookingStatus.PENDING)
+                
+                assignment = DriverAssignment.objects.get(
+                    booking_id=booking_id,
+                    driver_id=old_driver_id
+                )
+                
+                conflicts = DriverAssignment.objects.filter(
+                    driver_id=new_driver_id,
+                    start_date__lt=assignment.end_date,
+                    end_date__gt=assignment.start_date
+                ).exclude(booking_id=booking_id).exists()
+                
+                if conflicts:
+                    return None, "Selected driver has conflicting assignments"
+
+                new_driver = Driver.objects.get(id=new_driver_id, user__is_active=True)
+
+                assignment.driver = new_driver
+                assignment.assigned_at = timezone.now()
+                assignment.save()
+                
+                return assignment, None
+                
+        except Booking.DoesNotExist:
+            return None, "Booking not found or not in PENDING status"
+        except DriverAssignment.DoesNotExist:
+            return None, "Assignment not found for the specified driver and booking"
+        except Driver.DoesNotExist:
+            return None, "New driver not found or inactive"
+        except Exception as e:
+            return None, str(e)
