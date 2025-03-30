@@ -22,3 +22,8 @@ class DriverAssignmentSerializer(serializers.ModelSerializer):
         
         driver_assignment = DriverAssignment.objects.create(driver=driver, booking=booking, **validated_data)
         return driver_assignment
+    
+class DriverSwapSerializer(serializers.Serializer):
+    booking_id = serializers.CharField(required=True)
+    old_driver_id = serializers.CharField(required=True)
+    new_driver_id = serializers.CharField(required=True)

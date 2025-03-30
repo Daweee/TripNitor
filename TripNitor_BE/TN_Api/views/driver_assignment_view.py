@@ -3,11 +3,13 @@ from rest_framework.generics import (
     RetrieveAPIView,
     CreateAPIView,
     UpdateAPIView,
-    DestroyAPIView
+    DestroyAPIView,
 )
 from ..models import DriverAssignment, Driver, Booking
-from ..serializers import DriverAssignmentSerializer
-from drf_spectacular.utils import extend_schema
+from ..serializers import DriverAssignmentSerializer, DriverSerializer, DriverSwapSerializer
+from ..services import DriverAssignmentService
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from .mixins import CustomResponseMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
@@ -138,4 +140,114 @@ class DriverAssignmentUpdate(CustomResponseMixin, UpdateAPIView):
 @extend_schema(tags=['driver assignments'])
 class DriverAssignmentDestroy(CustomResponseMixin, DestroyAPIView):
     queryset = DriverAssignment.objects.all()
-    serializer_class = DriverAssignmentSerializer
+    serializer_class = DriverSerializer
+
+@extend_schema(
+    tags=['driver assignments'],
+    parameters=[
+        OpenApiParameter(
+            name='booking_id',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description='ID of the booking to find available drivers for',
+            required=True
+        ),
+        OpenApiParameter(
+            name='start_date',
+            type=OpenApiTypes.DATETIME,
+            location=OpenApiParameter.QUERY,
+            description='Start date of the booking (format: YYYY-MM-DD HH:MM:SS)',
+            required=True
+        ),
+        OpenApiParameter(
+            name='end_date',
+            type=OpenApiTypes.DATETIME,
+            location=OpenApiParameter.QUERY,
+            description='End date of the booking (format: YYYY-MM-DD HH:MM:SS)',
+            required=True
+        )
+    ],
+    responses={
+        200: DriverSerializer(many=True),
+        400: None,
+        404: None
+    }
+)
+class AvailableDriversForSwapView(CustomResponseMixin, ListAPIView):
+    serializer_class = DriverSerializer
+
+    def get(self, request, *args, **kwargs):
+        booking_id = request.query_params.get('booking_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        available_drivers, error = DriverAssignmentService.get_available_drivers_for_swap(
+            booking_id, start_date, end_date
+        )
+        
+        if error:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                error
+            )
+            
+        if not available_drivers or available_drivers.count() == 0:
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                None,
+                'No available drivers found for swap'
+            )
+            
+        serializer = self.get_serializer(available_drivers, many=True)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Available drivers for swap retrieved successfully'
+        )
+
+@extend_schema(tags=['driver assignments'])
+class SwapDriverView(CustomResponseMixin, UpdateAPIView):
+    serializer_class = DriverSwapSerializer
+    queryset = DriverAssignment.objects.all()
+
+    def get_object(self):
+        assignment_id = self.kwargs.get('id')
+        try:
+            obj = DriverAssignment.objects.get(id=assignment_id)
+            self.check_object_permissions(self.request, obj)
+            return obj
+        except DriverAssignment.DoesNotExist:
+            raise NotFound("Assignment not found")
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        new_driver_id = request.data.get('new_driver_id')
+        if not new_driver_id:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                "new_driver_id is required"
+            )
+        
+        booking_id = instance.booking_id
+        old_driver_id = instance.driver_id
+        
+        updated_assignment, error = DriverAssignmentService.swap_driver(
+            booking_id, old_driver_id, new_driver_id
+        )
+        
+        if error:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                error
+            )
+            
+        serializer = DriverAssignmentSerializer(updated_assignment)
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            serializer.data,
+            'Driver swapped successfully'
+        )

@@ -7,6 +7,6 @@ from .booking_serializer import BookingSerializer, BookingCreationSerializer, Bo
 from .location_serializer import LocationSerializer, LocationQuerySerializer
 from .leg_serializer import LegSerializer
 from .package_serializer import PackageSerializer, FareCalculationSerializer, PackageBasicSerializer
-from .driver_assignment_serializer import DriverAssignmentSerializer
+from .driver_assignment_serializer import DriverAssignmentSerializer, DriverSwapSerializer
 from .booking_leg_serializer import BookingLegSerializer, BookingLegStatusUpdateSerializer
 from .rating_serializer import RatingSerializer
