@@ -378,7 +378,43 @@ class _ReassignDriversPageState extends ConsumerState<ReassignDriversPage> {
     }
 
     try {
-      Navigator.pop(context);
+      final booking = ref.read(bookingStateProvider).booking;
+      if (booking == null) {
+        throw Exception('No active booking found');
+      }
+
+      final driverAssignmentState = ref.read(driverAssignmentStateProvider);
+
+      DriverAssignment? currentDriverAssignment;
+
+      if (driverAssignmentState.availableDrivers.isNotEmpty) {
+        await ref
+            .read(driverAssignmentStateProvider.notifier)
+            .retrieveDriverAssignment(booking.id, selectedCurrentDriver!.id);
+
+        if (driverAssignmentState.driverAssignment!.booking.id == booking.id &&
+            driverAssignmentState.driverAssignment!.driver.id ==
+                selectedCurrentDriver!.id) {
+          currentDriverAssignment = driverAssignmentState.driverAssignment;
+        } else {
+          throw Exception('Current driver assignment not found');
+        }
+
+        final driverAssignmentId = currentDriverAssignment!.id;
+        final oldDriverId = selectedCurrentDriver!.id;
+        final newDriverId = selectedNewDriver!.id;
+
+        await ref.read(driverAssignmentStateProvider.notifier).reassignDrivers(
+            driverAssignmentId, booking.id, oldDriverId, newDriverId);
+
+        await ref
+            .read(bookingStateProvider.notifier)
+            .getBookingDetails(booking.id);
+
+        Navigator.pop(context);
+      } else {
+        throw Exception('Driver assignments not loaded');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

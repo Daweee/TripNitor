@@ -113,6 +113,8 @@ class DriverAssignmentService {
       );
 
       if (response.statusCode == 200) {
+        if (response.data['data'] == null) return [];
+
         final List<dynamic> driversJson = response.data['data'];
         return driversJson.map((json) => Driver.fromJson(json)).toList();
       } else {
@@ -120,6 +122,51 @@ class DriverAssignmentService {
       }
     } catch (e) {
       throw Exception('Error getting available drivers: $e');
+    }
+  }
+
+  Future<DriverAssignment> reassignDrivers(int driverAssignmentId,
+      String bookingId, String oldDriverId, String newDriverId) async {
+    try {
+      final response = await _dio.put(
+        'api/driver-assignments/$driverAssignmentId/swap-driver/',
+        data: {
+          'booking_id': bookingId,
+          'old_driver_id': oldDriverId,
+          'new_driver_id': newDriverId
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return DriverAssignment.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to reassign drivers');
+      }
+    } catch (e) {
+      throw Exception('Error reassigning drivers: $e');
+    }
+  }
+
+  Future<DriverAssignment> retrieveDriverAssignment(
+      String bookingId, String driverId) async {
+    try {
+      final Map<String, dynamic> queryParams = {};
+
+      queryParams['booking_id'] = bookingId;
+      queryParams['driver_id'] = driverId;
+
+      final response = await _dio.get(
+        'api/drivers-assignment/retrieve/',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        return DriverAssignment.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to retrieve driver assignment');
+      }
+    } catch (e) {
+      throw Exception('Error retrieving driver assignment: $e');
     }
   }
 }

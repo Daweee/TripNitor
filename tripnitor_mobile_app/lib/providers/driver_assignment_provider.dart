@@ -28,7 +28,6 @@ class DriverAssignmentStateNotifier
   }
 
   Future<void> getAllSpecificDriverBookings(String driverId) async {
-    // Clear the list before fetching new data
     state =
         state.copyWith(isLoading: true, error: null, driverAssignmentList: []);
     try {
@@ -43,7 +42,7 @@ class DriverAssignmentStateNotifier
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to load driver booking schedule list: $e',
-        driverAssignmentList: [], // Ensure list is cleared on error
+        driverAssignmentList: [],
       );
     }
   }
@@ -88,6 +87,44 @@ class DriverAssignmentStateNotifier
         isLoading: false,
         error: 'Failed to load available drivers: $e',
         availableDrivers: [],
+      );
+    }
+  }
+
+  Future<void> reassignDrivers(int driverAssignmentId, String bookingId,
+      String oldDriverId, String newDriverId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final driverAssignment = await _driverAssignmentService.reassignDrivers(
+          driverAssignmentId, bookingId, oldDriverId, newDriverId);
+      state = state.copyWith(
+          isLoading: false,
+          driverAssignment: driverAssignment,
+          error: null,
+          message: 'Driver reassigned successfully.');
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to reassigned driver: $e',
+      );
+    }
+  }
+
+  Future<void> retrieveDriverAssignment(
+      String bookingId, String driverId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final driverAssignment = await _driverAssignmentService
+          .retrieveDriverAssignment(bookingId, driverId);
+      state = state.copyWith(
+          isLoading: false,
+          driverAssignment: driverAssignment,
+          error: null,
+          message: 'Driver reassigned successfully.');
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to reassigned driver: $e',
       );
     }
   }
