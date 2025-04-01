@@ -47,6 +47,7 @@ class DriverAssignmentState {
   final int? status;
   final DriverAssignment? driverAssignment;
   final List<DriverAssignment>? driverAssignmentList;
+  final List<Driver> availableDrivers;
   final String? message;
   final bool isLoading;
   final String? error;
@@ -55,6 +56,7 @@ class DriverAssignmentState {
     this.status,
     this.driverAssignment,
     this.driverAssignmentList,
+    this.availableDrivers = const [],
     this.message,
     this.isLoading = false,
     this.error,
@@ -64,6 +66,7 @@ class DriverAssignmentState {
     int? status,
     DriverAssignment? driverAssignment,
     List<DriverAssignment>? driverAssignmentList,
+    List<Driver>? availableDrivers,
     String? message,
     bool? isLoading,
     String? error,
@@ -72,6 +75,7 @@ class DriverAssignmentState {
       status: status ?? this.status,
       driverAssignment: driverAssignment ?? this.driverAssignment,
       driverAssignmentList: driverAssignmentList ?? this.driverAssignmentList,
+      availableDrivers: availableDrivers ?? this.availableDrivers,
       message: message ?? this.message,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,

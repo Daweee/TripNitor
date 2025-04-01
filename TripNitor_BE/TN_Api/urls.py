@@ -7,7 +7,7 @@ from .views import (
     BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView, 
     ConfirmBookingView, CancelBookingView, StartBookingView,
     PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView,
-    DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList, AvailableDriversForSwapView, SwapDriverView,
+    DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList, AvailableDriversForSwapView, SwapDriverView, GetDriverAssignment,
     LocationValidationView, SetBookingLegActiveView, CompleteBookingLegView,
     RatingCreateView, RatingListView, RatingDetailView,
 )
@@ -32,6 +32,7 @@ urlpatterns = [
     path('driver-assignments/<str:driver_id>/', DriverAssignmentRetrieveList.as_view(), name='driver_assignment_detail'),
     path('driver-assignment/available-for-swap/', AvailableDriversForSwapView.as_view(), name='driver-available-for-swap'),
     path('driver-assignments/<str:id>/swap-driver/', SwapDriverView.as_view(), name='swap-driver'),
+    path('drivers-assignment/retrieve/', GetDriverAssignment.as_view(), name='retrieve-driver-assigment'),
 
     path('vans/register/', VanCreateView.as_view(), name='register_van'),
     path('vans/', VanListView.as_view(), name='van_list'),

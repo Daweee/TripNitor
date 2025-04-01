@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import 'package:tripnitor_mobile_app/models/driver_assignment.dart';
+import 'package:tripnitor_mobile_app/models/driver_model.dart';
 
 class DriverAssignmentService {
   final Dio _dio = DioClient.instance;
@@ -94,6 +95,78 @@ class DriverAssignmentService {
     } on DioException catch (e) {
       throw Exception(
           'Failed to load confirmed driver bookings list: ${e.message}');
+    }
+  }
+
+  Future<List<Driver>> getAvailableDriversForSwap(
+      String bookingId, DateTime startDate, DateTime endDate) async {
+    try {
+      final Map<String, dynamic> queryParams = {};
+
+      queryParams['booking_id'] = bookingId;
+      queryParams['start_date'] = startDate;
+      queryParams['end_date'] = endDate;
+
+      final response = await _dio.get(
+        'api/driver-assignment/available-for-swap/',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        if (response.data['data'] == null) return [];
+
+        final List<dynamic> driversJson = response.data['data'];
+        return driversJson.map((json) => Driver.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load available drivers');
+      }
+    } catch (e) {
+      throw Exception('Error getting available drivers: $e');
+    }
+  }
+
+  Future<DriverAssignment> reassignDrivers(int driverAssignmentId,
+      String bookingId, String oldDriverId, String newDriverId) async {
+    try {
+      final response = await _dio.put(
+        'api/driver-assignments/$driverAssignmentId/swap-driver/',
+        data: {
+          'booking_id': bookingId,
+          'old_driver_id': oldDriverId,
+          'new_driver_id': newDriverId
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return DriverAssignment.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to reassign drivers');
+      }
+    } catch (e) {
+      throw Exception('Error reassigning drivers: $e');
+    }
+  }
+
+  Future<DriverAssignment> retrieveDriverAssignment(
+      String bookingId, String driverId) async {
+    try {
+      final Map<String, dynamic> queryParams = {};
+
+      queryParams['booking_id'] = bookingId;
+      queryParams['driver_id'] = driverId;
+
+      final response = await _dio.get(
+        'api/drivers-assignment/retrieve/',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        return DriverAssignment.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to retrieve driver assignment');
+      }
+    } catch (e) {
+      throw Exception('Error retrieving driver assignment: $e');
     }
   }
 }

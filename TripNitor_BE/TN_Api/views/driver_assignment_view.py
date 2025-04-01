@@ -251,3 +251,55 @@ class SwapDriverView(CustomResponseMixin, UpdateAPIView):
             serializer.data,
             'Driver swapped successfully'
         )
+    
+@extend_schema(
+    tags=['driver assignments'],
+    parameters=[
+        OpenApiParameter(
+            name='booking_id', 
+            description='ID of the booking', 
+            required=True, 
+            type=OpenApiTypes.STR
+        ),
+        OpenApiParameter(
+            name='driver_id', 
+            description='ID of the driver', 
+            required=True, 
+            type=OpenApiTypes.STR
+        ),
+    ],
+    responses={200: DriverAssignmentSerializer}
+)
+class GetDriverAssignment(CustomResponseMixin, RetrieveAPIView):
+    serializer_class = DriverAssignmentSerializer
+    
+    def get_object(self):
+        booking_id = self.request.query_params.get('booking_id')
+        driver_id = self.request.query_params.get('driver_id')
+        
+        if not booking_id or not driver_id:
+            raise NotFound("Both booking_id and driver_id are required")
+            
+        try:
+            return DriverAssignment.objects.get(
+                booking_id=booking_id,
+                driver_id=driver_id
+            )
+        except DriverAssignment.DoesNotExist:
+            raise NotFound(f"No driver assignment found for booking ID {booking_id} and driver ID {driver_id}")
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                serializer.data,
+                'Driver assignment retrieved successfully'
+            )
+        except NotFound as e:
+            return self.get_custom_response(
+                status.HTTP_404_NOT_FOUND,
+                None,
+                str(e)
+            )
