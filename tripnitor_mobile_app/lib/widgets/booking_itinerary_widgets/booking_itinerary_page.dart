@@ -107,30 +107,31 @@ class _BookingItineraryPageState extends ConsumerState<BookingItineraryPage> {
           backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
           scrolledUnderElevation: 0,
           actions: [
-            Container(
-              margin: EdgeInsets.only(right: 8.0),
-              decoration: BoxDecoration(
-                color: bookingState.booking?.status == "ONGOING"
-                    ? Colors.red[100]
-                    : Color(ColorConstants.DISABLED_COLOR),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: IconButton(
-                icon: FaIcon(
-                  FontAwesomeIcons.headset,
+            if (authState.user?.role != "ADMIN")
+              Container(
+                margin: EdgeInsets.only(right: 8.0),
+                decoration: BoxDecoration(
                   color: bookingState.booking?.status == "ONGOING"
-                      ? Colors.red[700]
-                      : Colors.white,
-                  size: 20.0,
+                      ? Colors.red[100]
+                      : Color(ColorConstants.DISABLED_COLOR),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                tooltip: 'Contact Admin',
-                onPressed: bookingState.booking?.status == "ONGOING"
-                    ? () {
-                        _showContactAdminDialog();
-                      }
-                    : null,
+                child: IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.headset,
+                    color: bookingState.booking?.status == "ONGOING"
+                        ? Colors.red[700]
+                        : Colors.white,
+                    size: 20.0,
+                  ),
+                  tooltip: 'Contact Admin',
+                  onPressed: bookingState.booking?.status == "ONGOING"
+                      ? () {
+                          _showContactAdminDialog();
+                        }
+                      : null,
+                ),
               ),
-            ),
           ],
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(1.0),
