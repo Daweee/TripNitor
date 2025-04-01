@@ -68,6 +68,30 @@ class DriverAssignmentStateNotifier
     }
   }
 
+  Future<void> getAvailableDriversForSwap(
+      String bookingId, DateTime startDate, DateTime endDate) async {
+    state = state.copyWith(isLoading: true, error: null, availableDrivers: []);
+    try {
+      final drivers = await _driverAssignmentService.getAvailableDriversForSwap(
+        bookingId,
+        startDate,
+        endDate,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        availableDrivers: drivers,
+        error: null,
+        message: 'Available drivers retrieved successfully.',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load available drivers: $e',
+        availableDrivers: [],
+      );
+    }
+  }
+
   void clearState() {
     state = DriverAssignmentState();
   }

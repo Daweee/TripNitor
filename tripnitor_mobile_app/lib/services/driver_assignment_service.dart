@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
 import 'package:tripnitor_mobile_app/models/driver_assignment.dart';
+import 'package:tripnitor_mobile_app/models/driver_model.dart';
 
 class DriverAssignmentService {
   final Dio _dio = DioClient.instance;
@@ -94,6 +95,31 @@ class DriverAssignmentService {
     } on DioException catch (e) {
       throw Exception(
           'Failed to load confirmed driver bookings list: ${e.message}');
+    }
+  }
+
+  Future<List<Driver>> getAvailableDriversForSwap(
+      String bookingId, DateTime startDate, DateTime endDate) async {
+    try {
+      final Map<String, dynamic> queryParams = {};
+
+      queryParams['booking_id'] = bookingId;
+      queryParams['start_date'] = startDate;
+      queryParams['end_date'] = endDate;
+
+      final response = await _dio.get(
+        'api/driver-assignment/available-for-swap/',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> driversJson = response.data['data'];
+        return driversJson.map((json) => Driver.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load available drivers');
+      }
+    } catch (e) {
+      throw Exception('Error getting available drivers: $e');
     }
   }
 }
