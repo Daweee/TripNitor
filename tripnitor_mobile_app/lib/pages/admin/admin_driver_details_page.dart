@@ -5,6 +5,7 @@ import '../../core/constants/constant.dart';
 import '../../models/booking_model.dart';
 import '../../models/driver_model.dart';
 import '../../providers/booking_provider.dart';
+import 'reassign_drivers_page.dart';
 
 class AdminDriverDetailsPage extends ConsumerStatefulWidget {
   final List<Driver> driverList;
@@ -89,7 +90,13 @@ class _AdminDriverDetailsPageState
               width: double.infinity,
               height: 45,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ReassignDriversPage()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
                   shape: RoundedRectangleBorder(
