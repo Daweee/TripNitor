@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/constants/constant.dart';
+import '../../models/booking_model.dart';
 import '../../models/driver_model.dart';
+import '../../providers/booking_provider.dart';
 
-class AdminDriverDetailsPage extends StatefulWidget {
-  List<Driver> driverList;
+class AdminDriverDetailsPage extends ConsumerStatefulWidget {
+  final List<Driver> driverList;
 
-  AdminDriverDetailsPage({super.key, required this.driverList});
+  AdminDriverDetailsPage({
+    super.key,
+    required this.driverList,
+  });
 
   @override
-  State<AdminDriverDetailsPage> createState() => _AdminDriverDetailsPageState();
+  ConsumerState<AdminDriverDetailsPage> createState() =>
+      _AdminDriverDetailsPageState();
 }
 
-class _AdminDriverDetailsPageState extends State<AdminDriverDetailsPage> {
+class _AdminDriverDetailsPageState
+    extends ConsumerState<AdminDriverDetailsPage> {
   @override
   Widget build(BuildContext context) {
+    final booking = ref.watch(bookingStateProvider);
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight + 1),
@@ -47,23 +57,57 @@ class _AdminDriverDetailsPageState extends State<AdminDriverDetailsPage> {
         ),
       ),
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: _buildBody(),
+      body: _buildBody(booking.booking),
     );
   }
 
-  Widget _buildBody() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: widget.driverList.map((driver) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: _individualDriverContainer(driver),
-            );
-          }).toList(),
+  Widget _buildBody(Booking? booking) {
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                ...widget.driverList.map((driver) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: _individualDriverContainer(driver),
+                  );
+                }).toList(),
+                SizedBox(height: 80),
+              ],
+            ),
+          ),
         ),
-      ),
+        if (booking != null && booking.status == "PENDING")
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: SizedBox(
+              width: double.infinity,
+              height: 45,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: Text(
+                  'Reassign Drivers',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
