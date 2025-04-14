@@ -9,3 +9,4 @@ from .driver_assignment_view import DriverAssignmentList, DriverAssignmentByDriv
 from .location_view import LocationValidationView
 from .booking_leg_view import SetBookingLegActiveView, CompleteBookingLegView
 from .rating_view import RatingCreateView, RatingListView, RatingDetailView
+from .payment_view import ProcessPaymentView

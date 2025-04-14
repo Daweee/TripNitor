@@ -10,6 +10,7 @@ from .views import (
     DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList, AvailableDriversForSwapView, SwapDriverView, GetDriverAssignment,
     LocationValidationView, SetBookingLegActiveView, CompleteBookingLegView,
     RatingCreateView, RatingListView, RatingDetailView,
+    ProcessPaymentView,
 )
 
 urlpatterns = [
@@ -74,4 +75,6 @@ urlpatterns = [
     path('ratings/register/', RatingCreateView.as_view(), name='register-rating'),
     path('ratings/', RatingListView.as_view(), name='rating-list'),
     path('ratings/<int:pk>/', RatingDetailView.as_view(), name='rating-detail'),
+
+    path('payments/process/', ProcessPaymentView.as_view(), name='process-payment'),
 ]
