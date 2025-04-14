@@ -71,6 +71,8 @@ class BookingCreationSerializer(serializers.ModelSerializer):
         representation['user'] = UserSerializer(instance.user).data
         representation['package'] = PackageSerializer(instance.package).data
         representation['drivers'] = DriverSerializer(instance.drivers.all(), many=True).data
+        representation['start_location'] = LocationSerializer(instance.start_location).data if instance.start_location else None
+        representation['final_destination'] = LocationSerializer(instance.final_destination).data if instance.final_destination else None
         return representation
     
 class BookingPreviewSerializer(serializers.ModelSerializer):

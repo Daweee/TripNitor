@@ -1,11 +1,14 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/user/booking_detail_page.dart';
 import '../../models/booking_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/payment_service.dart';
 import '../../providers/booking_provider.dart';
 import '../../widgets/custom_modal_dialogue.dart';
 
@@ -21,6 +24,97 @@ class PaymentBookingPage extends ConsumerStatefulWidget {
 
 class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
   String _selectedPaymentMethod = 'CASH';
+  bool _isProcessingPayment = false;
+
+  late StripeService _stripeService;
+
+  @override
+  void initState() {
+    super.initState();
+    _stripeService = StripeService();
+  }
+
+  Future<void> _handleCardPayment(double totalPrice,
+      [String currency = 'php']) async {
+    try {
+      setState(() {
+        _isProcessingPayment = true;
+      });
+
+      final result =
+          await _stripeService.createPaymentIntent(totalPrice, currency);
+      final paymentIntentClientSecret = result['client_secret'];
+
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntentClientSecret,
+          style: ThemeMode.dark,
+          customFlow: false,
+          merchantDisplayName: 'Tripnitor',
+        ),
+      );
+
+      await Stripe.instance.presentPaymentSheet();
+
+      final bookingState = ref.read(bookingStateProvider);
+      final authState = ref.read(authProvider);
+      final driverIds = bookingState.previewBooking!.assignedDrivers
+          .map((driver) => driver.id)
+          .toList();
+
+      final booking = BookingCreationRequest(
+        user: authState.user!.id,
+        package: widget.packageId,
+        assigned_drivers: driverIds,
+        numberOfPassengers: bookingState.previewBooking!.numberOfPassengers,
+        modeOfPayment: _selectedPaymentMethod,
+        startDate: bookingState.previewBooking!.startDate,
+        endDate: bookingState.previewBooking!.endDate,
+        updatedPackageFare: bookingState.previewBooking!.basePackagePrice,
+        totalPrice: bookingState.previewBooking!.totalPrice,
+      );
+
+      await ref.read(bookingStateProvider.notifier).createBooking(booking);
+
+      if (ref.read(bookingStateProvider).booking != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookingDetailPage(),
+          ),
+        );
+      }
+    } catch (e) {
+      if (e is StripeException) {
+        if (e.error.code == 'canceled') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Payment canceled'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Payment failed: ${e.error.localizedMessage}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isProcessingPayment = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -413,25 +507,54 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
+                        // Existing Cash option
                         Row(
-                          children: const [
-                            FaIcon(FontAwesomeIcons.moneyBill1),
-                            SizedBox(width: 10),
-                            Text('Cash', style: TextStyle(fontSize: 16)),
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: const [
+                                FaIcon(FontAwesomeIcons.moneyBill1),
+                                SizedBox(width: 10),
+                                Text('Cash', style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                            Radio<String>(
+                              value: 'CASH',
+                              groupValue: _selectedPaymentMethod,
+                              onChanged: (String? value) {
+                                setState(() {
+                                  _selectedPaymentMethod = value!;
+                                });
+                              },
+                              activeColor: Colors.grey[800],
+                            ),
                           ],
                         ),
-                        Radio<String>(
-                          value: 'CASH',
-                          groupValue: _selectedPaymentMethod,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedPaymentMethod = value!;
-                            });
-                          },
-                          activeColor: Colors.grey[800],
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: const [
+                                FaIcon(FontAwesomeIcons.creditCard),
+                                SizedBox(width: 10),
+                                Text('Credit Card',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                            Radio<String>(
+                              value: 'CREDIT_CARD',
+                              groupValue: _selectedPaymentMethod,
+                              onChanged: (String? value) {
+                                setState(() {
+                                  _selectedPaymentMethod = value!;
+                                });
+                              },
+                              activeColor: Colors.grey[800],
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -441,47 +564,52 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () async {
-                          final driverIds = bookingState
-                              .previewBooking!.assignedDrivers
-                              .map((driver) => driver.id)
-                              .toList();
+                        onPressed: _isProcessingPayment
+                            ? null
+                            : () async {
+                                setState(() {
+                                  _isProcessingPayment = true;
+                                });
 
-                          final booking = BookingCreationRequest(
-                            user: authState.user!.id,
-                            package: widget.packageId,
-                            assigned_drivers: driverIds,
-                            numberOfPassengers:
-                                bookingState.previewBooking!.numberOfPassengers,
-                            modeOfPayment: _selectedPaymentMethod,
-                            startDate: bookingState.previewBooking!.startDate,
-                            endDate: bookingState.previewBooking!.endDate,
-                            updatedPackageFare:
-                                bookingState.previewBooking!.basePackagePrice,
-                            totalPrice: bookingState.previewBooking!.totalPrice,
-                          );
+                                try {
+                                  final driverIds = bookingState
+                                      .previewBooking!.assignedDrivers
+                                      .map((driver) => driver.id)
+                                      .toList();
 
-                          await ref
-                              .read(bookingStateProvider.notifier)
-                              .createBooking(booking);
+                                  final booking = BookingCreationRequest(
+                                    user: authState.user!.id,
+                                    package: widget.packageId,
+                                    assigned_drivers: driverIds,
+                                    numberOfPassengers: bookingState
+                                        .previewBooking!.numberOfPassengers,
+                                    modeOfPayment: _selectedPaymentMethod,
+                                    startDate:
+                                        bookingState.previewBooking!.startDate,
+                                    endDate:
+                                        bookingState.previewBooking!.endDate,
+                                    updatedPackageFare: bookingState
+                                        .previewBooking!.basePackagePrice,
+                                    totalPrice:
+                                        bookingState.previewBooking!.totalPrice,
+                                  );
 
-                          if (ref.read(bookingStateProvider).booking != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BookingDetailPage(),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Failed to create booking. Please try again.'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        },
+                                  if (_selectedPaymentMethod == 'CASH') {
+                                    // Cash payment flow
+                                    await _processCashBooking(booking);
+                                  } else if (_selectedPaymentMethod ==
+                                      'CREDIT_CARD') {
+                                    // Card payment flow
+                                    await _handleCardPayment(
+                                        bookingState.previewBooking!.totalPrice,
+                                        'php');
+                                  }
+                                } finally {
+                                  setState(() {
+                                    _isProcessingPayment = false;
+                                  });
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
                           padding: EdgeInsets.symmetric(vertical: 12),
@@ -489,14 +617,20 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text(
-                          'Confirm Booking',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: _isProcessingPayment
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2))
+                            : Text(
+                                'Confirm Booking',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -590,5 +724,25 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
         );
       },
     );
+  }
+
+  Future<void> _processCashBooking(BookingCreationRequest booking) async {
+    await ref.read(bookingStateProvider.notifier).createBooking(booking);
+
+    if (ref.read(bookingStateProvider).booking != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BookingDetailPage(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to create booking. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

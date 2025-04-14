@@ -77,3 +77,7 @@ class MapConfig {
   static const double SIDE_PADDING = 50.0;
   static const double BOTTOM_PADDING = 250.0;
 }
+
+class StripeConfig {
+  static String? STRIPE_PUBLISHABLE_KEY = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
+}
