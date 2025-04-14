@@ -162,7 +162,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                                     const SizedBox(height: 2),
                                     Text(
                                       DateFormat('d MMM yyyy, h:mm a')
-                                          .format(booking.createdAt),
+                                          .format(booking.localCreatedAt!),
                                       style: const TextStyle(
                                           color: Colors.black45, fontSize: 12),
                                     ),

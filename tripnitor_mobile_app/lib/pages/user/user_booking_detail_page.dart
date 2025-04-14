@@ -214,7 +214,7 @@ class BookingDetailsContent extends ConsumerWidget {
                   _buildInfoRow("Booking ID:", booking.id, isWhite: true),
                   _buildInfoRow(
                     "Booked On:",
-                    dateTimeFormat.format(booking.createdAt),
+                    dateTimeFormat.format(booking.localCreatedAt!),
                     isWhite: true,
                   ),
                 ],
