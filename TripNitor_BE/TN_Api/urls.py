@@ -6,7 +6,7 @@ from .views import (
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
     BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView, 
     ConfirmBookingView, CancelBookingView, StartBookingView,
-    PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView,
+    PackageCreateView, PackageListView, PackageDetailView, PackageUpdateView, PackageDeleteView, CalculatePackageFareView, JoinPackageView,
     DriverAssignmentList, DriverAssignmentByDriverList, DriverAssignmentRetrieveList, DriverActiveBookingsList, AvailableDriversForSwapView, SwapDriverView, GetDriverAssignment,
     LocationValidationView, SetBookingLegActiveView, CompleteBookingLegView,
     RatingCreateView, RatingListView, RatingDetailView,
@@ -66,6 +66,7 @@ urlpatterns = [
     path('packages/<str:pk>/', PackageDetailView.as_view(), name='get_package'),
     path('packages/<str:pk>/update/', PackageUpdateView.as_view(), name='update_package'),
     path('packages/<str:pk>/delete/', PackageDeleteView.as_view(), name='delete_package'),
+    path('packages/<str:pk>/join/', JoinPackageView.as_view(), name='package-join'),
 
     path('locations/check-coordinates/', LocationValidationView.as_view(), name='check-coordinates'),
 

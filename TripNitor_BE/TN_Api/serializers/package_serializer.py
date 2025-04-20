@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Package, Leg, Location
+from ..models import Package, Leg, Location, User
 from .leg_serializer import LegSerializer
 from .location_serializer import LocationSerializer
 from .driver_serializer import DriverSerializer
@@ -21,13 +21,6 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = ['id', 'package_name', 'description', 'base_price', 'package_type', 'visibility', 
                   'start_location', 'final_destination', 'legs', 'max_participants', 
                   'current_participants', 'assigned_driver', 'start_date', 'end_date', 'total_distance']
-
-    def get_joined_users(self, obj):
-        if obj.visibility == Package.PackageVisibility.PRIVATE:
-            return None
-        
-        users = obj.package_users.all().select_related('user')
-        return UserSerializer([pu.user for pu in users], many=True).data
 
     def create(self, validated_data):
         if 'visibility' in validated_data and validated_data['visibility'] == Package.PackageVisibility.JOINER:
@@ -51,3 +44,14 @@ class PackageBasicSerializer(serializers.ModelSerializer):
         fields = ['id', 'package_name', 'description', 'base_price', 'package_type', 'visibility', 
                   'start_location', 'final_destination', 'max_participants', 
                   'current_participants', 'assigned_driver', 'start_date', 'end_date', 'total_distance']
+
+class JoinPackageSerializer(serializers.Serializer):
+    user_id = serializers.CharField()
+    number_of_passengers = serializers.IntegerField(min_value=1)
+    
+    def validate_user_id(self, value):
+        try:
+            User.objects.get(id=value)
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError(f"User with ID {value} does not exist")

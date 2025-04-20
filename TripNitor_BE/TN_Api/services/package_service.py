@@ -1,5 +1,5 @@
-from ..models import Gas, Leg, Location, Package
-from django.db.models import Min, Q
+from ..models import Gas, Leg, Location, Package, User, PackageUser
+from django.db.models import Min, Q, Sum
 from decimal import Decimal
 from django.db import IntegrityError, transaction
 
@@ -204,3 +204,50 @@ class PackageService:
                 cls.handle_leg_update(package, leg_data.copy())
                 
             return package
+        
+    @staticmethod
+    def join_package(package_id, user_id, number_of_passengers):
+    
+        try:
+            with transaction.atomic():
+                package = Package.objects.select_for_update().get(id=package_id)
+                user = User.objects.get(id=user_id)
+
+                if not hasattr(package, 'visibility') or package.visibility != Package.PackageVisibility.JOINER:
+                    raise ValueError("Only packages of type JOINER can be joined")
+                
+                if PackageUser.objects.filter(user_id=user_id, package_id=package_id).exists():
+                    raise ValueError("User has already joined this package")
+                    
+                current_passengers = PackageUser.objects.filter(package=package).aggregate(
+                total=Sum('number_of_passengers')
+                )['total'] or 0
+                
+                if current_passengers + number_of_passengers > 15:
+                    remaining_spots = max(0, 15 - current_passengers)
+                    raise ValueError(
+                        f"Cannot add {number_of_passengers} passengers. "
+                        f"Package has only {remaining_spots} spots remaining."
+                    )
+                    
+                package_user = PackageUser.objects.create(
+                    user=user,
+                    package=package,
+                    number_of_passengers=number_of_passengers
+                )
+
+                package.current_participants = current_passengers + number_of_passengers
+                package.save(update_fields=['current_participants'])
+                
+                return package_user
+                
+        except Package.DoesNotExist:
+            raise ValueError(f"Package with ID {package_id} does not exist")
+        except User.DoesNotExist:
+            raise ValueError(f"User with ID {user_id} does not exist")
+        except IntegrityError as e:
+            raise ValueError(f"Failed to join package: {str(e)}")
+        except Exception as e:
+            if hasattr(e, 'message'):
+                raise ValueError(e.message)
+            raise ValueError(str(e))
