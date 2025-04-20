@@ -1,8 +1,8 @@
 from django.db import models
-from ..models import Booking, Location
+from .location_model import Location
 
 class BookingLeg(models.Model):
-    booking = models.ForeignKey(Booking, related_name='booking_legs', on_delete=models.CASCADE)
+    booking = models.ForeignKey('Booking', related_name='booking_legs', on_delete=models.CASCADE)
     leg_number = models.PositiveIntegerField()
     start_location = models.ForeignKey(Location, related_name='booking_start_legs', on_delete=models.CASCADE)
     end_location = models.ForeignKey(Location, related_name='booking_end_legs', on_delete=models.CASCADE)

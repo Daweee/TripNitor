@@ -1,10 +1,9 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from TN_Api.models import Booking, User
 
 class Rating(models.Model):
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='booking_ratings')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='booking_ratings')
+    booking = models.ForeignKey('Booking', on_delete=models.CASCADE, related_name='booking_ratings')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='booking_ratings')
     rating = models.IntegerField(
         help_text="Rating from 0 to 5 stars"
     )
