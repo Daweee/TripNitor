@@ -1,3 +1,4 @@
+import 'driver_model.dart';
 import 'location_model.dart';
 import 'leg_model.dart';
 import 'location_service_data_model.dart';
@@ -14,6 +15,7 @@ class Package {
   final List<Leg> legs;
   final int? maxParticipants;
   final int? currentParticipants;
+  final Driver? assignedDriver;
   final DateTime? startDate;
   final DateTime? endDate;
   final String? totalDistance;
@@ -30,11 +32,12 @@ class Package {
       required this.legs,
       this.maxParticipants,
       this.currentParticipants,
+      this.assignedDriver,
       this.startDate,
       this.endDate,
       this.totalDistance});
 
-  DateTime? get locatStartDate => startDate?.toLocal();
+  DateTime? get localStartDate => startDate?.toLocal();
   DateTime? get localEndDate => endDate?.toLocal();
 
   factory Package.fromJson(Map<String, dynamic> json) {
@@ -70,6 +73,9 @@ class Package {
           : [],
       maxParticipants: maxParticipants,
       currentParticipants: currentParticipants,
+      assignedDriver: json['assigned_driver'] != null
+          ? Driver.fromJson(json['assigned_driver'])
+          : null,
       startDate: json['start_date'] != null
           ? DateTime.parse(json['start_date'])
           : null,
