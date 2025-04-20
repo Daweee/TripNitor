@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from ..models import User, Package, PackageUser
-from ..serializers import UserMinimalSerializer, PackageMinimalSerializer
+from ..models import PackageUser
+from ..serializers import UserSerializer, PackageSerializer
 
 class PackageUserSerializer(serializers.ModelSerializer):
-    user = UserMinimalSerializer(read_only=True)
-    package = PackageMinimalSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+    package = PackageSerializer(read_only=True)
 
     class Meta:
         model = PackageUser
