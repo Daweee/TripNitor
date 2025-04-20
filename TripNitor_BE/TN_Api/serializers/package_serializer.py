@@ -55,3 +55,8 @@ class JoinPackageSerializer(serializers.Serializer):
             return value
         except User.DoesNotExist:
             raise serializers.ValidationError(f"User with ID {value} does not exist")
+        
+class PackageMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = ['id', 'package_name']
