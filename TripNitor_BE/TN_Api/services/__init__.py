@@ -4,3 +4,4 @@ from .user_service import UserService
 from .rating_service import RatingService
 from .driver_assignment_service import DriverAssignmentService
 from .payment_service import PaymentService
+from .booking_service import BookingService

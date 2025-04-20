@@ -6,7 +6,7 @@ from .gas_serializer import GasSerializer
 from .booking_serializer import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer
 from .location_serializer import LocationSerializer, LocationQuerySerializer
 from .leg_serializer import LegSerializer
-from .package_serializer import PackageSerializer, FareCalculationSerializer, PackageBasicSerializer
+from .package_serializer import PackageSerializer, FareCalculationSerializer, PackageBasicSerializer, JoinPackageSerializer
 from .driver_assignment_serializer import DriverAssignmentSerializer, DriverSwapSerializer
 from .booking_leg_serializer import BookingLegSerializer, BookingLegStatusUpdateSerializer
 from .rating_serializer import RatingSerializer

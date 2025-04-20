@@ -1,8 +1,8 @@
 from django.db import models
 from .base_model import CustomPrimaryKeyModel
 from .location_model import Location
-from .gas_model import Gas
-from decimal import Decimal
+from .driver_model import Driver
+from django.core.exceptions import ValidationError
 from django.db.models import Min
 
 class Package(CustomPrimaryKeyModel):
@@ -25,8 +25,9 @@ class Package(CustomPrimaryKeyModel):
     visibility = models.CharField(max_length=7, choices=PackageVisibility.choices, default=PackageVisibility.PRIVATE)
     start_location = models.ForeignKey(Location, related_name='package_starts', on_delete=models.SET_NULL, null=True, blank=True)
     final_destination = models.ForeignKey(Location, related_name='package_ends', on_delete=models.SET_NULL, null=True, blank=True)
-    max_participants = models.PositiveIntegerField(null=True, blank=True)  # For JOINER packages
+    max_participants = models.PositiveIntegerField(default=15, null=True, blank=True)  # For JOINER packages
     current_participants = models.PositiveIntegerField(null=True, blank=True)  # For JOINER packages
+    assigned_driver = models.ForeignKey(Driver, related_name='assigned_driver', on_delete=models.CASCADE, null=True, blank=True) # For JOINER packages
     start_date = models.DateTimeField(null=True, blank=True)  # For scheduling for JOINER packages
     end_date = models.DateTimeField(null=True, blank=True)  # For scheduling for JOINER packages
 
@@ -39,6 +40,8 @@ class Package(CustomPrimaryKeyModel):
         if self.visibility == self.PackageVisibility.JOINER:
             if not self.max_participants:
                 raise ValidationError("Max participants is required for joiner packages")
+            if self.max_participants > 15:
+                raise ValidationError("Max participants cannot exceed 15")
             if not self.start_date or not self.end_date:
                 raise ValidationError("Start and end dates are required for joiner packages")
             if self.start_date >= self.end_date:

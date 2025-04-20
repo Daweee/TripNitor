@@ -1,5 +1,5 @@
-from ..models import Gas, Leg, Location, Package
-from django.db.models import Min, Q
+from ..models import Gas, Leg, Location, Package, User, PackageUser
+from django.db.models import Min, Q, Sum
 from decimal import Decimal
 from django.db import IntegrityError, transaction
 
@@ -44,14 +44,6 @@ class PackageService:
             except IntegrityError:
                 # If creation fails due to race condition, get the existing record
                 return Location.objects.get(**normalized_data)
-            
-        # # Use get_or_create which handles the race condition atomically
-        # location, created = Location.objects.get_or_create(
-        #     **normalized_data,
-        #     defaults=normalized_data  # Same values for creation if needed
-        # )
-
-        # return location
 
     @classmethod
     def handle_leg_update(cls, package, leg_data, existing_leg=None):
@@ -97,132 +89,6 @@ class PackageService:
             print(f"Error in handle_leg_update: {str(e)}")
             raise
 
-    # @classmethod
-    # def handle_leg_update(cls, package, leg_data, existing_leg=None):
-    #     """Handle creation or update of a leg with location management"""
-    #     # Handle locations
-    #     start_loc_data = leg_data.pop('start_location', None)
-    #     end_loc_data = leg_data.pop('end_location', None)
-
-    #     # Find or create locations
-    #     start_location = cls.find_or_create_location(start_loc_data) if start_loc_data else None
-    #     end_location = cls.find_or_create_location(end_loc_data) if end_loc_data else None
-
-    #     # ORIGINAL
-    #     # if existing_leg:
-    #     #     # Update existing leg
-    #     #     existing_leg.start_location = start_location or existing_leg.start_location
-    #     #     existing_leg.end_location = end_location or existing_leg.end_location
-    #     #     for key, value in leg_data.items():
-    #     #         setattr(existing_leg, key, value)
-    #     #     existing_leg.save()
-    #     #     return existing_leg
-    #     # else:
-    #     #     # Create new leg
-    #     #     return Leg.objects.create(
-    #     #         package=package,
-    #     #         start_location=start_location,
-    #     #         end_location=end_location,
-    #     #         **leg_data
-    #     #     )
-
-    #     if existing_leg:
-    #         # Update existing leg
-    #         if start_location:
-    #             existing_leg.start_location = start_location
-    #         if end_location:
-    #             existing_leg.end_location = end_location
-    #         for key, value in leg_data.items():
-    #             setattr(existing_leg, key, value)
-    #         existing_leg.save()
-    #         return existing_leg
-    #     else:
-    #         # Create new leg
-    #         leg_data['start_location'] = start_location
-    #         leg_data['end_location'] = end_location
-    #         leg_data['package'] = package
-    #         return Leg.objects.create(**leg_data)
-    
-    # @classmethod
-    # def update_package_legs(cls, package, legs_updates):
-    #     """
-    #     Update package legs handling:
-    #     - Addition of new legs (legs without id field)
-    #     - Removal of legs (legs not in the update)
-    #     - Updates to existing legs (including location changes and leg number changes)
-    #     """
-    #     with transaction.atomic():
-    #         # Get existing legs and their IDs
-    #         existing_legs = list(package.legs.all())
-    #         existing_leg_map = {leg.id: leg for leg in existing_legs}
-
-    #         # Track legs to update and create
-    #         final_legs = []
-            
-    #         for leg_data in legs_updates:
-    #             leg_id = leg_data.get('id')
-                
-    #             if leg_id and leg_id in existing_leg_map:
-    #                 # Update existing leg
-    #                 existing_leg = existing_leg_map[leg_id]
-    #                 updated_leg = cls.handle_leg_update(
-    #                     package, 
-    #                     dict(leg_data),  # Create a copy of the data
-    #                     existing_leg
-    #                 )
-    #                 final_legs.append(updated_leg)
-    #             else:
-    #                 # Create new leg
-    #                 new_leg = cls.handle_leg_update(
-    #                     package,
-    #                     dict(leg_data)  # Create a copy of the data
-    #                 )
-    #                 final_legs.append(new_leg)
-            
-    #         # Delete legs that weren't included in the update
-    #         updated_leg_ids = {leg_data.get('id') for leg_data in legs_updates if leg_data.get('id')}
-    #         for leg in existing_legs:
-    #             if leg.id not in updated_leg_ids:
-    #                 leg.delete()
-            
-    #         # Sort legs by leg_number
-    #         final_legs.sort(key=lambda x: x.leg_number)
-    #         return final_legs
-    # def update_package_legs(cls, package, legs_updates):
-    #     """
-    #     Update package legs handling:
-    #     - Addition of new legs (legs without id field)
-    #     - Removal of legs (legs not in the update)
-    #     - Updates to existing legs (including location changes and leg number changes)
-    #     """
-    #     with transaction.atomic():
-    #         # Get existing legs mapped by ID
-    #         existing_legs = {leg.id: leg for leg in package.legs.all()}
-        
-    #         # Track which legs should remain
-    #         updated_leg_ids = {leg_data['id'] for leg_data in legs_updates if leg_data.get('id')}
-            
-    #         # Remove legs that aren't in the updates
-    #         legs_to_delete = set(existing_legs.keys()) - updated_leg_ids
-    #         for leg_id in legs_to_delete:
-    #             existing_legs[leg_id].delete()
-            
-    #         # Update existing legs and add new ones
-    #         final_legs = []
-            
-    #         for leg_data in legs_updates:
-    #             leg_id = leg_data.get('id')
-    #             existing_leg = existing_legs.get(leg_id) if leg_id else None
-                
-    #             updated_leg = cls.handle_leg_update(
-    #                 package, 
-    #                 leg_data.copy(), 
-    #                 existing_leg
-    #             )
-    #             final_legs.append(updated_leg)
-            
-    #         return final_legs
-
     @classmethod
     def update_package(cls, package_instance, validated_data):
         """Update a package and its related objects"""
@@ -238,23 +104,6 @@ class PackageService:
                 package_instance.final_destination = cls.find_or_create_location(
                     validated_data.pop('final_destination')
                 )
-
-            # Handle legs (ORIGINAL)
-            # if 'legs' in validated_data:
-            #     legs_data = validated_data.pop('legs')
-            #     existing_legs = list(package_instance.legs.all())
-                
-            #     # Update or create legs
-            #     for index, leg_data in enumerate(legs_data):
-            #         if index < len(existing_legs):
-            #             cls.handle_leg_update(package_instance, leg_data.copy(), existing_legs[index])
-            #         else:
-            #             cls.handle_leg_update(package_instance, leg_data.copy())
-
-            #     # Remove excess legs
-            #     if len(legs_data) < len(existing_legs):
-            #         for leg in existing_legs[len(legs_data):]:
-            #             leg.delete()
 
             if 'legs' in validated_data:
                 cls.update_package_legs(package_instance, validated_data.pop('legs'))
@@ -317,3 +166,88 @@ class PackageService:
                 cls.handle_leg_update(package, leg_data.copy())
                 
             return package
+        
+    @classmethod 
+    def create_joiner_package(cls, validated_data):
+
+        with transaction.atomic():
+            legs_data = validated_data.pop('legs', [])
+            start_date = validated_data.pop('start_date')
+            end_date = validated_data.pop('end_date')
+
+            if 'base_price' not in validated_data and 'total_distance' in validated_data:
+                validated_data['base_price'] = cls.calculate_base_fare(
+                    validated_data['total_distance']
+                )
+
+            # Handle locations once
+            validated_data['start_location'] = cls.find_or_create_location(
+                validated_data.pop('start_location', None)
+            )
+            validated_data['final_destination'] = cls.find_or_create_location(
+                validated_data.pop('final_destination', None)
+            )
+
+            from ..services import BookingService
+            assigned_driver = BookingService.assign_driver_for_joiner(start_date, end_date)
+            if not assigned_driver:
+                raise ValueError("No available drivers found for the specified date range.")
+
+            validated_data['assigned_driver'] = assigned_driver
+            validated_data['start_date'] = start_date
+            validated_data['end_date'] = end_date
+
+            package = Package.objects.create(**validated_data)
+
+            # Create legs
+            for leg_data in legs_data:
+                cls.handle_leg_update(package, leg_data.copy())
+                
+            return package
+        
+    @staticmethod
+    def join_package(package_id, user_id, number_of_passengers):
+    
+        try:
+            with transaction.atomic():
+                package = Package.objects.select_for_update().get(id=package_id)
+                user = User.objects.get(id=user_id)
+
+                if not hasattr(package, 'visibility') or package.visibility != Package.PackageVisibility.JOINER:
+                    raise ValueError("Only packages of type JOINER can be joined")
+                
+                if PackageUser.objects.filter(user_id=user_id, package_id=package_id).exists():
+                    raise ValueError("User has already joined this package")
+                    
+                current_passengers = PackageUser.objects.filter(package=package).aggregate(
+                total=Sum('number_of_passengers')
+                )['total'] or 0
+                
+                if current_passengers + number_of_passengers > 15:
+                    remaining_spots = max(0, 15 - current_passengers)
+                    raise ValueError(
+                        f"Cannot add {number_of_passengers} passengers. "
+                        f"Package has only {remaining_spots} spots remaining."
+                    )
+                    
+                package_user = PackageUser.objects.create(
+                    user=user,
+                    package=package,
+                    number_of_passengers=number_of_passengers
+                )
+
+                package.current_participants = current_passengers + number_of_passengers
+                package.save(update_fields=['current_participants'])
+                
+                return package_user
+                
+        except Package.DoesNotExist:
+            raise ValueError(f"Package with ID {package_id} does not exist")
+        except User.DoesNotExist:
+            raise ValueError(f"User with ID {user_id} does not exist")
+        except IntegrityError as e:
+            raise ValueError(f"Failed to join package: {str(e)}")
+        except Exception as e:
+            if hasattr(e, 'message'):
+                raise ValueError(e.message)
+            raise ValueError(str(e))

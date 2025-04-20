@@ -33,7 +33,7 @@ class BookingCreationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = '__all__'
+        exclude = ['ratings', 'is_rated']
         read_only_fields = ('status', 'base_fare', 'number_of_nights')
 
     def validate(self, data):

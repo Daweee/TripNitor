@@ -7,7 +7,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView
 )
-from ..serializers import PackageSerializer, FareCalculationSerializer
+from ..serializers import PackageSerializer, FareCalculationSerializer, JoinPackageSerializer
 from TN_Api.models import Package
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
@@ -113,3 +113,44 @@ class PackageDeleteView(CustomResponseMixin, DestroyAPIView):
             None,
             'Package deleted successfully'
         )
+
+@extend_schema(tags=['packages'])
+class JoinPackageView(CustomResponseMixin, APIView):
+    serializer_class = JoinPackageSerializer
+    
+    def post(self, request, pk, *args, **kwargs):
+        data = request.data.copy()
+        
+        if 'user_id' not in data:
+            data['user_id'] = request.user.id
+            
+        serializer = JoinPackageSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            package_user = PackageService.join_package(
+                package_id=pk, 
+                user_id=serializer.validated_data['user_id'],
+                number_of_passengers=serializer.validated_data['number_of_passengers']
+            )
+
+            response_data = {
+                'id': package_user.id,
+                'user': package_user.user.username,
+                'package': package_user.package.package_name if hasattr(package_user.package, 'package_name') else str(package_user.package),
+                'number_of_passengers': package_user.number_of_passengers,
+                'joined_at': package_user.joined_at
+            }
+            
+            return self.get_custom_response(
+                status.HTTP_201_CREATED,
+                response_data,
+                'Successfully joined package'
+            )
+            
+        except ValueError as e:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                {'error': str(e)},
+                'Failed to join package'
+            )
