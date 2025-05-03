@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -72,6 +73,7 @@ class GetBookingStatusListView(ListAPIView):
             'message': f'All bookings with status {self.kwargs["bookingstatus"]} retrieved successfully.'
         })
     
+
 @extend_schema(tags=['bookings'])
 class BookingCreateView(CustomResponseMixin, CreateAPIView):
     queryset = Booking.objects.all()
@@ -139,6 +141,17 @@ class BookingPreviewView(APIView):
             start_date = serializer.validated_data['start_date']
             end_date = serializer.validated_data['end_date']
             number_of_passengers = serializer.validated_data['number_of_passengers']
+            
+            from ..services import BookingService
+
+            try:
+                BookingService.validate_booking_dates(start_date, end_date)
+            except ValidationError as e:
+                return Response({
+                    'status': status.HTTP_400_BAD_REQUEST,
+                    'data': None,
+                    'message': str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
 
             temp_booking = Booking(
                 package=package,
@@ -146,31 +159,36 @@ class BookingPreviewView(APIView):
                 end_date=end_date,
                 number_of_passengers=number_of_passengers
             )
-
-            temp_booking.clean()  # Ensure validation is applied
-            assigned_drivers = temp_booking.preview_driver_assignment()
-
-            # number_of_vans = len(assigned_drivers) 
-            temp_booking.calculate_final_fare(assigned_drivers)
-
-            # Calculate total price
-            total_price = temp_booking.total_price
-            base_fare = temp_booking.base_fare
-            number_of_nights = temp_booking.number_of_nights
-            updated_package_fare = temp_booking.updated_package_fare
-
-            # available_drivers = temp_booking.get_available_drivers()
-            # required_vans = (number_of_passengers + 14) // 15
-            # assigned_drivers = available_drivers[:required_vans]
+            
+            try:
+                BookingService.validate_capacity(temp_booking)
+            except ValidationError as e:
+                return Response({
+                    'status': status.HTTP_400_BAD_REQUEST,
+                    'data': None,
+                    'message': str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            assigned_drivers = BookingService.preview_driver_assignment(temp_booking)
+            
+            number_of_nights = BookingService.get_nights(start_date, end_date)
+            gas_cost = BookingService.calculate_gas_consumption_cost(temp_booking, assigned_drivers)
+            
+            BASE_FARE = Decimal('3000')
+            NIGHTLY_RATE = Decimal('1000')
+            
+            total_price = BASE_FARE + gas_cost + (number_of_nights * NIGHTLY_RATE)
+            
+            BookingService.set_booking_locations(temp_booking)
 
             preview_data = {
                 'package': package.package_name,
                 'start_date': start_date,
                 'end_date': end_date,
                 'number_of_passengers': number_of_passengers,
-                'base_fare': base_fare,
+                'base_fare': BASE_FARE,
                 'number_of_nights': number_of_nights,
-                'base_package_price': updated_package_fare,
+                'base_package_price': gas_cost,
                 'total_price': total_price,
                 
                 'assigned_drivers': [
