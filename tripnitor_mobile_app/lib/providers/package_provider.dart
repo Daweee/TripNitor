@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/package_model.dart';
+import '../models/package_user_model.dart';
 import '../services/package_service.dart';
 
 class PackageNotifier extends StateNotifier<PackageState> {
@@ -94,8 +95,29 @@ class PackageNotifier extends StateNotifier<PackageState> {
     }
   }
 
+  Future<void> getJoinerUsers(String packageId) async {
+    try {
+      state = state.copyWith(isLoadingJoiners: true);
+      final List<PackageUser> joiners =
+          await _packageService.retrieveJoinerPackageUsers(packageId);
+      state = state.copyWith(
+        packageJoiners: joiners,
+        isLoadingJoiners: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString(),
+        isLoadingJoiners: false,
+      );
+    }
+  }
+
   void clearState() {
     state = PackageState();
+  }
+
+  void clearPackageJoiners() {
+    state = state.copyWith(packageJoiners: [], isLoadingJoiners: false);
   }
 }
 

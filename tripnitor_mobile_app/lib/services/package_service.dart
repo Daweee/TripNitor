@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:tripnitor_mobile_app/core/network/dio_client.dart';
+import 'package:tripnitor_mobile_app/models/package_user_model.dart';
 import '../models/package_model.dart';
 
 class PackageService {
@@ -45,9 +46,13 @@ class PackageService {
 
   Future<Package> createPackage(PackageCreate package) async {
     try {
+      final packageToSend = package.visibility == 'PUBLIC'
+          ? package.copyWith(visibility: 'JOINER')
+          : package;
+
       final response = await _dio.post(
         'api/packages/register/',
-        data: package.toJson(),
+        data: packageToSend.toJson(),
       );
 
       if (response.data['data'] != null) {
@@ -110,6 +115,22 @@ class PackageService {
       }
     } on DioException catch (e) {
       throw Exception('Failed to update package: ${e.message}');
+    }
+  }
+
+  Future<List<PackageUser>> retrieveJoinerPackageUsers(String packageId) async {
+    try {
+      final response = await _dio.get('/api/packages/$packageId/users/');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> usersList = response.data['data'];
+        return usersList.map((json) => PackageUser.fromJson(json)).toList();
+      }
+
+      throw Exception('Failed to retrieve users: ${response.statusCode}');
+    } on DioException catch (e) {
+      throw Exception(
+          'Failed to retrieve joiner package users list: ${e.message}');
     }
   }
 }
