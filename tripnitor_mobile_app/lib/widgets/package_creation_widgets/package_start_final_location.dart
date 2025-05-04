@@ -20,7 +20,8 @@ class PackageStartFinalLocation extends StatefulWidget {
   final LocationServiceData? initialEndLocation;
   final List<Leg>? initialLegs;
   final String? packageId;
-  // add a List of Leg here but it wont be LegCreate
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   const PackageStartFinalLocation({
     super.key,
@@ -33,6 +34,8 @@ class PackageStartFinalLocation extends StatefulWidget {
     this.initialEndLocation,
     this.initialLegs,
     this.packageId,
+    this.startDate,
+    this.endDate,
   });
 
   @override
@@ -189,6 +192,8 @@ class _PackageStartFinalLocationState extends State<PackageStartFinalLocation> {
                             finalLocation: _endLocation!,
                             isEditing: widget.isEditing,
                             initialLegs: initialLegs,
+                            startDate: widget.startDate,
+                            endDate: widget.endDate,
                           ),
                         ),
                       );

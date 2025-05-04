@@ -10,7 +10,7 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 from ..serializers import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer
-from ..models import Booking
+from ..models import Booking, Package
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
@@ -168,8 +168,11 @@ class BookingPreviewView(APIView):
                     'data': None,
                     'message': str(e)
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
-            assigned_drivers = BookingService.preview_driver_assignment(temp_booking)
+                
+            if package.visibility == Package.PackageVisibility.PRIVATE or 'assigned_driver' not in serializer.validated_data:
+                assigned_drivers = BookingService.preview_driver_assignment(temp_booking)
+            else:
+                assigned_drivers = [serializer.validated_data['assigned_driver']]
             
             number_of_nights = BookingService.get_nights(start_date, end_date)
             gas_cost = BookingService.calculate_gas_consumption_cost(temp_booking, assigned_drivers)

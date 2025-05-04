@@ -28,6 +28,8 @@ class ItineraryRoutesPage extends ConsumerStatefulWidget {
   final List<LegCreate> itineraries;
   final bool isEditing;
   final String? packageId;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   const ItineraryRoutesPage({
     super.key,
@@ -40,6 +42,8 @@ class ItineraryRoutesPage extends ConsumerStatefulWidget {
     required this.itineraries,
     this.isEditing = false,
     this.packageId,
+    this.startDate,
+    this.endDate,
   });
 
   @override
@@ -180,6 +184,9 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
       finalDestination: finalLocation,
       legs: widget.itineraries,
       totalDistance: routeState.totalDistance ?? 0,
+      startDate: widget.packageVisibility == 'PUBLIC' ? widget.startDate : null,
+      endDate: widget.packageVisibility == 'PUBLIC' ? widget.endDate : null,
+      maxParticipants: widget.packageVisibility == 'PUBLIC' ? 15 : null,
     );
 
     Navigator.push(
@@ -742,6 +749,10 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                                     ],
                                   ),
                                   const SizedBox(height: 12),
+
+                                  // Add the new date and passenger section here
+                                  _buildDateAndPassengerInfo(),
+
                                   ..._buildItineraryList(),
                                   if (!isAllWithinRegion)
                                     Center(
@@ -799,6 +810,167 @@ class _ItineraryRoutesPageState extends ConsumerState<ItineraryRoutesPage>
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return 'Not specified';
+
+    // Format date as DD/MM/YYYY
+    String date =
+        '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
+
+    // Format time as HH:MM AM/PM
+    String period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    int hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    String time =
+        '${hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')} $period';
+
+    return '$date, $time';
+  }
+
+  Widget _buildDateAndPassengerInfo() {
+    if (widget.packageVisibility != "PUBLIC") {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1), // Light yellow background
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const FaIcon(
+                FontAwesomeIcons.calendarDays,
+                size: 16,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Trip Schedule',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                width: 30,
+                child: Center(
+                  child: FaIcon(
+                    FontAwesomeIcons.hourglassStart,
+                    size: 14,
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Departure',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDateTime(widget.startDate),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                width: 30,
+                child: Center(
+                  child: FaIcon(
+                    FontAwesomeIcons.hourglassEnd,
+                    size: 14,
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Return',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDateTime(widget.endDate),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFEEE8D5)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const FaIcon(
+                FontAwesomeIcons.userGroup,
+                size: 16,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Max Passengers: 15',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
           ),
         ],
       ),

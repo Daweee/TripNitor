@@ -22,9 +22,12 @@ class _PackageDetailsCreationPageState
   final TextEditingController _descriptionController = TextEditingController();
   final int _maxCharacters = 400;
   int _currentCharacters = 0;
+  DateTime? _startDateTime;
+  DateTime? _endDateTime;
 
   String? _nameError;
   String? _descriptionError;
+  String? _dateTimeError;
   bool _isFormSubmitted = false;
 
   @override
@@ -80,14 +83,40 @@ class _PackageDetailsCreationPageState
     });
   }
 
+  void _validateDates() {
+    setState(() {
+      if (widget.packageVisibility == 'PUBLIC') {
+        if (_startDateTime == null || _endDateTime == null) {
+          _dateTimeError =
+              'Both start and end dates are required for public packages';
+        } else if (_startDateTime!.isAfter(_endDateTime!)) {
+          _dateTimeError = 'Start date must be before end date';
+        } else {
+          _dateTimeError = null;
+        }
+      }
+    });
+  }
+
   void _validateForm() {
     setState(() {
       _isFormSubmitted = true;
       _validateName();
       _validateDescription();
+      if (widget.packageVisibility == 'PUBLIC') {
+        _validateDates();
+      }
     });
 
-    if (_nameError == null && _descriptionError == null) {
+    bool isValid = _nameError == null && _descriptionError == null;
+    if (widget.packageVisibility == 'PUBLIC') {
+      isValid = isValid &&
+          _dateTimeError == null &&
+          _startDateTime != null &&
+          _endDateTime != null;
+    }
+
+    if (isValid) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -96,6 +125,9 @@ class _PackageDetailsCreationPageState
             packageVisibility: widget.packageVisibility,
             packageName: _nameController.text.trim(),
             packageDescription: _descriptionController.text.trim(),
+            startDate:
+                widget.packageVisibility == 'PUBLIC' ? _startDateTime : null,
+            endDate: widget.packageVisibility == 'PUBLIC' ? _endDateTime : null,
           ),
         ),
       );
@@ -182,6 +214,70 @@ class _PackageDetailsCreationPageState
                   _buildCharacterCounter(),
                 ],
               ),
+              if (widget.packageVisibility == 'PUBLIC') ...[
+                SizedBox(height: 25),
+                _titleRow('Set Dates'),
+                SizedBox(height: 10),
+                _buildShadowedContainer([
+                  _buildSection('Start Date and Time', [
+                    _buildDateTimeRow(_startDateTime, (dateTime) {
+                      setState(() => _startDateTime = dateTime);
+                    }),
+                  ]),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Divider(
+                      color:
+                          Color(ColorConstants.PRIMARY_COLOR).withOpacity(.3),
+                      thickness: 1,
+                      height: 1,
+                    ),
+                  ),
+                  _buildSection('End Date and Time', [
+                    _buildDateTimeRow(_endDateTime, (dateTime) {
+                      setState(() => _endDateTime = dateTime);
+                    }),
+                  ]),
+                ]),
+                if (_isFormSubmitted && _dateTimeError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      _dateTimeError!,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 25),
+                _titleRow('Passenger Capacity'),
+                SizedBox(height: 10),
+                _buildShadowedContainer([
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Color(ColorConstants.PRIMARY_COLOR),
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'This tour package has a maximum capacity of 15 passengers only',
+                              style: TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ]),
+              ],
               SizedBox(height: 30),
               _confirmButton(),
             ],
@@ -249,6 +345,105 @@ class _PackageDetailsCreationPageState
         color: _currentCharacters > _maxCharacters ? Colors.red : Colors.grey,
         fontSize: 12,
       ),
+    );
+  }
+
+  Widget _buildShadowedContainer(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildDateTimeRow(DateTime? dateTime, Function(DateTime) onPick) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          dateTime != null ? '${dateTime.toLocal()}'.split('.')[0] : 'Not set',
+          style: TextStyle(fontSize: 14),
+        ),
+        IconButton(
+          icon: Icon(Icons.calendar_today,
+              color: Color(ColorConstants.ACCENT_COLOR)),
+          onPressed: () async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: dateTime ?? DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(Duration(days: 365)),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: Color(ColorConstants.PRIMARY_COLOR),
+                      onPrimary: Color(ColorConstants.TERTIARY_COLOR),
+                      surface: Color(ColorConstants.BACKGROUND_COLOR),
+                      onSurface:
+                          Color(ColorConstants.BOTTOM_PACKAGE_CARD_COLOR),
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+
+            if (date != null) {
+              final time = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: Color(ColorConstants.PRIMARY_COLOR),
+                        onPrimary: Color(ColorConstants.TERTIARY_COLOR),
+                        surface: Color(ColorConstants.BACKGROUND_COLOR),
+                        onSurface:
+                            Color(ColorConstants.BOTTOM_PACKAGE_CARD_COLOR),
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+
+              if (time != null) {
+                onPick(DateTime(
+                    date.year, date.month, date.day, time.hour, time.minute));
+              }
+            }
+          },
+        ),
+      ],
     );
   }
 

@@ -116,6 +116,11 @@ class _PackageConfirmationPageState
             Text(package.description),
           ]),
           SizedBox(height: 20),
+
+          // Add the new Trip Details section here
+          _buildTripDetailsSection(package),
+          if (package.visibility == "PUBLIC") SizedBox(height: 20),
+
           _buildSection(
               'Locations',
               [
@@ -489,6 +494,190 @@ class _PackageConfirmationPageState
         ),
       ),
     );
+  }
+
+  Widget _buildTripDetailsSection(PackageCreate package) {
+    // Only show this section if the package is PUBLIC
+    if (package.visibility != "PUBLIC") {
+      return const SizedBox.shrink();
+    }
+
+    return _buildSection('Trip Details', [
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Dates section
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const FaIcon(
+                  FontAwesomeIcons.calendarDays,
+                  size: 16,
+                  color: Color(ColorConstants.PRIMARY_COLOR),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Trip Schedule',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const FaIcon(
+                                      FontAwesomeIcons.hourglassStart,
+                                      size: 12,
+                                      color:
+                                          Color(ColorConstants.PRIMARY_COLOR),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Departure',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: Text(
+                                    package.startDate != null
+                                        ? _formatDateTime(package.startDate!)
+                                        : 'Not specified',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const FaIcon(
+                                      FontAwesomeIcons.hourglassEnd,
+                                      size: 12,
+                                      color:
+                                          Color(ColorConstants.PRIMARY_COLOR),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Return',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: Text(
+                                    package.endDate != null
+                                        ? _formatDateTime(package.endDate!)
+                                        : 'Not specified',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 20, thickness: 1),
+            // Passenger limit section
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const FaIcon(
+                  FontAwesomeIcons.userGroup,
+                  size: 16,
+                  color: Color(ColorConstants.PRIMARY_COLOR),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Maximum Passengers:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '15',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ]);
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    // Format date as DD/MM/YYYY
+    String date =
+        '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
+
+    // Format time as HH:MM AM/PM
+    String period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    int hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    String time =
+        '${hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')} $period';
+
+    return '$date, $time';
   }
 
   Widget _buildBottomBar(PackageCreate package) {

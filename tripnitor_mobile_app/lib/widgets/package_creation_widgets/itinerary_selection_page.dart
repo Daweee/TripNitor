@@ -20,6 +20,8 @@ class ItinerarySelectionPage extends StatefulWidget {
   final bool isEditing;
   final List<LegCreate>? initialLegs;
   final String? packageId;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   ItinerarySelectionPage({
     super.key,
@@ -32,6 +34,8 @@ class ItinerarySelectionPage extends StatefulWidget {
     this.isEditing = false,
     this.initialLegs,
     this.packageId,
+    this.startDate,
+    this.endDate,
   });
 
   @override
@@ -122,6 +126,8 @@ class _ItinerarySelectionPageState extends State<ItinerarySelectionPage> {
               finalLocation: widget.finalLocation,
               itineraries: legs,
               isEditing: widget.isEditing,
+              startDate: widget.startDate,
+              endDate: widget.endDate,
             ),
           ),
         );
