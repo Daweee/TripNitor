@@ -8,6 +8,7 @@ import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/user/booking_detail_page.dart';
 import '../../models/booking_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/package_provider.dart';
 import '../../services/payment_service.dart';
 import '../../providers/booking_provider.dart';
 import '../../widgets/custom_modal_dialogue.dart';
@@ -32,6 +33,7 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
   void initState() {
     super.initState();
     _stripeService = StripeService();
+    _checkPackageVisibility();
   }
 
   Future<void> _handleCardPayment(double totalPrice,
@@ -116,11 +118,31 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
     }
   }
 
+  void _checkPackageVisibility() {
+    final packageState = ref.read(packageProvider);
+
+    if (packageState.selectedPackage != null &&
+        packageState.selectedPackage!.id == widget.packageId) {
+      if (packageState.selectedPackage!.visibility == 'JOINER' &&
+          _selectedPaymentMethod == 'CREDIT_CARD') {
+        setState(() {
+          _selectedPaymentMethod = 'CASH';
+        });
+      }
+    } else {
+      ref.read(packageProvider.notifier).getPackageDetails(widget.packageId);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
     final authState = ref.watch(authProvider);
+    final packageState = ref.watch(packageProvider);
     final DateFormat dateTimeFormat = DateFormat('d MMM yyyy, h:mm a');
+
+    final bool isJoinerPackage =
+        packageState.selectedPackage?.visibility == 'JOINER';
 
     return Scaffold(
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
@@ -533,29 +555,30 @@ class _PaymentBookingPageState extends ConsumerState<PaymentBookingPage> {
                           ],
                         ),
                         SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: const [
-                                FaIcon(FontAwesomeIcons.creditCard),
-                                SizedBox(width: 10),
-                                Text('Credit Card',
-                                    style: TextStyle(fontSize: 16)),
-                              ],
-                            ),
-                            Radio<String>(
-                              value: 'CREDIT_CARD',
-                              groupValue: _selectedPaymentMethod,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedPaymentMethod = value!;
-                                });
-                              },
-                              activeColor: Colors.grey[800],
-                            ),
-                          ],
-                        ),
+                        if (!isJoinerPackage)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: const [
+                                  FaIcon(FontAwesomeIcons.creditCard),
+                                  SizedBox(width: 10),
+                                  Text('Credit Card',
+                                      style: TextStyle(fontSize: 16)),
+                                ],
+                              ),
+                              Radio<String>(
+                                value: 'CREDIT_CARD',
+                                groupValue: _selectedPaymentMethod,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedPaymentMethod = value!;
+                                  });
+                                },
+                                activeColor: Colors.grey[800],
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),

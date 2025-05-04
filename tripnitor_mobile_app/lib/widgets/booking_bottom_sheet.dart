@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/pages/user/payment_booking_page.dart';
 import 'package:tripnitor_mobile_app/widgets/custom_modal_dialogue.dart';
+import 'package:intl/intl.dart';
 import '../core/constants/constant.dart';
 import '../models/package_model.dart';
 import '../models/preview_boking_model.dart';
@@ -24,7 +25,24 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
   int passengers = 1;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.package.visibility.toUpperCase() == "JOINER") {
+      startDateTime = widget.package.startDate;
+      endDateTime = widget.package.endDate;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool isJoiner = widget.package.visibility.toUpperCase() == "JOINER";
+    final int? maxParticipants = widget.package.maxParticipants;
+    final int currentParticipants = widget.package.currentParticipants ?? 0;
+
+    final int remainingSlots = isJoiner && maxParticipants != null
+        ? maxParticipants - currentParticipants
+        : 0;
+
     return DraggableScrollableSheet(
       initialChildSize: .95,
       minChildSize: 0.3,
@@ -51,7 +69,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   title: Text(
-                    'Booking Details',
+                    isJoiner ? 'Join Package' : 'Booking Details',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -78,33 +96,48 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                         ],
                         showColorBar: true),
                     SizedBox(height: 24),
-                    _buildShadowedContainer([
-                      _buildSection('Start Date and Time', [
-                        _buildDateTimeRow(startDateTime, (dateTime) {
-                          setState(() => startDateTime = dateTime);
-                        }),
+                    if (isJoiner) ...[
+                      _buildShadowedContainer([
+                        _buildSection('Trip Schedule', [
+                          _buildFixedDateInfo(
+                              widget.package.startDate, widget.package.endDate),
+                          if (maxParticipants != null) ...[
+                            SizedBox(height: 12),
+                            _buildJoinerParticipantsInfo(
+                                currentParticipants, maxParticipants),
+                          ],
+                        ]),
                       ]),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: Divider(
-                          color: Color(ColorConstants.PRIMARY_COLOR)
-                              .withOpacity(.3),
-                          thickness: 1,
-                          height: 1,
+                    ] else ...[
+                      _buildShadowedContainer([
+                        _buildSection('Start Date and Time', [
+                          _buildDateTimeRow(startDateTime, (dateTime) {
+                            setState(() => startDateTime = dateTime);
+                          }),
+                        ]),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: Divider(
+                            color: Color(ColorConstants.PRIMARY_COLOR)
+                                .withOpacity(.3),
+                            thickness: 1,
+                            height: 1,
+                          ),
                         ),
-                      ),
-                      _buildSection('End Date and Time', [
-                        _buildDateTimeRow(endDateTime, (dateTime) {
-                          setState(() => endDateTime = dateTime);
-                        }),
+                        _buildSection('End Date and Time', [
+                          _buildDateTimeRow(endDateTime, (dateTime) {
+                            setState(() => endDateTime = dateTime);
+                          }),
+                        ]),
                       ]),
-                    ]),
+                    ],
                     SizedBox(height: 24),
                     _buildShadowedContainer([
                       Column(
                         children: [
-                          Text(
-                              'A van holds up to 15 passengers. If you have more, additional vans will be provided.'),
+                          Text(isJoiner
+                              ? 'Joiner tour packages hold a maximum of 15 passengers'
+                              : 'A van holds up to 15 passengers. If you have more, additional vans will be provided.'),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10.0),
                             child: Divider(
@@ -114,7 +147,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                               height: 1,
                             ),
                           ),
-                          _buildPassengerSelector(),
+                          _buildPassengerSelector(isJoiner, remainingSlots),
                         ],
                       ),
                     ]),
@@ -135,6 +168,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                             startDate: startDateTime!,
                             endDate: endDateTime!,
                             numberOfPassengers: passengers,
+                            assignedDriver: widget.package.assignedDriver?.id,
                           );
 
                           final userId = await tokenService.getUserId();
@@ -159,7 +193,8 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                             final assignedDrivers =
                                 bookingState.previewBooking?.assignedDrivers ??
                                     [];
-                            final requiredDrivers = (passengers + 14) ~/ 15;
+                            final requiredDrivers =
+                                isJoiner ? 1 : (passengers + 14) ~/ 15;
 
                             if (assignedDrivers.length < requiredDrivers) {
                               throw 'Our drivers are busy. Please adjust booking date or number of passengers.';
@@ -205,7 +240,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                         }
                       },
                       child: Text(
-                        'Book now',
+                        isJoiner ? 'Join now' : 'Book now',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -219,6 +254,108 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFixedDateInfo(DateTime? startDate, DateTime? endDate) {
+    final DateFormat dateFormat = DateFormat('d MMM yyyy, h:mm a');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.calendar_today,
+              color: Color(ColorConstants.ACCENT_COLOR),
+              size: 18,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Start:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 26.0),
+          child: Text(
+            startDate != null ? dateFormat.format(startDate) : 'Not specified',
+            style: TextStyle(fontSize: 14),
+          ),
+        ),
+        SizedBox(height: 12),
+        Row(
+          children: [
+            Icon(
+              Icons.calendar_today,
+              color: Color(ColorConstants.ACCENT_COLOR),
+              size: 18,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'End:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 26.0),
+          child: Text(
+            endDate != null ? dateFormat.format(endDate) : 'Not specified',
+            style: TextStyle(fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildJoinerParticipantsInfo(
+      int currentParticipants, int maxParticipants) {
+    final int remainingSlots = maxParticipants - currentParticipants;
+
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.people,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Current passengers:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            '$currentParticipants/$maxParticipants',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: remainingSlots < 3
+                  ? Colors.red
+                  : Color(ColorConstants.PRIMARY_COLOR),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -305,12 +442,29 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
     );
   }
 
-  Widget _buildPassengerSelector() {
+  Widget _buildPassengerSelector(bool isJoiner, int remainingSlots) {
+    final int maxAllowedPassengers = isJoiner ? remainingSlots : 999;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Passengers',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Passengers',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            if (isJoiner)
+              Text(
+                'Remaining slots: $remainingSlots',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: remainingSlots < 3 ? Colors.red : Colors.grey[600],
+                  fontWeight:
+                      remainingSlots < 3 ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+          ],
+        ),
         Row(
           children: [
             IconButton(
@@ -327,7 +481,9 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             ),
             IconButton(
               icon: Icon(Icons.add_circle_outline),
-              onPressed: () => setState(() => passengers++),
+              onPressed: passengers < maxAllowedPassengers
+                  ? () => setState(() => passengers++)
+                  : null,
             ),
           ],
         ),

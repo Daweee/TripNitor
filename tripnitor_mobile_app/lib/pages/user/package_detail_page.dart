@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
+import 'package:tripnitor_mobile_app/widgets/joiner_package_users_list.dart';
 import '../../core/constants/constant.dart';
 import '../../helpers/location_transformation_help.dart';
+import '../../models/driver_model.dart';
 import '../../providers/package_provider.dart';
 import '../../models/package_model.dart';
 import '../../models/leg_model.dart';
@@ -30,8 +32,22 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        ref.read(packageProvider.notifier).getPackageDetails(widget.packageId));
+    Future.microtask(() async {
+      await ref
+          .read(packageProvider.notifier)
+          .getPackageDetails(widget.packageId);
+
+      final packageState = ref.read(packageProvider);
+      final package = packageState.selectedPackage;
+
+      if (package != null &&
+          package.visibility.toUpperCase() == "JOINER" &&
+          (packageState.packageJoiners == null ||
+              packageState.packageJoiners!.isEmpty) &&
+          !packageState.isLoadingJoiners) {
+        ref.read(packageProvider.notifier).getJoinerUsers(widget.packageId);
+      }
+    });
   }
 
   @override
@@ -48,7 +64,7 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
             size: 20.0,
           ),
           onPressed: () {
-            ref.read(bookingStateProvider.notifier).clearState();
+            ref.read(packageProvider.notifier).clearPackageJoiners();
             Navigator.of(context).pop();
           },
         ),
@@ -91,6 +107,7 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
     }
 
     final package = packageState.selectedPackage!;
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 80.0),
       child: Column(
@@ -108,8 +125,21 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               _buildPackageInfo(package.packageType),
               SizedBox(width: 5),
               _buildPackageInfo(package.visibility),
+              if (package.visibility.toUpperCase() == "JOINER" &&
+                  package.maxParticipants != null) ...[
+                SizedBox(width: 5),
+                _buildParticipantsTag(
+                    "${package.currentParticipants ?? 0}/${package.maxParticipants}"),
+              ],
             ],
           ),
+          SizedBox(
+            height: 5,
+          ),
+          if (package.startDate != null && package.endDate != null) ...[
+            SizedBox(width: 5),
+            _buildDateRangeTag(package.localStartDate!, package.localEndDate!),
+          ],
           SizedBox(height: 20),
           _buildSection('Description', [
             Text(package.description),
@@ -134,6 +164,11 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
               ],
               totalDistance: '${package.totalDistance}km'),
           SizedBox(height: 20),
+          if (package.visibility.toUpperCase() == "JOINER" &&
+              package.assignedDriver != null) ...[
+            _buildDriverSection('Assigned Driver', package.assignedDriver!),
+            SizedBox(height: 20),
+          ],
           _buildItinerarySection(
             'Itinerary',
             [
@@ -141,6 +176,13 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
             ],
             package,
           ),
+          if (package.visibility.toUpperCase() == "JOINER") ...[
+            SizedBox(height: 20),
+            JoinerPackageUsersList(
+              joiners: packageState.packageJoiners ?? [],
+              isLoading: packageState.isLoadingJoiners,
+            ),
+          ],
         ],
       ),
     );
@@ -210,37 +252,38 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ],
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PackageStartFinalLocation(
-                      packageId: package.id,
-                      packageName: package.packageName,
-                      packageType: package.packageType,
-                      packageDescription: package.description,
-                      packageVisibility: package.visibility,
-                      isEditing: true,
-                      initialStartLocation:
-                          LocationTransformations.locationToLocationServiceData(
-                              package.startLocation),
-                      initialEndLocation:
-                          LocationTransformations.locationToLocationServiceData(
-                              package.finalDestination),
-                      initialLegs: package.legs,
+            if (package.visibility.toUpperCase() == "PRIVATE")
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PackageStartFinalLocation(
+                        packageId: package.id,
+                        packageName: package.packageName,
+                        packageType: package.packageType,
+                        packageDescription: package.description,
+                        packageVisibility: package.visibility,
+                        isEditing: true,
+                        initialStartLocation: LocationTransformations
+                            .locationToLocationServiceData(
+                                package.startLocation),
+                        initialEndLocation: LocationTransformations
+                            .locationToLocationServiceData(
+                                package.finalDestination),
+                        initialLegs: package.legs,
+                      ),
                     ),
+                  );
+                },
+                child: Text(
+                  'Change',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
                   ),
-                );
-              },
-              child: Text(
-                'Change',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue,
                 ),
               ),
-            ),
           ],
         ),
         SizedBox(height: 10),
@@ -397,7 +440,184 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
     );
   }
 
+  Widget _buildParticipantsTag(String participantsInfo) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.15),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.userGroup,
+              color: Color(ColorConstants.PRIMARY_COLOR),
+              size: 8.0,
+            ),
+            SizedBox(width: 3),
+            Text(
+              participantsInfo,
+              style: TextStyle(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDriverSection(String title, Driver driver) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Color(ColorConstants.PRIMARY_COLOR),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                ),
+                height: 20,
+                width: 5,
+              ),
+              SizedBox(width: 10),
+              Text(title,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Card(
+            margin: EdgeInsets.only(bottom: 16),
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Driver Details',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${driver.van.model} | ${driver.van.plateNumber}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black.withOpacity(.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  _buildDriverInfoRow("Name", driver.user.name),
+                  _buildDriverInfoRow("Phone Number", driver.user.phoneNumber)
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDriverInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateRangeTag(DateTime startDate, DateTime endDate) {
+    final DateFormat dateFormat = DateFormat('d MMM yyyy, h:mm a');
+    final String formattedStartDate = dateFormat.format(startDate);
+    final String formattedEndDate = dateFormat.format(endDate);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.15),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.calendar,
+              color: Color(ColorConstants.PRIMARY_COLOR),
+              size: 8.0,
+            ),
+            SizedBox(width: 3),
+            Text(
+              "$formattedStartDate - $formattedEndDate",
+              style: TextStyle(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBottomBar(PackageState packageState) {
+    final package = packageState.selectedPackage;
+    if (package == null) return SizedBox.shrink();
+
+    final bool isFullyBooked = package.visibility.toUpperCase() == "JOINER" &&
+        package.maxParticipants != null &&
+        package.currentParticipants != null &&
+        package.currentParticipants! >= package.maxParticipants!;
+
+    final String buttonText = package.visibility.toUpperCase() == "JOINER"
+        ? "Join and book now"
+        : "Book now";
+
     return Container(
       height: 75.0,
       decoration: BoxDecoration(
@@ -451,7 +671,7 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
                 ],
               ),
               Text(
-                '₱${packageState.selectedPackage?.basePrice ?? ''}',
+                '₱${package.basePrice ?? ''}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -461,16 +681,20 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+              backgroundColor: isFullyBooked
+                  ? Colors.grey
+                  : Color(ColorConstants.PRIMARY_COLOR),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-            onPressed: () {
-              _showBookingBottomSheet(context, packageState.selectedPackage);
-            },
+            onPressed: isFullyBooked
+                ? null
+                : () {
+                    _showBookingBottomSheet(context, package);
+                  },
             child: Text(
-              'Book now',
+              buttonText,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
