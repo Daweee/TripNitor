@@ -26,7 +26,7 @@ class BookingPreview {
         startDate: DateTime.parse(json["start_date"]),
         endDate: DateTime.parse(json["end_date"]),
         numberOfPassengers: json["number_of_passengers"],
-        baseFare: json["base_fare"],
+        baseFare: (json["base_fare"] as num).toInt(),
         numberOfNights: json["number_of_nights"],
         basePackagePrice: json["base_package_price"],
         totalPrice: json["total_price"],
@@ -53,20 +53,30 @@ class PreviewBookingRequest {
   final DateTime startDate;
   final DateTime endDate;
   final int numberOfPassengers;
+  final String? assignedDriver;
 
   PreviewBookingRequest({
     required this.package,
     required this.startDate,
     required this.endDate,
     required this.numberOfPassengers,
+    this.assignedDriver,
   });
 
-  Map<String, dynamic> toJson() => {
-        'package': package,
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'number_of_passengers': numberOfPassengers,
-      };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'package': package,
+      'start_date': startDate.toIso8601String(),
+      'end_date': endDate.toIso8601String(),
+      'number_of_passengers': numberOfPassengers,
+    };
+
+    if (assignedDriver != null) {
+      data['assigned_driver'] = assignedDriver;
+    }
+
+    return data;
+  }
 
   factory PreviewBookingRequest.fromJson(Map<String, dynamic> json) {
     return PreviewBookingRequest(

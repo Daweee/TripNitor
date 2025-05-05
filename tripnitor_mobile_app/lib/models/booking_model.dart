@@ -14,7 +14,7 @@ class Booking {
   final Location? finalDestination;
   final List<Driver> drivers;
   final String status;
-  final String baseFare;
+  final dynamic baseFare;
   final String updatedPackageFare;
   final int numberOfNights;
   final String totalPrice;

@@ -157,7 +157,7 @@ class _PackagePageState extends ConsumerState<PackagePage> {
                         onChanged: (value) => ref
                             .read(visibilityFilterProvider.notifier)
                             .state = value,
-                        items: ['PRIVATE', 'PUBLIC', null]
+                        items: ['PRIVATE', 'JOINER', null]
                             .map((visibility) => DropdownMenuItem(
                                 value: visibility,
                                 child: Text(
