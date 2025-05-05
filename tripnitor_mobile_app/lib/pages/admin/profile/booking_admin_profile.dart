@@ -365,6 +365,35 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                           ],
                         ),
                       ),
+                    if (bookingState.booking!.package.visibility ==
+                        'JOINER') ...[
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.grey[600],
+                              size: 16,
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Note: Joiner packages can only be confirmed in the package page.",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     SizedBox(
                       height: 40,
                     ),
@@ -402,7 +431,9 @@ class _BookingAdminProfileState extends ConsumerState<BookingAdminProfile> {
                         ),
                       ),
                     ),
-                    if (bookingState.booking!.status == 'PENDING') ...[
+                    if (bookingState.booking!.status == 'PENDING' &&
+                        bookingState.booking!.package.visibility !=
+                            'JOINER') ...[
                       _confirmBookingButton(bookingState.booking!),
                       SizedBox(
                         height: 20,
