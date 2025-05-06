@@ -295,7 +295,7 @@ class _BookingItineraryPageState extends ConsumerState<BookingItineraryPage> {
                   Row(
                     children: [
                       Text(
-                        'Itinerary ${index + 1}',
+                        'Trip ${index + 1}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,

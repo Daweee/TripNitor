@@ -395,7 +395,7 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Itinerary ${leg.legNumber}',
+              'Trip ${leg.legNumber}',
               style: TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
