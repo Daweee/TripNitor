@@ -3,29 +3,38 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driver_bottom_nav/driver_booking.dart';
-import 'package:tripnitor_mobile_app/pages/driver/driver_bottom_nav/driver_message.dart';
 import 'package:tripnitor_mobile_app/pages/driver/driver_bottom_nav/driver_profile.dart';
 import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
+import 'package:tripnitor_mobile_app/models/driver_assignment.dart';
+import 'package:tripnitor_mobile_app/providers/driver_assignment_provider.dart';
+import 'package:tripnitor_mobile_app/pages/driver/driver_booking_details.dart';
 
-import '../../models/driver_assignment.dart';
-import '../../providers/driver_assignment_provider.dart';
-import '../../providers/driver_provider.dart';
-import 'driver_booking_details.dart';
+final driverNavIndexProvider = StateProvider<int>((ref) => 0);
 
-final currentIndexProvider = StateProvider<int>((ref) => 0);
+void resetToDriverHomePage(WidgetRef ref) {
+  ref.read(driverNavIndexProvider.notifier).state = 0;
+}
 
-class DriverHomePage extends StatefulWidget {
+class DriverHomePage extends ConsumerStatefulWidget {
   const DriverHomePage({Key? key}) : super(key: key);
 
   @override
-  State<DriverHomePage> createState() => _DriverHomePageState();
+  ConsumerState<DriverHomePage> createState() => _DriverHomePageState();
 }
 
-class _DriverHomePageState extends State<DriverHomePage> {
-  int currentPage = 0;
+class _DriverHomePageState extends ConsumerState<DriverHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      resetToDriverHomePage(ref);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final currentPage = ref.watch(driverNavIndexProvider);
+
     return Scaffold(
       body: _buildPage(currentPage),
       bottomNavigationBar: BottomNavigationBar(
@@ -35,11 +44,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
         onTap: (value) {
-          setState(
-            () {
-              currentPage = value;
-            },
-          );
+          ref.read(driverNavIndexProvider.notifier).state = value;
         },
         items: const [
           BottomNavigationBarItem(
@@ -51,11 +56,6 @@ class _DriverHomePageState extends State<DriverHomePage> {
             activeIcon: Icon(Icons.book),
             icon: Icon(Icons.book_outlined),
             label: "Booking",
-          ),
-          BottomNavigationBarItem(
-            activeIcon: Icon(Icons.chat_bubble),
-            icon: Icon(Icons.chat_bubble_outline_rounded),
-            label: "Message",
           ),
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.person),
@@ -74,8 +74,6 @@ class _DriverHomePageState extends State<DriverHomePage> {
       case 1:
         return DriverBookingPage();
       case 2:
-        return DriverMessagePage();
-      case 3:
         return DriverProfilePage();
       default:
         return DriverHomepage();
@@ -282,7 +280,7 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
         driverConfirmedBookingList.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(50.0),
-        child: const Center(child: Text("No Ongoing bookings available")),
+        child: const Center(child: Text("No Confirmed bookings available")),
       );
     }
 
