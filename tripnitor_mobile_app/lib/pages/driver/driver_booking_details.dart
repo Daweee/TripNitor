@@ -426,37 +426,18 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
     final bool isEnabled = booking.status == "CONFIRMED";
     final bool isOngoing = booking.status == "ONGOING";
     final bool isCompleted = booking.status == "COMPLETED";
-    final bool isWithinStartWindow =
-        startDate.difference(now).inHours <= 6 && now.isBefore(startDate);
-    final bool isOverdue = now.isAfter(startDate);
+    final bool isBeforeStartDate = now.isBefore(startDate);
+    final bool isJoinerPackage = booking.package.visibility == "JOINER";
 
-    void _showStartBookingDialogue(BuildContext context) {
-      if (now.isBefore(startDate) && !isWithinStartWindow) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Cannot Start Booking'),
-              content: Text(
-                  'This booking cannot be started yet. Please wait until 6 hours before the scheduled start time.'),
-              actions: [
-                TextButton(
-                  child: Text('OK'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            );
-          },
-        );
-        return;
-      }
-
+    void _confirmStartBooking(BuildContext context) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return CustomModalDialog(
             title: 'Start Booking',
-            content: 'Are you sure you want to start this booking now?',
+            content: isJoinerPackage
+                ? 'Are you sure you want to start this booking now?\n\nNote: Starting this JOINER booking will also start other bookings related to it.'
+                : 'Are you sure you want to start this booking now?',
             onConfirm: () async {
               await ref
                   .read(bookingStateProvider.notifier)
@@ -467,6 +448,29 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
           );
         },
       );
+    }
+
+    void _showStartBookingDialogue(BuildContext context) {
+      if (isBeforeStartDate) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CustomModalDialog(
+              title: 'Start Booking Early',
+              content:
+                  'This booking is scheduled to start on ${DateFormat('d MMM yyyy, h:mm a').format(startDate)}. Are you sure you want to start it now?',
+              onConfirm: () {
+                _confirmStartBooking(context);
+              },
+              color: Color(ColorConstants.ACCENT_COLOR),
+              buttonText: 'Start Anyway',
+            );
+          },
+        );
+        return;
+      }
+
+      _confirmStartBooking(context);
     }
 
     String getOverdueText() {
@@ -483,7 +487,7 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isOverdue && !isOngoing && !isCompleted)
+        if (now.isAfter(startDate) && !isOngoing && !isCompleted)
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
@@ -539,9 +543,8 @@ class _DriverBookingDetailsState extends ConsumerState<DriverBookingDetails> {
             width: double.infinity,
             height: 45,
             child: ElevatedButton(
-              onPressed: isEnabled && (isWithinStartWindow || isOverdue)
-                  ? () => _showStartBookingDialogue(context)
-                  : null,
+              onPressed:
+                  isEnabled ? () => _showStartBookingDialogue(context) : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(ColorConstants.SUCCESS_COLOR),
                 disabledBackgroundColor: Color(ColorConstants.DISABLED_COLOR),

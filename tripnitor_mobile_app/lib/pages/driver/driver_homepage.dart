@@ -301,6 +301,10 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
   }
 
   Widget _buildBookingCard(DriverAssignment driverBooking) {
+    final isJoinerPackage =
+        driverBooking.booking.package.visibility == "JOINER";
+    final packageId = driverBooking.booking.package.id;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -310,6 +314,7 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isJoinerPackage) _buildJoinerBadge(packageId),
             _buildLocationRow(
               icon: Icons.location_on,
               iconColor: Colors.red,
@@ -370,6 +375,45 @@ class _DriverHomepageState extends ConsumerState<DriverHomepage> {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJoinerBadge(String packageId) {
+    final displayId =
+        packageId.length > 10 ? '${packageId.substring(0, 12)}...' : packageId;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.2),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: Color(ColorConstants.PRIMARY_COLOR),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.group,
+              size: 14,
+              color: Color(ColorConstants.PRIMARY_COLOR),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'JOINER PKG: $displayId',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
             ),
           ],
         ),
