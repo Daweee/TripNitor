@@ -180,6 +180,7 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
             SizedBox(height: 20),
             JoinerPackageUsersList(
               joiners: packageState.packageJoiners ?? [],
+              packageCreator: package.createdBy,
               isLoading: packageState.isLoadingJoiners,
             ),
           ],
@@ -614,9 +615,21 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         package.currentParticipants != null &&
         package.currentParticipants! >= package.maxParticipants!;
 
-    final String buttonText = package.visibility.toUpperCase() == "JOINER"
-        ? "Join and book now"
-        : "Book now";
+    String buttonText;
+    if (isFullyBooked) {
+      buttonText = "Fully Booked";
+    } else if (package.isConfirmed == true &&
+        package.visibility.toUpperCase() == "JOINER") {
+      buttonText = "Package has been finalized";
+    } else {
+      buttonText = package.visibility.toUpperCase() == "JOINER"
+          ? "Join and book now"
+          : "Book now";
+    }
+
+    bool isButtonDisabled = isFullyBooked ||
+        (package.isConfirmed == true &&
+            package.visibility.toUpperCase() == "JOINER");
 
     return Container(
       height: 75.0,
@@ -681,14 +694,14 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isFullyBooked
+              backgroundColor: isButtonDisabled
                   ? Colors.grey
                   : Color(ColorConstants.PRIMARY_COLOR),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-            onPressed: isFullyBooked
+            onPressed: isButtonDisabled
                 ? null
                 : () {
                     _showBookingBottomSheet(context, package);

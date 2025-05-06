@@ -3,14 +3,17 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../models/package_user_model.dart';
 import '../../core/constants/constant.dart';
+import '../models/auth_model.dart';
 
 class JoinerPackageUsersList extends StatelessWidget {
   final List<PackageUser> joiners;
+  final User packageCreator;
   final bool isLoading;
 
   const JoinerPackageUsersList({
     Key? key,
     required this.joiners,
+    required this.packageCreator,
     this.isLoading = false,
   }) : super(key: key);
 
@@ -62,6 +65,8 @@ class JoinerPackageUsersList extends StatelessWidget {
   }
 
   Widget _buildJoinerCard(PackageUser joiner) {
+    final bool isCreator = joiner.user.id == packageCreator.id;
+
     return Card(
       color: Colors.white,
       margin: EdgeInsets.symmetric(vertical: 8),
@@ -69,26 +74,72 @@ class JoinerPackageUsersList extends StatelessWidget {
         padding: EdgeInsets.all(12),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundColor:
-                  Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.2),
-              child: FaIcon(
-                FontAwesomeIcons.user,
-                color: Color(ColorConstants.PRIMARY_COLOR),
-                size: 16,
-              ),
+            Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                CircleAvatar(
+                  backgroundColor:
+                      Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.2),
+                  child: FaIcon(
+                    FontAwesomeIcons.user,
+                    color: Color(ColorConstants.PRIMARY_COLOR),
+                    size: 16,
+                  ),
+                ),
+                if (isCreator)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Color(ColorConstants.PRIMARY_COLOR),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: FaIcon(
+                        FontAwesomeIcons.crown,
+                        color: Colors.white,
+                        size: 8,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    joiner.user.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        joiner.user.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if (isCreator)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 6.0),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Color(ColorConstants.PRIMARY_COLOR)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Creator',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Color(ColorConstants.PRIMARY_COLOR),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   SizedBox(height: 4),
                   Text(

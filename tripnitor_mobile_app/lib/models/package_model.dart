@@ -1,7 +1,9 @@
+import 'auth_model.dart';
 import 'driver_model.dart';
 import 'location_model.dart';
 import 'leg_model.dart';
 import 'location_service_data_model.dart';
+import 'package_user_model.dart';
 
 class Package {
   final String id;
@@ -19,23 +21,30 @@ class Package {
   final DateTime? startDate;
   final DateTime? endDate;
   final String? totalDistance;
+  final bool isConfirmed;
+  final bool isCompleted;
+  final User createdBy;
 
-  Package(
-      {required this.id,
-      required this.packageName,
-      required this.description,
-      required this.basePrice,
-      required this.packageType,
-      required this.visibility,
-      required this.startLocation,
-      required this.finalDestination,
-      required this.legs,
-      this.maxParticipants,
-      this.currentParticipants,
-      this.assignedDriver,
-      this.startDate,
-      this.endDate,
-      this.totalDistance});
+  Package({
+    required this.id,
+    required this.packageName,
+    required this.description,
+    required this.basePrice,
+    required this.packageType,
+    required this.visibility,
+    required this.startLocation,
+    required this.finalDestination,
+    required this.legs,
+    this.maxParticipants,
+    this.currentParticipants,
+    this.assignedDriver,
+    this.startDate,
+    this.endDate,
+    this.totalDistance,
+    required this.isConfirmed,
+    required this.isCompleted,
+    required this.createdBy,
+  });
 
   DateTime? get localStartDate => startDate?.toLocal();
   DateTime? get localEndDate => endDate?.toLocal();
@@ -82,6 +91,9 @@ class Package {
       endDate:
           json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
       totalDistance: json["total_distance"],
+      isConfirmed: json["is_confirmed"],
+      isCompleted: json["is_completed"],
+      createdBy: User.fromJson(json["created_by"]),
     );
   }
 
@@ -200,34 +212,42 @@ class PackageState {
   final List<Package> packages;
   final Package? selectedPackage;
   final bool isLoading;
+  final bool isLoadingJoiners;
   final String? error;
   final int? status;
   final String? message;
+  final List<PackageUser>? packageJoiners;
 
   PackageState({
     this.packages = const [],
     this.selectedPackage,
     this.isLoading = false,
+    this.isLoadingJoiners = false,
     this.error,
     this.status,
     this.message,
+    this.packageJoiners,
   });
 
   PackageState copyWith({
     List<Package>? packages,
     Package? selectedPackage,
     bool? isLoading,
+    bool? isLoadingJoiners,
     String? error,
     int? status,
     String? message,
+    List<PackageUser>? packageJoiners,
   }) {
     return PackageState(
       packages: packages ?? this.packages,
       selectedPackage: selectedPackage ?? this.selectedPackage,
       isLoading: isLoading ?? this.isLoading,
+      isLoadingJoiners: isLoadingJoiners ?? this.isLoadingJoiners,
       error: error ?? this.error,
       status: status ?? this.status,
       message: message ?? this.message,
+      packageJoiners: packageJoiners ?? this.packageJoiners,
     );
   }
 

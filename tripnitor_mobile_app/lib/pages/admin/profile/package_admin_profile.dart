@@ -107,6 +107,7 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildInfoRow('Name', package.packageName),
+                            _buildInfoRow('Creator', package.createdBy.name),
                             _buildInfoRow('Type', package.packageType),
                             _buildInfoRow('Visibility', package.visibility),
                             _buildInfoRow('Price', '₱${package.basePrice}'),

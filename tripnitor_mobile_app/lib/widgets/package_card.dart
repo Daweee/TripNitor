@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
+import 'package:tripnitor_mobile_app/providers/auth_provider.dart';
 import '../pages/user/package_detail_page.dart';
 import '../providers/package_provider.dart';
 import 'shimmer_package_card.dart';
@@ -18,7 +19,7 @@ class PackageCard extends ConsumerWidget {
 
     if (packageState.isLoading) {
       return ListView.builder(
-        itemCount: 3,
+        itemCount: 5,
         itemBuilder: (context, index) => ShimmerPackageCard(),
       );
     }
@@ -41,6 +42,8 @@ class PackageCard extends ConsumerWidget {
       itemCount: filteredPackages.length,
       itemBuilder: (context, index) {
         final package = filteredPackages[index];
+        final bool isAdminPackage = package.createdBy.role == 'ADMIN';
+
         return Container(
           height: 150.0,
           margin: EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
@@ -165,9 +168,37 @@ class PackageCard extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(
-                                height: 20.0,
-                              ),
+                              if (isAdminPackage) ...[
+                                SizedBox(height: 5),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: Color(ColorConstants.PRIMARY_COLOR),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      FaIcon(
+                                        FontAwesomeIcons.crown,
+                                        size: 10,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        "Pre-set",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              SizedBox(height: 5),
                               Text(
                                 "₱${package.basePrice}",
                                 style: TextStyle(
@@ -185,6 +216,7 @@ class PackageCard extends ConsumerWidget {
                             ],
                           ),
                         ),
+                        // Positioned element with "show more" remains the same
                         Positioned(
                           bottom: 0,
                           left: 0,
