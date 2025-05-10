@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../models/package_user_model.dart';
 import '../../core/constants/constant.dart';
 import '../models/auth_model.dart';
+import '../providers/auth_provider.dart';
 
-class JoinerPackageUsersList extends StatelessWidget {
+class JoinerPackageUsersList extends ConsumerWidget {
   final List<PackageUser> joiners;
   final User packageCreator;
   final bool isLoading;
@@ -18,7 +20,10 @@ class JoinerPackageUsersList extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.watch(authProvider).user;
+
     if (isLoading) {
       return _buildLoadingState();
     }
@@ -57,18 +62,31 @@ class JoinerPackageUsersList extends StatelessWidget {
                 itemCount: joiners.length,
                 itemBuilder: (context, index) {
                   final joiner = joiners[index];
-                  return _buildJoinerCard(joiner);
+
+                  return _buildJoinerCard(joiner, currentUser?.id);
                 },
               ),
       ],
     );
   }
 
-  Widget _buildJoinerCard(PackageUser joiner) {
+  Widget _buildJoinerCard(PackageUser joiner, String? currentUserId) {
     final bool isCreator = joiner.user.id == packageCreator.id;
+    final bool isCurrentUser = joiner.user.id == currentUserId;
 
     return Card(
       color: Colors.white,
+      shape: isCurrentUser
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+                width: 2.0,
+              ),
+            )
+          : RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -131,6 +149,27 @@ class JoinerPackageUsersList extends StatelessWidget {
                             ),
                             child: Text(
                               'Creator',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Color(ColorConstants.PRIMARY_COLOR),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (isCurrentUser && !isCreator)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 6.0),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Color(ColorConstants.PRIMARY_COLOR)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'You',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Color(ColorConstants.PRIMARY_COLOR),

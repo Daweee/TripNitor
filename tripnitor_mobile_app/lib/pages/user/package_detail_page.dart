@@ -9,6 +9,7 @@ import 'package:tripnitor_mobile_app/widgets/joiner_package_users_list.dart';
 import '../../core/constants/constant.dart';
 import '../../helpers/location_transformation_help.dart';
 import '../../models/driver_model.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/package_provider.dart';
 import '../../models/package_model.dart';
 import '../../models/leg_model.dart';
@@ -615,21 +616,27 @@ class _PackageDetailPageState extends ConsumerState<PackageDetailPage> {
         package.currentParticipants != null &&
         package.currentParticipants! >= package.maxParticipants!;
 
+    final bool isConfirmed = package.isConfirmed == true &&
+        package.visibility.toUpperCase() == "JOINER";
+
+    final bool hasUserJoined = packageState.packageJoiners != null &&
+        packageState.packageJoiners!
+            .any((joiner) => joiner.user.id == ref.read(authProvider).user?.id);
+
     String buttonText;
     if (isFullyBooked) {
       buttonText = "Fully Booked";
-    } else if (package.isConfirmed == true &&
-        package.visibility.toUpperCase() == "JOINER") {
+    } else if (isConfirmed) {
       buttonText = "Package has been finalized";
+    } else if (hasUserJoined) {
+      buttonText = "Already Joined";
     } else {
       buttonText = package.visibility.toUpperCase() == "JOINER"
           ? "Join and book now"
           : "Book now";
     }
 
-    bool isButtonDisabled = isFullyBooked ||
-        (package.isConfirmed == true &&
-            package.visibility.toUpperCase() == "JOINER");
+    bool isButtonDisabled = isFullyBooked || isConfirmed || hasUserJoined;
 
     return Container(
       height: 75.0,
