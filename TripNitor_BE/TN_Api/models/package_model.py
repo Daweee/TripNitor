@@ -2,6 +2,7 @@ from django.db import models
 from .base_model import CustomPrimaryKeyModel
 from .location_model import Location
 from .driver_model import Driver
+from .user_model import User
 from django.core.exceptions import ValidationError
 from django.db.models import Min
 
@@ -25,8 +26,11 @@ class Package(CustomPrimaryKeyModel):
     visibility = models.CharField(max_length=7, choices=PackageVisibility.choices, default=PackageVisibility.PRIVATE)
     start_location = models.ForeignKey(Location, related_name='package_starts', on_delete=models.SET_NULL, null=True, blank=True)
     final_destination = models.ForeignKey(Location, related_name='package_ends', on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey(User, related_name='package_creator', on_delete=models.CASCADE, null=True, blank=True)
     max_participants = models.PositiveIntegerField(default=15, null=True, blank=True)  # For JOINER packages
     current_participants = models.PositiveIntegerField(null=True, blank=True)  # For JOINER packages
+    is_confirmed = models.BooleanField(default=False) # For JOINER packages
+    is_completed = models.BooleanField(default=False) # For JOINER packages
     assigned_driver = models.ForeignKey(Driver, related_name='assigned_driver', on_delete=models.CASCADE, null=True, blank=True) # For JOINER packages
     start_date = models.DateTimeField(null=True, blank=True)  # For scheduling for JOINER packages
     end_date = models.DateTimeField(null=True, blank=True)  # For scheduling for JOINER packages

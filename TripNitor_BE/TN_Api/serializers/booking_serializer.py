@@ -50,22 +50,60 @@ class BookingCreationSerializer(serializers.ModelSerializer):
         )
         
         BookingService.validate_capacity(temp_booking)
+
+        user_id = data['user'].id
+        has_conflicts, error_message = BookingService.check_user_booking_conflicts(
+            user_id=user_id,
+            start_date=data['start_date'],
+            end_date=data['end_date']
+        )
+
+        if has_conflicts:
+            raise serializers.ValidationError(error_message)
         
         return data
 
     def create(self, validated_data):
         from ..models import DriverAssignment, BookingLeg
-        from ..services import BookingService
+        from ..services import BookingService, PackageService
         
         drivers_data = validated_data.pop('drivers', [])
         package = validated_data.get('package')
+        user = validated_data.get('user')
 
-        validated_data['number_of_nights'] = BookingService.get_nights(
-            validated_data['start_date'], 
-            validated_data['end_date']
-        )
-        
-        validated_data['base_fare'] = Decimal('3000')  
+        if package and package.visibility == Package.PackageVisibility.JOINER:
+            number_of_passengers = validated_data.get('number_of_passengers', 1)
+            package_user = PackageService.join_package(
+                package_id=package.id,
+                user_id=user.id,
+                number_of_passengers=number_of_passengers
+            )
+            
+            validated_data['start_date'] = package.start_date
+            validated_data['end_date'] = package.end_date
+
+            has_conflicts, error_message = BookingService.check_user_booking_conflicts(
+                user_id=user.id,
+                start_date=package.start_date,
+                end_date=package.end_date
+            )
+            
+            if has_conflicts:
+                raise serializers.ValidationError(error_message)
+    
+            validated_data['number_of_nights'] = BookingService.get_nights(
+                package.start_date, package.end_date
+            )
+            validated_data['base_fare'] = Decimal('3000')
+            
+            if package.assigned_driver:
+                drivers_data = [package.assigned_driver]
+        else:
+            validated_data['number_of_nights'] = BookingService.get_nights(
+                validated_data['start_date'], 
+                validated_data['end_date']
+            )
+            validated_data['base_fare'] = Decimal('3000')
         
         with transaction.atomic():
             booking = super().create(validated_data)
@@ -74,7 +112,7 @@ class BookingCreationSerializer(serializers.ModelSerializer):
             booking.save(update_fields=['start_location', 'final_destination'])
             
             for driver in drivers_data:
-                DriverAssignment.objects.create(booking=booking, driver=driver)
+                DriverAssignment.objects.create(booking=booking, driver=driver, user=user)
             
             BookingService.calculate_final_fare(booking, booking.drivers.all())
             booking.save(update_fields=['total_price', 'updated_package_fare'])
@@ -131,6 +169,22 @@ class BookingPreviewSerializer(serializers.ModelSerializer):
         if data['start_date'] >= data['end_date']:
             raise serializers.ValidationError("End date must be after start date.")
         
+        user = None
+        if self.context and 'request' in self.context and hasattr(self.context['request'], 'user'):
+            user = self.context['request'].user
+
+        if user and user.is_authenticated:
+            from ..services import BookingService
+            
+            has_conflicts, error_message = BookingService.check_user_booking_conflicts(
+                user_id=user.id,
+                start_date=data['start_date'],
+                end_date=data['end_date']
+            )
+            
+            if has_conflicts:
+                raise serializers.ValidationError(error_message)
+
         package = data['package']
         number_of_passengers = data['number_of_passengers']
         
@@ -171,3 +225,13 @@ class BookingPreviewSerializer(serializers.ModelSerializer):
 class BookingStatusUpdateSerializer(serializers.Serializer):
     id = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
+
+class ConfirmJoinerPackageBookingsSerializer(serializers.Serializer):
+    package_id = serializers.CharField(required=True, help_text="ID of the package to confirm all pending bookings for")
+
+    def validate_package_id(self, value):
+        try:
+            package = Package.objects.get(id=value)
+            return value
+        except Package.DoesNotExist:
+            raise serializers.ValidationError(f"Package with ID {value} does not exist.")

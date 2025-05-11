@@ -7,7 +7,8 @@ from drf_spectacular.utils import extend_schema
 from django.utils import timezone
 from .mixins import CustomResponseMixin
 from ..serializers import BookingLegStatusUpdateSerializer, BookingLegSerializer
-from ..models import BookingLeg
+from ..models import BookingLeg, Package
+from django.db import transaction
 
 @extend_schema(tags=['booking legs'])
 class SetBookingLegActiveView(CustomResponseMixin, UpdateAPIView):
@@ -66,12 +67,35 @@ class SetBookingLegActiveView(CustomResponseMixin, UpdateAPIView):
                     f'Previous leg {booking_leg.leg_number - 1} not found. Cannot establish proper sequence.'
                 )
         
-        booking = booking_leg.booking
-        BookingLeg.objects.filter(booking=booking, is_active=True).update(is_active=False)
-        
-        booking_leg.is_active = True
-        booking_leg.departure_time = timezone.now()
-        booking_leg.save()
+        with transaction.atomic():
+            booking = booking_leg.booking
+            package = booking.package
+
+            BookingLeg.objects.filter(booking=booking, is_active=True).update(is_active=False)
+
+            if package.visibility == Package.PackageVisibility.JOINER:
+                same_package_bookings = booking.__class__.objects.filter(
+                    package=package,
+                    status='ONGOING'
+                ).exclude(id=booking.id)
+                
+                BookingLeg.objects.filter(
+                    booking__in=same_package_bookings,
+                    is_active=True
+                ).update(is_active=False)
+                
+                same_leg_number_legs = BookingLeg.objects.filter(
+                    booking__in=same_package_bookings,
+                    leg_number=booking_leg.leg_number,
+                    is_completed=False 
+                )
+                
+                current_time = timezone.now()
+                same_leg_number_legs.update(is_active=True, departure_time=current_time)
+            
+            booking_leg.is_active = True
+            booking_leg.departure_time = timezone.now()
+            booking_leg.save()
         
         serializer = BookingLegSerializer(booking_leg)
         return self.get_custom_response(
@@ -117,20 +141,62 @@ class CompleteBookingLegView(CustomResponseMixin, UpdateAPIView):
                 'Only active booking legs can be completed.'
             )
         
-        booking_leg.is_completed = True
-        booking_leg.is_active = False
-        booking_leg.arrival_time = timezone.now()
-        booking_leg.save()
-        
-        is_last_leg = not BookingLeg.objects.filter(
-            booking=booking_leg.booking,
-            leg_number__gt=booking_leg.leg_number
-        ).exists()
-        
-        if is_last_leg:
+        with transaction.atomic():
             booking = booking_leg.booking
-            booking.status = 'COMPLETED'
-            booking.save()
+            package = booking.package
+            
+            booking_leg.is_completed = True
+            booking_leg.is_active = False
+            booking_leg.arrival_time = timezone.now()
+            booking_leg.save()
+
+            same_package_bookings = []
+            if package.visibility == Package.PackageVisibility.JOINER:
+                same_package_bookings = booking.__class__.objects.filter(
+                    package=package,
+                    status='ONGOING'
+                ).exclude(id=booking.id)
+                
+                current_time = timezone.now()
+                BookingLeg.objects.filter(
+                    booking__in=same_package_bookings,
+                    leg_number=booking_leg.leg_number,
+                    is_active=True
+                ).update(is_completed=True, is_active=False, arrival_time=current_time)
+            
+            is_last_leg = not BookingLeg.objects.filter(
+                booking=booking,
+                leg_number__gt=booking_leg.leg_number
+            ).exists()
+            
+            if is_last_leg:
+                booking.status = 'COMPLETED'
+                booking.save()
+                
+                if package.visibility == Package.PackageVisibility.JOINER:
+                    all_completed = True
+                    
+                    for other_booking in same_package_bookings:
+                        other_is_last_leg = not BookingLeg.objects.filter(
+                            booking=other_booking,
+                            leg_number__gt=booking_leg.leg_number
+                        ).exists()
+                        
+                        if other_is_last_leg:
+                            other_booking.status = 'COMPLETED'
+                            other_booking.save()
+                    
+                    incomplete_bookings = booking.__class__.objects.filter(
+                        package=package
+                    ).exclude(
+                        status='COMPLETED'
+                    ).exclude(
+                        status='CANCELLED'
+                    ).exists()
+                    
+                    if not incomplete_bookings:
+                        package.is_completed = True
+                        package.save()
         
         serializer = BookingLegSerializer(booking_leg)
         return self.get_custom_response(

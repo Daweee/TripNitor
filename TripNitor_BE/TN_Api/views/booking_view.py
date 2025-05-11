@@ -9,12 +9,13 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView,
 )
-from ..serializers import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer
-from ..models import Booking, Package
+from ..serializers import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer, ConfirmJoinerPackageBookingsSerializer
+from ..models import Booking, Package, PackageUser
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
 from django.db.models import Case, When, IntegerField
+from django.db import transaction
 
 @extend_schema(tags=['bookings'])
 class BookingListView(CustomResponseMixin, ListAPIView):
@@ -263,6 +264,32 @@ class CancelBookingView(CustomResponseMixin, UpdateAPIView):
                 'Booking cannot be canceled.'
             )
         
+        if booking.package.visibility == Package.PackageVisibility.JOINER:
+            user_id = booking.user.id
+            package_id = booking.package.id
+            
+            try:
+                package_user = PackageUser.objects.get(
+                    user_id=user_id,
+                    package_id=package_id
+                )
+                
+                if booking.package.current_participants is not None:
+                    from django.db.models import F
+                    Package.objects.filter(id=package_id).update(
+                        current_participants=F('current_participants') - package_user.number_of_passengers
+                    )
+                
+                package_user.delete()
+                
+            except PackageUser.DoesNotExist:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    f"Booking {pk} cancelled but no PackageUser found for "
+                    f"user {user_id} and package {package_id}"
+                )
+        
         booking.driverassignment_set.all().delete()
         Booking.objects.filter(id=pk).update(status=Booking.BookingStatus.CANCELLED)
         booking.refresh_from_db()
@@ -284,17 +311,106 @@ class StartBookingView(CustomResponseMixin, UpdateAPIView):
             booking = Booking.objects.get(id=pk, status=Booking.BookingStatus.CONFIRMED)
         except Booking.DoesNotExist:
             return self.get_custom_response(
-            status.HTTP_400_BAD_REQUEST,
-            None,
-            'Booking not found or is not yet confirmed.'
-        )
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                'Booking not found or is not yet confirmed.'
+            )
 
-        Booking.objects.filter(id=pk).update(status=Booking.BookingStatus.ONGOING)
-        booking.refresh_from_db() 
-        serializer = BookingSerializer(booking)
+        with transaction.atomic():
+            if booking.package.visibility == Package.PackageVisibility.JOINER:
+                related_bookings = Booking.objects.filter(
+                    package_id=booking.package_id,
+                    status=Booking.BookingStatus.CONFIRMED
+                ).exclude(id=pk)  
+                
+                if related_bookings.exists():
+                    related_bookings.update(status=Booking.BookingStatus.ONGOING)
+            
+            Booking.objects.filter(id=pk).update(status=Booking.BookingStatus.ONGOING)
+            booking.refresh_from_db()
+            serializer = BookingSerializer(booking)
+
+        related_count = 0
+        message = 'Booking started successfully.'
+        
+        if booking.package.visibility == Package.PackageVisibility.JOINER:
+            related_count = related_bookings.count() if 'related_bookings' in locals() else 0
+            if related_count > 0:
+                message = f'Booking started successfully. {related_count} related booking(s) were also started.'
 
         return self.get_custom_response(
             status.HTTP_200_OK,
             serializer.data,
-            'Booking started successfully.'
+            message
         )
+
+@extend_schema(tags=['bookings'])
+class ConfirmJoinerPackageBookingsView(CustomResponseMixin, APIView):
+    serializer_class = ConfirmJoinerPackageBookingsSerializer
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if not serializer.is_valid():
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                serializer.errors
+            )
+        
+        package_id = serializer.validated_data['package_id']
+        
+        if not package_id:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                'Package ID is required.'
+            )
+            
+        try:
+            package = Package.objects.get(id=package_id)
+            
+            pending_bookings = Booking.objects.filter(
+                package_id=package_id,
+                status=Booking.BookingStatus.PENDING
+            )
+            
+            if not pending_bookings.exists():
+                return self.get_custom_response(
+                    status.HTTP_404_NOT_FOUND,
+                    None,
+                    f'No pending bookings found for package {package.package_name}.'
+                )
+            
+            with transaction.atomic():
+                count = pending_bookings.update(status=Booking.BookingStatus.CONFIRMED)
+
+                if package.visibility == Package.PackageVisibility.JOINER:
+                    package.is_confirmed = True
+                    package.save()
+
+            updated_bookings = Booking.objects.filter(id__in=pending_bookings.values_list('id', flat=True))
+            serializer = BookingSerializer(updated_bookings, many=True)
+            
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                serializer.data,
+                f'Successfully confirmed {count} bookings for package {package.package_name}.'
+            )
+            
+        except Package.DoesNotExist:
+            return self.get_custom_response(
+                status.HTTP_404_NOT_FOUND,
+                None,
+                'Package not found.'
+            )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error confirming bookings for package {package_id}: {str(e)}")
+            
+            return self.get_custom_response(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                None,
+                f'An error occurred: {str(e)}'
+            )

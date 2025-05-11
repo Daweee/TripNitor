@@ -15,12 +15,14 @@ class PackageSerializer(serializers.ModelSerializer):
     assigned_driver = DriverSerializer(required=False)
     total_distance = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     base_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    created_by = UserSerializer(read_only=True)
 
     class Meta:
         model = Package
         fields = ['id', 'package_name', 'description', 'base_price', 'package_type', 'visibility', 
                   'start_location', 'final_destination', 'legs', 'max_participants', 
-                  'current_participants', 'assigned_driver', 'start_date', 'end_date', 'total_distance']
+                  'current_participants', 'assigned_driver', 'start_date', 'end_date', 'total_distance',
+                  'is_confirmed', 'is_completed', 'created_by']
 
     def create(self, validated_data):
         if 'visibility' in validated_data and validated_data['visibility'] == Package.PackageVisibility.JOINER:
@@ -38,12 +40,14 @@ class PackageBasicSerializer(serializers.ModelSerializer):
     start_location = LocationSerializer(required=False)
     final_destination = LocationSerializer(required=False)
     assigned_driver = DriverSerializer(required=False)
+    created_by = UserSerializer(read_only=True)
     
     class Meta:
         model = Package
         fields = ['id', 'package_name', 'description', 'base_price', 'package_type', 'visibility', 
                   'start_location', 'final_destination', 'max_participants', 
-                  'current_participants', 'assigned_driver', 'start_date', 'end_date', 'total_distance']
+                  'current_participants', 'assigned_driver', 'start_date', 'end_date', 'total_distance',
+                  'is_confirmed', 'is_completed', 'created_by']
 
 class JoinPackageSerializer(serializers.Serializer):
     user_id = serializers.CharField()

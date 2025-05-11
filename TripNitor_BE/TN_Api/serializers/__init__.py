@@ -3,7 +3,7 @@ from .auth_serializers import LoginSerializer, LogoutSerializer
 from .driver_serializer import (DriverSerializer, DriverCreationSerializer)
 from .van_serializer import VanSerializer
 from .gas_serializer import GasSerializer
-from .booking_serializer import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer
+from .booking_serializer import BookingSerializer, BookingCreationSerializer, BookingPreviewSerializer, BookingStatusUpdateSerializer, ConfirmJoinerPackageBookingsSerializer
 from .location_serializer import LocationSerializer, LocationQuerySerializer
 from .leg_serializer import LegSerializer
 from .package_serializer import PackageSerializer, FareCalculationSerializer, PackageBasicSerializer, JoinPackageSerializer, PackageMinimalSerializer

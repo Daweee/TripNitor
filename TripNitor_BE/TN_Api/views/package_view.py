@@ -8,11 +8,12 @@ from rest_framework.generics import (
     DestroyAPIView
 )
 from ..serializers import PackageSerializer, FareCalculationSerializer, JoinPackageSerializer
-from TN_Api.models import Package
+from TN_Api.models import Package, User
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
 from ..services import PackageService
+from django.db.models import Q, Case, When, Value, BooleanField
 
 @extend_schema(tags=['packages'])
 class PackageCreateView(CustomResponseMixin, CreateAPIView):
@@ -22,6 +23,8 @@ class PackageCreateView(CustomResponseMixin, CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        serializer.validated_data['created_by'] = request.user
+
         package = serializer.save()
         
         return self.get_custom_response(
@@ -34,6 +37,51 @@ class PackageCreateView(CustomResponseMixin, CreateAPIView):
 class PackageListView(CustomResponseMixin, ListAPIView):
     queryset = Package.objects.select_related('start_location', 'final_destination').prefetch_related('legs')
     serializer_class = PackageSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        user = self.request.user
+        user_role = user.role
+        
+        joiner_filter = Q(
+            visibility=Package.PackageVisibility.JOINER,
+            is_confirmed=False,
+            is_completed=False
+        )
+        
+        if user_role == User.Role.ADMIN:
+            return queryset.annotate(
+                is_admin_created=Case(
+                    When(created_by__role=User.Role.ADMIN, then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField()
+                )
+            ).order_by('-is_admin_created', '-created_at')
+        elif user_role == User.Role.USER:
+            admin = User.objects.filter(role=User.Role.ADMIN)
+            return queryset.filter(
+                Q(created_by=user) | 
+                Q(created_by__in=admin) | 
+                joiner_filter
+            ).annotate(
+                is_admin_created=Case(
+                    When(created_by__role=User.Role.ADMIN, then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField()
+                )
+            ).order_by('-is_admin_created', '-created_at')
+        else:
+            return queryset.filter(
+                Q(created_by=user) | 
+                joiner_filter
+            ).annotate(
+                is_admin_created=Case(
+                    When(created_by__role=User.Role.ADMIN, then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField()
+                )
+            ).order_by('-is_admin_created', '-created_at')
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
