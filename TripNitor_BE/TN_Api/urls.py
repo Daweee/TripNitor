@@ -51,7 +51,7 @@ urlpatterns = [
 
     path('bookings/user-bookings/', UserBookingListView.as_view(), name='user-bookings'),
     path('bookings/confirm-joiner-package-bookings/', ConfirmJoinerPackageBookingsView.as_view(), name='confirm-joiner-package-bookings'),
-    path('api/bookings/check-date-conflict/', CheckBookingDateConflictView.as_view(), name='check-booking-date-conflict'),
+    path('bookings/check-date-conflict/', CheckBookingDateConflictView.as_view(), name='check-booking-date-conflict'),
     path('bookings/status/<str:bookingstatus>/', GetBookingStatusListView.as_view(), name='booking-status'),
     path('bookings/', BookingListView.as_view(), name='booking-list'),
     path('bookings/preview-booking/', BookingPreviewView.as_view(), name='preview-bookin'),

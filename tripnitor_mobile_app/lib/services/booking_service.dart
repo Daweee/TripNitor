@@ -172,4 +172,25 @@ class BookingService {
       throw Exception('Failed to start booking: ${e.message}');
     }
   }
+
+  Future<bool> hasDateConflict(
+      {required DateTime startDate, required DateTime endDate}) async {
+    try {
+      await _dio.get(
+        'api/bookings/check-date-conflict/',
+        queryParameters: {
+          'start_date': startDate.toIso8601String(),
+          'end_date': endDate.toIso8601String(),
+        },
+      );
+
+      return false;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        return true;
+      }
+
+      rethrow;
+    }
+  }
 }

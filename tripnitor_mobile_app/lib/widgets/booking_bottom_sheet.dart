@@ -8,6 +8,7 @@ import '../models/package_model.dart';
 import '../models/preview_boking_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../services/booking_service.dart';
 import '../services/token_service.dart';
 
 class BookingBottomSheet extends ConsumerStatefulWidget {
@@ -163,6 +164,50 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                       ),
                       onPressed: () async {
                         if (startDateTime != null && endDateTime != null) {
+                          try {
+                            final bookingService = BookingService();
+
+                            final hasConflict =
+                                await bookingService.hasDateConflict(
+                              startDate: startDateTime!,
+                              endDate: endDateTime!,
+                            );
+
+                            if (hasConflict) {
+                              showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomModalDialog(
+                                    title: 'Booking Conflict',
+                                    content:
+                                        'You already have a booking that conflicts with these dates. Please select different dates.',
+                                    onConfirm: () {},
+                                    color: Color(ColorConstants.ERROR_COLOR),
+                                    buttonText: 'OK',
+                                  );
+                                },
+                              );
+                              return;
+                            }
+                          } catch (error) {
+                            showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CustomModalDialog(
+                                  title: 'Date Check Error',
+                                  content:
+                                      'Unable to check date availability: ${error.toString()}',
+                                  onConfirm: () {},
+                                  color: Color(ColorConstants.ERROR_COLOR),
+                                  buttonText: 'OK',
+                                );
+                              },
+                            );
+                            return;
+                          }
+
                           final previewRequest = PreviewBookingRequest(
                             package: widget.package.id,
                             startDate: startDateTime!,
