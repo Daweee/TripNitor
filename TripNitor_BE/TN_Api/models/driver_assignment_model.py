@@ -1,11 +1,12 @@
 from django.db import models
 from .booking_model import Booking
-from .base_model import CustomPrimaryKeyModel
 from .driver_model import Driver
+from .user_model import User
 
 class DriverAssignment(models.Model):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default='default_value')
     assigned_at = models.DateTimeField(auto_now_add=True)
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
@@ -17,6 +18,9 @@ class DriverAssignment(models.Model):
         return f"{self.driver} assigned to {self.booking}" 
     
     def save(self, *args, **kwargs):
+        if not self.user and self.booking and self.booking.user:
+            self.user = self.booking.user
+
         if not self.start_date or not self.end_date:
             self.start_date = self.booking.start_date
             self.end_date = self.booking.end_date

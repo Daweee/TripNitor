@@ -5,6 +5,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView,
 )
+from rest_framework.views import APIView
 from ..models import DriverAssignment, Driver, Booking
 from ..serializers import DriverAssignmentSerializer, DriverSerializer, DriverSwapSerializer
 from ..services import DriverAssignmentService
@@ -14,6 +15,8 @@ from .mixins import CustomResponseMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.exceptions import NotFound
+from dateutil.parser import parse
+from django.utils.timezone import is_aware, make_aware
 
 @extend_schema(tags=['driver assignments'])
 class DriverAssignmentList(CustomResponseMixin, ListAPIView):
@@ -302,4 +305,73 @@ class GetDriverAssignment(CustomResponseMixin, RetrieveAPIView):
                 status.HTTP_404_NOT_FOUND,
                 None,
                 str(e)
+            )
+        
+@extend_schema(
+    tags=['bookings'],
+    parameters=[
+        OpenApiParameter(
+            name='start_date',
+            type=OpenApiTypes.DATETIME,
+            description='Start date (format: YYYY-MM-DD HH:MM:SS)',
+            required=True
+        ),
+        OpenApiParameter(
+            name='end_date',
+            type=OpenApiTypes.DATETIME,
+            description='End date (format: YYYY-MM-DD HH:MM:SS)',
+            required=True
+        ),
+    ]
+)
+class CheckBookingDateConflictView(CustomResponseMixin, APIView):
+    
+    def get(self, request, *args, **kwargs):
+        from ..services import BookingService
+        
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if not start_date or not end_date:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                "Both start_date and end_date are required"
+            )
+            
+        try:
+            if isinstance(start_date, str):
+                start_date = parse(start_date)
+                if not is_aware(start_date):
+                    start_date = make_aware(start_date)
+                    
+            if isinstance(end_date, str):
+                end_date = parse(end_date)
+                if not is_aware(end_date):   
+                    end_date = make_aware(end_date)
+                
+            has_conflicts, error_message = BookingService.check_user_booking_conflicts(
+                user_id=request.user.id,
+                start_date=start_date,
+                end_date=end_date
+            )
+            
+            if has_conflicts:
+                return self.get_custom_response(
+                    status.HTTP_409_CONFLICT,
+                    {"has_conflicts": True},
+                    error_message
+                )
+                
+            return self.get_custom_response(
+                status.HTTP_200_OK,
+                {"has_conflicts": False},
+                "Selected dates do not conflict with your existing bookings"
+            )
+            
+        except ValueError as e:
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,
+                None,
+                f"Invalid date format: {str(e)}"
             )

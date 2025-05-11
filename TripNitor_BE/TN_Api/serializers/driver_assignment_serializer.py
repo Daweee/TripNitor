@@ -17,10 +17,12 @@ class DriverAssignmentSerializer(serializers.ModelSerializer):
         booking = Booking.objects.get(pk=booking_data['id'])  
         driver = Driver.objects.get(pk=driver_data['id']) 
 
+        user = booking.user
+
         validated_data['start_date'] = booking.start_date
         validated_data['end_date'] = booking.end_date
         
-        driver_assignment = DriverAssignment.objects.create(driver=driver, booking=booking, **validated_data)
+        driver_assignment = DriverAssignment.objects.create(driver=driver, booking=booking, user=user, **validated_data)
         return driver_assignment
     
 class DriverSwapSerializer(serializers.Serializer):

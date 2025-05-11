@@ -1,6 +1,7 @@
 from decimal import Decimal
 from random import shuffle
 from django.forms import ValidationError
+from ..models import Booking
 
 class BookingService:
     @staticmethod
@@ -129,3 +130,33 @@ class BookingService:
         booking.ratings = ratings
         booking.save(update_fields=['ratings'])
         return booking
+    
+    @staticmethod
+    def check_user_booking_conflicts(user_id, start_date, end_date, exclude_booking_id=None):
+        conflicting_bookings = Booking.objects.filter(
+            user_id=user_id,
+            start_date__lt=end_date,
+            end_date__gt=start_date,
+            status__in=[
+                Booking.BookingStatus.PENDING,
+                Booking.BookingStatus.CONFIRMED,
+                Booking.BookingStatus.ONGOING
+            ]
+        )
+
+        if exclude_booking_id:
+            conflicting_bookings = conflicting_bookings.exclude(id=exclude_booking_id)
+            
+        if conflicting_bookings.exists():
+            conflict = conflicting_bookings.first()
+            
+            conflict_start = conflict.start_date.strftime('%Y-%m-%d %H:%M')
+            conflict_end = conflict.end_date.strftime('%Y-%m-%d %H:%M')
+            
+            package_info = ""
+            if conflict.package:
+                package_info = f" for package '{conflict.package.package_name}'"
+            
+            return True, f"You already have a booking{package_info} from {conflict_start} to {conflict_end}. Please select different dates."
+            
+        return False, None
