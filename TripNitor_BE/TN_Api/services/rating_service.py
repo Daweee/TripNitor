@@ -5,7 +5,7 @@ from django.db import transaction
 class RatingService:
     
     def validate_can_rate(self, booking, user):
-        if not booking.can_be_rated():
+        if booking.status != Booking.BookingStatus.COMPLETED:
             raise ValidationError(
                 "Only completed bookings with assigned drivers can be rated"
             )
@@ -14,7 +14,12 @@ class RatingService:
             raise PermissionDenied(
                 "Only the booking customer can rate their booking"
             )
-        
+                
+    def set_booking_ratings(self, booking, rating_value):
+        booking.ratings = rating_value
+        booking.is_rated = True
+        booking.save(update_fields=['ratings', 'is_rated'])
+
     def create_rating(self, booking_id, user, rating, comment=""):
         try:
             booking = Booking.objects.get(id=booking_id)
@@ -34,8 +39,7 @@ class RatingService:
                 }
             )
 
-            booking.set_booking_ratings(int(rating))
-            booking.mark_as_rated()
+            self.set_booking_ratings(booking, int(rating))
 
         return rating_obj
 
