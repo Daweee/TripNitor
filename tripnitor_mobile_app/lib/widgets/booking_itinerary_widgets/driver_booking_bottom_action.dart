@@ -50,9 +50,15 @@ class DriverBookingBottomAction extends ConsumerWidget {
               ? () {
                   if (hasActiveItinerary) {
                     _showArrivedModal(
-                        context, ref, locations, activeIndex, isLastItinerary);
+                        context,
+                        ref,
+                        locations,
+                        activeIndex,
+                        isLastItinerary,
+                        booking.package.visibility == "JOINER");
                   } else {
-                    _showStartItineraryModal(context, ref, locations);
+                    _showStartItineraryModal(context, ref, locations,
+                        booking.package.visibility == "JOINER");
                   }
                 }
               : null,
@@ -84,8 +90,8 @@ class DriverBookingBottomAction extends ConsumerWidget {
     );
   }
 
-  void _showStartItineraryModal(
-      BuildContext context, WidgetRef ref, List<dynamic> locations) {
+  void _showStartItineraryModal(BuildContext context, WidgetRef ref,
+      List<dynamic> locations, bool isJoinerPackage) {
     int nextIndex = locations.indexWhere((leg) => !leg.isCompleted);
     final nextBookingLegId = nextIndex >= 0 ? locations[nextIndex].id : null;
 
@@ -94,8 +100,9 @@ class DriverBookingBottomAction extends ConsumerWidget {
       builder: (BuildContext context) {
         return CustomModalDialog(
           title: "Start Itinerary",
-          content:
-              "Are you ready to begin your journey? This will mark the itinerary as active.",
+          content: isJoinerPackage
+              ? "Are you ready to begin your journey? This will mark the itinerary as active.\n\nNote: Starting this JOINER booking will also start other bookings related to it."
+              : "Are you ready to begin your journey? This will mark the itinerary as active.",
           buttonText: "Start",
           color: Color(ColorConstants.PRIMARY_COLOR),
           onConfirm: () async {
@@ -110,19 +117,33 @@ class DriverBookingBottomAction extends ConsumerWidget {
     );
   }
 
-  void _showArrivedModal(BuildContext context, WidgetRef ref,
-      List<dynamic> locations, int activeIndex, bool isLastItinerary) {
+  void _showArrivedModal(
+      BuildContext context,
+      WidgetRef ref,
+      List<dynamic> locations,
+      int activeIndex,
+      bool isLastItinerary,
+      bool isJoinerPackage) {
     final activeBookingLegId =
         activeIndex >= 0 ? locations[activeIndex].id : null;
+
+    String content;
+    if (isLastItinerary) {
+      content = isJoinerPackage
+          ? "Have you completed your final destination? This will mark your booking as complete.\n\nNote: Completing this JOINER booking will also complete other bookings related to it."
+          : "Have you completed your final destination? This will mark your booking as complete.";
+    } else {
+      content = isJoinerPackage
+          ? "Have you arrived at this location? This will ready up the next itinerary.\n\nNote: Updating this JOINER booking will also update other bookings related to it."
+          : "Have you arrived at this location? This will ready up the next itinerary.";
+    }
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return CustomModalDialog(
           title: "Confirm Arrival",
-          content: isLastItinerary
-              ? "Have you completed your final destination? This will mark your booking as complete."
-              : "Have you arrived at this location? This will ready up the next itinerary.",
+          content: content,
           buttonText: isLastItinerary ? "Complete Booking" : "Confirm",
           color: isLastItinerary
               ? Colors.green

@@ -190,14 +190,19 @@ class _BookingItineraryPageState extends ConsumerState<BookingItineraryPage> {
 
   Widget _buildUI(BuildContext context) {
     final bookingState = ref.watch(bookingStateProvider);
+    final authState = ref.watch(authProvider);
     final isCompleted = bookingState.booking?.status == "COMPLETED";
     final isRated = bookingState.booking?.isRated ?? false;
+    final userRole = authState.user?.role;
 
     return SingleChildScrollView(
       physics: AlwaysScrollableScrollPhysics(),
       child: Column(
         children: [
-          if (isCompleted && bookingState.booking != null && !isRated)
+          if (isCompleted &&
+              bookingState.booking != null &&
+              !isRated &&
+              userRole == "USER")
             BookingRatingWidget(bookingId: widget.bookingId),
           _itineraryList(context),
           SizedBox(height: 80),
