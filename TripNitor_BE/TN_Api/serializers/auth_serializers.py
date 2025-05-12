@@ -12,6 +12,7 @@ class LoginSerializer(TokenObtainPairSerializer):
             'email': self.user.email,
             'name': self.user.name,
             'phone_number': self.user.phone_number,
+            'is_active': self.user.is_active,
             'role': self.user.role,
         })
 

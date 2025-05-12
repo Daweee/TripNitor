@@ -60,6 +60,7 @@ class LoginView(CustomResponseMixin, TokenObtainPairView):
                 'name': serializer.validated_data.get('name'),
                 'phone_number': serializer.validated_data.get('phone_number'),
                 'role': serializer.validated_data.get('role'),
+                'is_active': serializer.validated_data.get('is_active'),
                 'token': {
                     'access': str(serializer.validated_data.get('access')),
                     'refresh': str(serializer.validated_data.get('refresh'))
