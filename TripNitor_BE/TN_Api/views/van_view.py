@@ -10,6 +10,7 @@ from rest_framework.generics import (
 )
 from ..serializers import VanSerializer
 from django.db import IntegrityError
+from django.db.models.deletion import ProtectedError, RestrictedError
 from TN_Api.models import Van
 from drf_spectacular.utils import extend_schema
 from .mixins import CustomResponseMixin
@@ -97,13 +98,19 @@ class VanDeleteView(CustomResponseMixin, DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        self.perform_destroy(instance)
-
-        return self.get_custom_response(
-            status.HTTP_204_NO_CONTENT,
-            None,
-            'Van deleted successfully'
-        )
+        try:
+            self.perform_destroy(instance)
+            return self.get_custom_response(
+                status.HTTP_204_NO_CONTENT,
+                None,
+                'Van deleted successfully'
+            )
+        except (ProtectedError, RestrictedError):
+            return self.get_custom_response(
+                status.HTTP_400_BAD_REQUEST,  
+                None,
+                'This van cannot be deleted because it is referenced by other records'
+            )
     
 @extend_schema(tags=['vans'])
 class UnassignedVanListView(CustomResponseMixin, ListAPIView):
