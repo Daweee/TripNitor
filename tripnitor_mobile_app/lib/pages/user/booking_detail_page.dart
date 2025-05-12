@@ -210,6 +210,13 @@ class BookingDetailsContent extends StatelessWidget {
                     "No. of Passengers",
                     booking.numberOfPassengers.toString(),
                   ),
+                  if (booking.package.visibility == "JOINER" &&
+                      booking.package.currentParticipants != null &&
+                      booking.package.maxParticipants != null)
+                    _buildInfoRow(
+                      "Package Participants",
+                      "${booking.package.currentParticipants}/${booking.package.maxParticipants}",
+                    ),
                   _buildStatusRow(
                     "Booking status:",
                     booking.status,

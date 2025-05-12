@@ -237,6 +237,13 @@ class BookingDetailsContent extends ConsumerWidget {
                     "No. of Passengers",
                     booking.numberOfPassengers.toString(),
                   ),
+                  if (booking.package.visibility == "JOINER" &&
+                      booking.package.currentParticipants != null &&
+                      booking.package.maxParticipants != null)
+                    _buildInfoRow(
+                      "Package Participants",
+                      "${booking.package.currentParticipants}/${booking.package.maxParticipants}",
+                    ),
                   _buildStatusRow(
                     "Booking status:",
                     booking.status,
@@ -554,6 +561,10 @@ class BookingDetailsContent extends ConsumerWidget {
 
   Widget _cancelBookingButton(
       Booking booking, BuildContext context, WidgetRef ref) {
+    if (booking.modeOfPayment == "CREDIT_CARD") {
+      return SizedBox.shrink();
+    }
+
     final bool isEnabled = booking.status == "PENDING";
 
     void _showCancelConfirmation() {
