@@ -82,19 +82,35 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _driverService.deactivateDriver(driverId);
-      final updatedDriverList =
-          state.driverList?.where((driver) => driver.id != driverId).toList();
 
       state = state.copyWith(
         isLoading: false,
         error: null,
-        driverList: updatedDriverList,
         message: 'Driver account deactivated successfully.',
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to deactivate driver account. $e',
+      );
+      throw e;
+    }
+  }
+
+  Future<void> reactivateDriver(String driverId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _driverService.reactivateDriver(driverId);
+
+      state = state.copyWith(
+        isLoading: false,
+        error: null,
+        message: 'Driver account reactivated successfully.',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to reactivate driver account. $e',
       );
       throw e;
     }
