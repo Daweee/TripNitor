@@ -59,7 +59,7 @@ class DriverAssignmentStateNotifier
         message: 'Confirmed driver booking list retrieved successfully.',
       );
     } catch (e) {
-      state.copyWith(
+      state = state.copyWith(
         isLoading: false,
         error: 'Failed to load confirmed driver booking list: $e',
         driverAssignmentList: [],

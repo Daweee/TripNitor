@@ -383,24 +383,20 @@ class _ReassignDriversPageState extends ConsumerState<ReassignDriversPage> {
         throw Exception('No active booking found');
       }
 
-      final driverAssignmentState = ref.read(driverAssignmentStateProvider);
+      await ref
+          .read(driverAssignmentStateProvider.notifier)
+          .retrieveDriverAssignment(booking.id, selectedCurrentDriver!.id);
 
-      DriverAssignment? currentDriverAssignment;
+      final updatedState = ref.read(driverAssignmentStateProvider);
+      final currentDriverAssignment = updatedState.driverAssignment;
 
-      if (driverAssignmentState.availableDrivers.isNotEmpty) {
-        await ref
-            .read(driverAssignmentStateProvider.notifier)
-            .retrieveDriverAssignment(booking.id, selectedCurrentDriver!.id);
+      if (currentDriverAssignment == null) {
+        throw Exception('Current driver assignment not found');
+      }
 
-        if (driverAssignmentState.driverAssignment!.booking.id == booking.id &&
-            driverAssignmentState.driverAssignment!.driver.id ==
-                selectedCurrentDriver!.id) {
-          currentDriverAssignment = driverAssignmentState.driverAssignment;
-        } else {
-          throw Exception('Current driver assignment not found');
-        }
-
-        final driverAssignmentId = currentDriverAssignment!.id;
+      if (currentDriverAssignment.booking.id == booking.id &&
+          currentDriverAssignment.driver.id == selectedCurrentDriver!.id) {
+        final driverAssignmentId = currentDriverAssignment.id;
         final oldDriverId = selectedCurrentDriver!.id;
         final newDriverId = selectedNewDriver!.id;
 
@@ -412,8 +408,10 @@ class _ReassignDriversPageState extends ConsumerState<ReassignDriversPage> {
             .getBookingDetails(booking.id);
 
         Navigator.pop(context);
+        Navigator.pop(context);
       } else {
-        throw Exception('Driver assignments not loaded');
+        throw Exception(
+            'Current driver assignment not valid for this booking and driver');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
