@@ -108,8 +108,12 @@ class VanDeleteView(CustomResponseMixin, DestroyAPIView):
 @extend_schema(tags=['vans'])
 class UnassignedVanListView(CustomResponseMixin, ListAPIView):
     permission_classes = [IsAuthenticated]
-    queryset = Van.objects.filter(driver__isnull=True) 
     serializer_class = VanSerializer
+
+    def get_queryset(self):
+        return Van.objects.exclude(
+            assigned_drivers__user__is_active=True
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -118,5 +122,5 @@ class UnassignedVanListView(CustomResponseMixin, ListAPIView):
         return self.get_custom_response(
             status.HTTP_200_OK,
             serializer.data,
-            'Van list retrieved successfully'
+            'Available vans retrieved successfully'
         )

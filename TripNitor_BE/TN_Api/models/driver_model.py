@@ -6,7 +6,7 @@ from .van_model import Van
 
 class Driver(CustomPrimaryKeyModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    van = models.OneToOneField(Van, on_delete=models.PROTECT)
+    van = models.ForeignKey(Van, on_delete=models.PROTECT, null=True, blank=True, related_name='assigned_drivers')
     license_number = models.CharField(max_length=20, unique=True)
     date_hired = models.DateField()
 
