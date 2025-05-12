@@ -34,6 +34,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
   final TextEditingController _licenseNumberController =
       TextEditingController();
   String? _selectedVanId;
+  bool _isLoading = false;
 
   bool get _isEditMode => widget.driver != null;
 
@@ -41,7 +42,15 @@ class _DriversFormState extends ConsumerState<DriversForm> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(vanStateProvider.notifier).getAllUnassignedVans();
+      _loadInitialData();
+    });
+  }
+
+  Future<void> _loadInitialData() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await ref.read(vanStateProvider.notifier).getAllUnassignedVans();
 
       if (_isEditMode && widget.driver != null) {
         _usernameController.text = widget.driver!.user.username;
@@ -50,76 +59,158 @@ class _DriversFormState extends ConsumerState<DriversForm> {
         _phoneNumberController.text = widget.driver!.user.phoneNumber;
         _licenseNumberController.text = widget.driver!.licenseNumber;
         _selectedVanId = widget.driver!.van.id;
-        // Set the selected date if available
+
         ref.read(selectedDateProvider.notifier).state =
             widget.driver!.dateHired;
       } else {
-        // Set _selectedVanId to null for new drivers
         _selectedVanId = null;
       }
-    });
+    } catch (e) {
+      _showSnackBar('Failed to load data: ${e.toString()}', isError: true);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.all(15),
+        duration: Duration(seconds: isError ? 4 : 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final vanState = ref.watch(vanStateProvider);
-    final List<Van>? _vans = vanState.vanList;
+    final List<Van>? vans = vanState.vanList;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      ),
-      resizeToAvoidBottomInset: true,
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      body: Container(
-        padding: EdgeInsets.only(top: 20),
-        child: _buildUI(_vans),
+      appBar: _buildAppBar(),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+            )
+          : _buildFormContent(vans),
+    );
+  }
+
+  PreferredSize _buildAppBar() {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(kToolbarHeight + 1),
+      child: AppBar(
+        title: Text(
+          _isEditMode ? 'Edit Driver' : 'Add Driver',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(1.0),
+          child: Divider(
+            color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(.3),
+            thickness: 1,
+            height: 1,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
     );
   }
 
-  Widget _buildUI(_vans) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width,
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
+  Widget _buildFormContent(List<Van>? vans) {
+    return SafeArea(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
-            Container(
-              padding: EdgeInsets.only(bottom: 40),
-              child: _headerText(context),
+            _buildFormHeader(),
+            Expanded(
+              child: _buildFormFields(vans),
             ),
-            _DriversFormBody(_vans),
           ],
         ),
       ),
     );
   }
 
-  Widget _headerText(BuildContext context) {
+  Widget _buildFormHeader() {
     return Container(
-      child: Text(
-        _isEditMode ? "Edit Driver" : "Add Driver",
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-        ),
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundColor:
+                Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.1),
+            child: Icon(
+              _isEditMode ? Icons.edit_document : Icons.person_add,
+              size: 40,
+              color: Color(ColorConstants.PRIMARY_COLOR),
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            _isEditMode ? "Update Driver Information" : "Add New Driver",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(ColorConstants.PRIMARY_COLOR),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            _isEditMode
+                ? "Edit the driver's details below"
+                : "Fill in the details to add a new driver",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _DriversFormBody(_vans) {
+  Widget _buildFormFields(List<Van>? vans) {
     final selectedDate = ref.watch(selectedDateProvider);
-    return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
+
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildSectionHeader("Personal Information"),
+            SizedBox(height: 16),
             if (!_isEditMode)
-              CustomeFormField(
-                labelText: "Username",
-                height: MediaQuery.sizeOf(context).height * .1,
+              _buildFormField(
                 controller: _usernameController,
+                label: "Username",
+                icon: Icons.person,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a username';
@@ -127,132 +218,384 @@ class _DriversFormState extends ConsumerState<DriversForm> {
                   return null;
                 },
               ),
-            CustomeFormField(
-              labelText: "name",
-              height: MediaQuery.sizeOf(context).height * .1,
+            _buildFormField(
               controller: _nameController,
+              label: "Full Name",
+              icon: Icons.badge,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a username';
+                  return 'Please enter a name';
                 }
                 return null;
               },
             ),
             if (!_isEditMode)
-              CustomeFormField(
-                labelText: "Email",
-                height: MediaQuery.sizeOf(context).height * .1,
+              _buildFormField(
                 controller: _emailController,
+                label: "Email Address",
+                icon: Icons.email,
+                keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter an Email';
+                    return 'Please enter an email';
+                  }
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      .hasMatch(value)) {
+                    return 'Please enter a valid email';
                   }
                   return null;
                 },
               ),
-
-            CustomeFormField(
-              labelText: "Phone Number",
-              height: MediaQuery.sizeOf(context).height * .1,
+            _buildFormField(
               controller: _phoneNumberController,
-              keyboardType: TextInputType.number,
+              label: "Phone Number",
+              icon: Icons.phone,
+              keyboardType: TextInputType.phone,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a username';
+                  return 'Please enter a phone number';
                 }
                 return null;
               },
             ),
             if (!_isEditMode)
-              CustomeFormField(
-                labelText: "Password",
-                height: MediaQuery.of(context).size.height * .1,
+              _buildFormField(
                 controller: _passwordController,
+                label: "Password",
+                icon: Icons.lock,
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the password';
+                    return 'Please enter a password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters long';
                   }
                   return null;
                 },
               ),
-            CustomeFormField(
-              labelText: "License number",
-              height: MediaQuery.sizeOf(context).height * .1,
+            SizedBox(height: 24),
+            _buildSectionHeader("Driver Details"),
+            SizedBox(height: 16),
+            _buildFormField(
               controller: _licenseNumberController,
+              label: "License Number",
+              icon: Icons.credit_card,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your License Number';
+                  return 'Please enter a license number';
                 }
                 return null;
               },
             ),
-            // Date of purchase
-            InkWell(
-              onTap: () => _selectDate(context),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Date Hired',
-                  fillColor: Color(ColorConstants.SECONDARY_COLOR),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Color(ColorConstants.SECONDARY_COLOR),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            SizedBox(height: 16),
+            _buildDatePicker(selectedDate),
+            SizedBox(height: 16),
+            _buildVanDropdown(vans),
+            SizedBox(height: 32),
+            _buildSubmitButton(),
+            SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      padding: EdgeInsets.only(left: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color(ColorConstants.PRIMARY_COLOR),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(
+            icon,
+            color: Color(ColorConstants.PRIMARY_COLOR),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.PRIMARY_COLOR),
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.red,
+              width: 1,
+            ),
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        style: TextStyle(fontSize: 16),
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        validator: validator,
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(DateTime? selectedDate) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => _selectDate(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+                size: 24,
+              ),
+              SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Text(
+                      "Date Hired",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    SizedBox(height: 4),
                     Text(
                       selectedDate == null
                           ? 'Select Date'
-                          : DateFormat('yyyy-MM-dd').format(selectedDate),
+                          : DateFormat('MMMM dd, yyyy').format(selectedDate),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: selectedDate == null
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                      ),
                     ),
-                    Icon(Icons.calendar_today),
                   ],
                 ),
               ),
-            ),
-
-            SizedBox(height: 20),
-            DropdownButtonFormField<String?>(
-              decoration: InputDecoration(
-                labelText: "Assign a van",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+              Icon(
+                Icons.arrow_drop_down,
+                color: Colors.grey,
               ),
-              value: _vans?.any((van) => van.id == _selectedVanId) == true
-                  ? _selectedVanId
-                  : null,
-              items: [
-                DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Select a van'),
-                ),
-                ..._vans?.map<DropdownMenuItem<String>>((Van van) {
-                      return DropdownMenuItem<String>(
-                        value: van.id,
-                        child: Text('${van.model} | ${van.plateNumber}'),
-                      );
-                    }).toList() ??
-                    [],
-              ],
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedVanId = newValue;
-                });
-              },
-              validator: (value) {
-                if (!_isEditMode && (value == null || value.isEmpty)) {
-                  return 'Please select a van';
-                }
-                return null;
-              },
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVanDropdown(List<Van>? vans) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<String?>(
+        decoration: InputDecoration(
+          labelText: "Assign Van",
+          prefixIcon: Icon(
+            Icons.airport_shuttle,
+            color: Color(ColorConstants.PRIMARY_COLOR),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 1,
             ),
-            SizedBox(height: 20),
-            _addDriverButton(context, ref),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.SECONDARY_COLOR),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(ColorConstants.PRIMARY_COLOR),
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.red,
+              width: 1,
+            ),
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        style: TextStyle(fontSize: 16),
+        value: vans?.any((van) => van.id == _selectedVanId) == true
+            ? _selectedVanId
+            : null,
+        items: [
+          DropdownMenuItem<String?>(
+            value: null,
+            child: Text(
+              'Select a van',
+              style: TextStyle(
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          ...vans?.map<DropdownMenuItem<String>>((Van van) {
+                return DropdownMenuItem<String>(
+                  value: van.id,
+                  child: Text(
+                    '${van.model} | ${van.plateNumber}',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                );
+              }).toList() ??
+              [],
+        ],
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedVanId = newValue;
+          });
+        },
+        validator: (value) {
+          if (!_isEditMode && (value == null || value.isEmpty)) {
+            return 'Please select a van';
+          }
+          return null;
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.4),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          padding: EdgeInsets.zero,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _isEditMode ? Icons.save : Icons.add_circle,
+              size: 24,
+            ),
+            SizedBox(width: 8),
+            Text(
+              _isEditMode ? 'Update Driver' : 'Add Driver',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -263,114 +606,104 @@ class _DriversFormState extends ConsumerState<DriversForm> {
     final DateTime now = DateTime.now();
     final DateTime sixMonthsFromNow =
         DateTime(now.year, now.month + 6, now.day);
+    final DateTime? picked = await _showCustomDatePicker(context);
 
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: ref.read(selectedDateProvider) ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: sixMonthsFromNow,
-    );
     if (picked != null) {
       ref.read(selectedDateProvider.notifier).state = picked;
     }
   }
 
-  Widget _addDriverButton(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(1),
-            offset: Offset(5, 5),
-            blurRadius: 10,
-          ),
-        ],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: SizedBox(
-        width: MediaQuery.sizeOf(context).width,
-        height: MediaQuery.sizeOf(context).height * .06,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
-          ),
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              try {
-                final driverNotifier = ref.read(driverStateProvider.notifier);
+  Future<DateTime?> _showCustomDatePicker(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime sixMonthsFromNow =
+        DateTime(now.year, now.month + 6, now.day);
 
-                final selectedDate = ref.read(selectedDateProvider);
-                String? formattedDate;
-                if (selectedDate != null) {
-                  formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-                }
-
-                if (_isEditMode) {
-                  final user = UserPatch(
-                    name: _nameController.text.trim(),
-                    phoneNumber: _phoneNumberController.text.trim(),
-                  );
-
-                  final updateDriver = await driverNotifier.updateDriver(
-                    widget.driver!.id,
-                    DriverPatch(
-                      user: user,
-                      licenseNumber: _licenseNumberController.text.trim(),
-                      dateHired: formattedDate,
-                      vanId: _selectedVanId,
-                    ),
-                  );
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          DriverAdminProfile(driver: updateDriver),
-                    ),
-                  );
-                } else {
-                  final createdDriver = await driverNotifier.createDriver(
-                    _usernameController.text.trim(),
-                    _nameController.text.trim(),
-                    _emailController.text.trim(),
-                    _phoneNumberController.text.trim(),
-                    _passwordController.text.trim(),
-                    _licenseNumberController.text.trim(),
-                    formattedDate,
-                    _selectedVanId,
-                  );
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Driver created successfully')),
-                  );
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DriverAdminPage(),
-                    ),
-                  );
-                }
-
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => DriverAdminPage()),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('An error occurred. Please try again.')),
-                );
-              }
-            }
-          },
-          child: Text(
-            _isEditMode ? 'Update Driver' : 'Add Driver',
-            style: TextStyle(
-              color: Colors.white,
+    return showDatePicker(
+      context: context,
+      initialDate: ref.read(selectedDateProvider) ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: sixMonthsFromNow,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Color(ColorConstants.PRIMARY_COLOR),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
+            dialogBackgroundColor: Colors.white,
           ),
-        ),
-      ),
+          child: Container(
+            child: child,
+          ),
+        );
+      },
     );
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+
+      try {
+        final driverNotifier = ref.read(driverStateProvider.notifier);
+        final selectedDate = ref.read(selectedDateProvider);
+        String? formattedDate;
+
+        if (selectedDate != null) {
+          formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+        }
+
+        if (_isEditMode) {
+          final user = UserPatch(
+            name: _nameController.text.trim(),
+            phoneNumber: _phoneNumberController.text.trim(),
+          );
+
+          final updatedDriver = await driverNotifier.updateDriver(
+            widget.driver!.id,
+            DriverPatch(
+              user: user,
+              licenseNumber: _licenseNumberController.text.trim(),
+              dateHired: formattedDate,
+              vanId: _selectedVanId,
+            ),
+          );
+
+          _showSnackBar('Driver updated successfully');
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DriverAdminProfile(driver: updatedDriver),
+            ),
+          );
+        } else {
+          final createdDriver = await driverNotifier.createDriver(
+            _usernameController.text.trim(),
+            _nameController.text.trim(),
+            _emailController.text.trim(),
+            _phoneNumberController.text.trim(),
+            _passwordController.text.trim(),
+            _licenseNumberController.text.trim(),
+            formattedDate,
+            _selectedVanId,
+          );
+
+          _showSnackBar('Driver created successfully');
+
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => DriverAdminPage()),
+          );
+        }
+      } catch (e) {
+        _showSnackBar('An error occurred: ${e.toString()}', isError: true);
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
+    }
   }
 }
