@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
 import 'package:tripnitor_mobile_app/pages/admin/forms/drivers_form.dart';
 
 import '../../../providers/driver_provider.dart';
+import '../driver_admin_page.dart';
 
 class DriverAdminProfile extends ConsumerStatefulWidget {
   final Driver driver;
@@ -84,6 +86,11 @@ class _DriverAdminProfileState extends ConsumerState<DriverAdminProfile> {
         backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: FaIcon(FontAwesomeIcons.angleLeft, color: Colors.black),
+          onPressed: () => Navigator.of(context).popUntil((route) =>
+              route.isFirst || route is MaterialPageRoute<DriverAdminPage>),
+        ),
         title: Text(
           'Driver Profile',
           style: TextStyle(
@@ -108,6 +115,8 @@ class _DriverAdminProfileState extends ConsumerState<DriverAdminProfile> {
             _buildProfileHeader(context, isActive),
             SizedBox(height: 24),
             _buildInfoSection(context, dateFormat, screenWidth),
+            SizedBox(height: 24),
+            _buildVanInfoSection(context, screenWidth),
             SizedBox(height: 40),
             _buildActionButtons(context),
             SizedBox(height: 40),
@@ -368,50 +377,110 @@ class _DriverAdminProfileState extends ConsumerState<DriverAdminProfile> {
     );
   }
 
-  Widget _buildActivityItem({
-    required String title,
-    required String description,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-        ),
-        SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
+  Widget _buildVanInfoSection(BuildContext context, double screenWidth) {
+    if (driver.van == null) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 16),
+              child: Text(
+                'Van Information',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Color(ColorConstants.PRIMARY_COLOR),
                 ),
               ),
-              SizedBox(height: 4),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+            ),
+            SizedBox(height: 16),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: Color(ColorConstants.TERTIARY_COLOR),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: Text(
+                    'No van assigned to this driver',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 16),
+            child: Text(
+              'Van Information',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
+          Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            color: Color(ColorConstants.TERTIARY_COLOR),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildInfoRow(
+                    icon: Icons.local_shipping,
+                    label: 'Van ID',
+                    value: driver.van.id,
+                    screenWidth: screenWidth,
+                  ),
+                  Divider(height: 24),
+                  _buildInfoRow(
+                    icon: Icons.directions_car,
+                    label: 'License Plate',
+                    value: driver.van.plateNumber,
+                    screenWidth: screenWidth,
+                  ),
+                  Divider(height: 24),
+                  _buildInfoRow(
+                    icon: Icons.chair,
+                    label: 'Capacity',
+                    value: driver.van.maxPassengers.toString(),
+                    screenWidth: screenWidth,
+                  ),
+                  Divider(height: 24),
+                  _buildInfoRow(
+                    icon: Icons.auto_stories,
+                    label: 'Model',
+                    value: driver.van.model,
+                    screenWidth: screenWidth,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
