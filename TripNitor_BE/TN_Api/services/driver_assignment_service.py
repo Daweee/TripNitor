@@ -1,4 +1,4 @@
-from ..models import Driver, DriverAssignment, Booking
+from ..models import Driver, DriverAssignment, Booking, Package
 from django.db import transaction
 from django.utils import timezone
 from datetime import datetime
@@ -53,28 +53,61 @@ class DriverAssignmentService:
         try:
             with transaction.atomic():
                 booking = Booking.objects.get(id=booking_id, status=Booking.BookingStatus.PENDING)
+                package = booking.package
                 
-                assignment = DriverAssignment.objects.get(
+                is_joiner = package.visibility == Package.PackageVisibility.JOINER
+                
+                original_assignment = DriverAssignment.objects.get(
                     booking_id=booking_id,
                     driver_id=old_driver_id
                 )
                 
+                related_bookings = []
+                if is_joiner:
+                    related_bookings = Booking.objects.filter(
+                        package=package,
+                        status=Booking.BookingStatus.PENDING,
+                        start_date=booking.start_date,
+                        end_date=booking.end_date
+                    ).exclude(id=booking_id)
+
                 conflicts = DriverAssignment.objects.filter(
                     driver_id=new_driver_id,
-                    start_date__lt=assignment.end_date,
-                    end_date__gt=assignment.start_date
+                    start_date__lt=original_assignment.end_date,
+                    end_date__gt=original_assignment.start_date
                 ).exclude(booking_id=booking_id).exists()
                 
                 if conflicts:
                     return None, "Selected driver has conflicting assignments"
 
                 new_driver = Driver.objects.get(id=new_driver_id, user__is_active=True)
-
-                assignment.driver = new_driver
-                assignment.assigned_at = timezone.now()
-                assignment.save()
                 
-                return assignment, None
+                original_assignment.driver = new_driver
+                original_assignment.assigned_at = timezone.now()
+                original_assignment.save()
+                
+                updated_assignments = [original_assignment]
+                if is_joiner and related_bookings:
+                    for related_booking in related_bookings:
+                        try:
+                            related_assignment = DriverAssignment.objects.get(
+                                booking=related_booking,
+                                driver_id=old_driver_id
+                            )
+                            
+                            related_assignment.driver = new_driver
+                            related_assignment.assigned_at = timezone.now()
+                            related_assignment.save()
+                            
+                            updated_assignments.append(related_assignment)
+                        except DriverAssignment.DoesNotExist:
+                            continue
+                
+                if is_joiner:
+                    package.assigned_driver = new_driver
+                    package.save()
+                    
+                return original_assignment, None
                 
         except Booking.DoesNotExist:
             return None, "Booking not found or not in PENDING status"
