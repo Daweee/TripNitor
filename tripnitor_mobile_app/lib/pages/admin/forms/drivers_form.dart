@@ -50,9 +50,11 @@ class _DriversFormState extends ConsumerState<DriversForm> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(vanStateProvider.notifier).getAllUnassignedVans();
-
       if (_isEditMode && widget.driver != null) {
+        await ref
+            .read(vanStateProvider.notifier)
+            .getUnassignedVansAndDriverVan(widget.driver!.van.id);
+
         _usernameController.text = widget.driver!.user.username;
         _nameController.text = widget.driver!.user.name;
         _emailController.text = widget.driver!.user.email;
@@ -63,6 +65,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
         ref.read(selectedDateProvider.notifier).state =
             widget.driver!.dateHired;
       } else {
+        await ref.read(vanStateProvider.notifier).getAllUnassignedVans();
         _selectedVanId = null;
       }
     } catch (e) {
@@ -510,9 +513,7 @@ class _DriversFormState extends ConsumerState<DriversForm> {
           fillColor: Colors.white,
         ),
         style: TextStyle(fontSize: 16),
-        value: vans?.any((van) => van.id == _selectedVanId) == true
-            ? _selectedVanId
-            : null,
+        value: _selectedVanId,
         items: [
           DropdownMenuItem<String?>(
             value: null,
@@ -524,14 +525,46 @@ class _DriversFormState extends ConsumerState<DriversForm> {
             ),
           ),
           ...vans?.map<DropdownMenuItem<String>>((Van van) {
+                final bool isCurrentVan =
+                    _isEditMode && van.id == widget.driver?.van.id;
+
                 return DropdownMenuItem<String>(
                   value: van.id,
-                  child: Text(
-                    '${van.model} | ${van.plateNumber}',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.normal,
-                    ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${van.model} | ${van.plateNumber}',
+                          style: TextStyle(
+                            color: isCurrentVan
+                                ? Color(ColorConstants.PRIMARY_COLOR)
+                                : Colors.black87,
+                            fontWeight: isCurrentVan
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isCurrentVan)
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Color(ColorConstants.PRIMARY_COLOR)
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Current',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(ColorConstants.PRIMARY_COLOR),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               }).toList() ??
@@ -552,6 +585,9 @@ class _DriversFormState extends ConsumerState<DriversForm> {
           Icons.arrow_drop_down,
           color: Colors.grey,
         ),
+        dropdownColor: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        isExpanded: true,
       ),
     );
   }

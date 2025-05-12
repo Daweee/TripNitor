@@ -42,6 +42,35 @@ class VanStateNotifier extends StateNotifier<VanState> {
     }
   }
 
+  Future<void> getUnassignedVansAndDriverVan(String? currentVanId) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final List<Van> unassignedVans = await _vanService.getUnassignedVanList();
+
+      if (currentVanId != null &&
+          !unassignedVans.any((van) => van.id == currentVanId)) {
+        try {
+          final Van currentVan = await _vanService.getVanDetail(currentVanId);
+          unassignedVans.add(currentVan);
+        } catch (e) {
+          print('Could not fetch van with ID $currentVanId: $e');
+        }
+      }
+
+      state = state.copyWith(
+        vanList: unassignedVans,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString(),
+        isLoading: false,
+      );
+      throw e;
+    }
+  }
+
   Future<void> getVanDetail(String vanId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
