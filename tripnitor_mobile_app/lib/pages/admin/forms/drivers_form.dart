@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tripnitor_mobile_app/core/constants/constant.dart';
 import 'package:tripnitor_mobile_app/models/driver_model.dart';
@@ -114,6 +115,10 @@ class _DriversFormState extends ConsumerState<DriversForm> {
     return PreferredSize(
       preferredSize: Size.fromHeight(kToolbarHeight + 1),
       child: AppBar(
+        leading: IconButton(
+          icon: FaIcon(FontAwesomeIcons.angleLeft, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text(
           _isEditMode ? 'Edit Driver' : 'Add Driver',
           style: TextStyle(
@@ -132,10 +137,6 @@ class _DriversFormState extends ConsumerState<DriversForm> {
             thickness: 1,
             height: 1,
           ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
     );
