@@ -90,9 +90,9 @@ class DriverService {
     }
   }
 
-  Future<void> deleteDriver(String driverId) async {
+  Future<void> deactivateDriver(String driverId) async {
     try {
-      final response = await _dio.delete('api/drivers/$driverId/delete/',
+      final response = await _dio.patch('api/drivers/$driverId/deactivate/',
           options: Options(
             followRedirects: false,
             validateStatus: (status) {
@@ -104,10 +104,31 @@ class DriverService {
         return;
       } else {
         throw Exception(
-            'Failed to delete driver with status code: ${response.statusCode}');
+            'Failed to deactivate driver with status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      throw Exception('Failed to delete driver: ${e.message}');
+      throw Exception('Failed to deactivate driver: ${e.message}');
+    }
+  }
+
+  Future<void> reactivateDriver(String driverId) async {
+    try {
+      final response = await _dio.patch('api/drivers/$driverId/reactivate/',
+          options: Options(
+            followRedirects: false,
+            validateStatus: (status) {
+              return status! < 500;
+            },
+          ));
+
+      if (response.statusCode == 204) {
+        return;
+      } else {
+        throw Exception(
+            'Failed to reactivate driver with status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to reactivate driver: ${e.message}');
     }
   }
 

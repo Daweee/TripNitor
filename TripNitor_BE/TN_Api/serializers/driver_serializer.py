@@ -6,22 +6,13 @@ from django.db import transaction
 
 class DriverSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    # user = UserSerializer(read_only=True)
-    # van = VanSerializer(read_only=True)
     van = serializers.PrimaryKeyRelatedField(queryset=Van.objects.all(), write_only=True)  
     van_details = VanSerializer(source='van', read_only=True)
 
     class Meta:
         model = Driver
         fields = ['id', 'user', 'license_number', 'date_hired', 'van', 'van_details']
-        # fields = ['id', 'user', 'license_number', 'date_hired', 'van']
         depth = 1
-
-    # def update(self, instance, validated_data):
-    #     instance.license_number = validated_data.get('license_number', instance.license_number)
-    #     instance.date_hired = validated_data.get('date_hired', instance.date_hired)
-    #     instance.save()
-    #     return instance
     
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     RegisterView, LoginView, LogoutView, UserDetailView, GetUserWithAdminRole,
-    DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeleteView, RetrieveDriverInstanceView,
+    DriverCreateView,DriverListView,DriverDetailView,DriverUpdateView,DriverDeactivateView, RetrieveDriverInstanceView, DriverReactivateView,
     VanCreateView, VanListView, VanDetailView, VanUpdateView, VanDeleteView, UnassignedVanListView,
     GasCreateView, GasListView, GasDetailView, GasUpdateView, GasDeleteView,
     BookingCreateView, BookingListView, BookingDetailView, BookingUpdateView, BookingDeleteView, BookingPreviewView, UserBookingListView, GetBookingStatusListView, 
@@ -25,7 +25,8 @@ urlpatterns = [
     path('drivers/', DriverListView.as_view(), name='driver_list'),
     path('drivers/<str:id>/', DriverDetailView.as_view(), name='get_driver'),
     path('drivers/<str:id>/update/', DriverUpdateView.as_view(), name='update_driver'),
-    path('drivers/<str:id>/delete/', DriverDeleteView.as_view(), name='delete_driver'),
+    path('drivers/<str:id>/deactivate/', DriverDeactivateView.as_view(), name='deactivate_driver'),
+    path('drivers/<str:id>/reactivate/', DriverReactivateView.as_view(), name='reactivate_driver'),
     path('user-info/', RetrieveDriverInstanceView.as_view(), name='retrieve-driver-instance'),
 
     path('drivers-assignment/', DriverAssignmentList.as_view(), name='driver_assignment_list'),

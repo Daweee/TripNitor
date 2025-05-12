@@ -193,7 +193,7 @@ class _DriverAdminPageState extends ConsumerState<DriverAdminPage> {
                             try {
                               await ref
                                   .read(driverStateProvider.notifier)
-                                  .deleteDriver(driver.id);
+                                  .deactivateDriver(driver.id);
                               // Check the state after the operation
                               final currentState =
                                   ref.read(driverStateProvider);

@@ -7,6 +7,7 @@ class User {
   final String name;
   final String phoneNumber;
   final String role;
+  final bool isActive;
   final Token? token;
 
   User({
@@ -16,6 +17,7 @@ class User {
     required this.name,
     required this.phoneNumber,
     required this.role,
+    required this.isActive,
     this.token,
   });
 
@@ -26,6 +28,7 @@ class User {
         name: json["name"],
         phoneNumber: json["phone_number"],
         role: json["role"],
+        isActive: json["is_active"],
         token: json["token"] != null ? Token.fromJson(json["token"]) : null,
       );
 

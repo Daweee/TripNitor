@@ -14,7 +14,7 @@ class BookingService:
     def get_available_drivers(booking):
         """Get all drivers available for the given booking dates."""
         from ..models.driver_model import Driver  # Import here to avoid circular imports
-        all_drivers = Driver.objects.all()
+        all_drivers = Driver.objects.filter(user__is_active=True)
         available_drivers = []
         
         for driver in all_drivers:
@@ -26,7 +26,7 @@ class BookingService:
     def assign_driver_for_joiner(start_date, end_date):
         """Get a single driver available for the given joiner package date."""
         from ..models.driver_model import Driver
-        all_drivers = Driver.objects.all()
+        all_drivers = Driver.objects.filter(user__is_active=True)
 
         available_drivers = []
         for driver in all_drivers:

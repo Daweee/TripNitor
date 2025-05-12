@@ -78,10 +78,10 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
     }
   }
 
-  Future<void> deleteDriver(String driverId) async {
+  Future<void> deactivateDriver(String driverId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await _driverService.deleteDriver(driverId);
+      await _driverService.deactivateDriver(driverId);
       final updatedDriverList =
           state.driverList?.where((driver) => driver.id != driverId).toList();
 
@@ -89,12 +89,12 @@ class DriverStateNotifier extends StateNotifier<DriverState> {
         isLoading: false,
         error: null,
         driverList: updatedDriverList,
-        message: 'Driver account deleted successfully.',
+        message: 'Driver account deactivated successfully.',
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to delete driver account. $e',
+        error: 'Failed to deactivate driver account. $e',
       );
       throw e;
     }

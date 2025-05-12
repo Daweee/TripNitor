@@ -180,21 +180,41 @@ class DriverUpdateView(CustomResponseMixin, UpdateAPIView):
             )
 
 @extend_schema(tags=['drivers'])    
-class DriverDeleteView(CustomResponseMixin, DestroyAPIView):
+class DriverDeactivateView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
     serializer_class = DriverSerializer
     lookup_field = 'id'
 
-    def destroy(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        user = instance.user  
+        user = instance.user
 
-        super().destroy(request, *args, **kwargs)
-        user.delete()
+        user.is_active = False
+        user.save(update_fields=['is_active'])
 
         return self.get_custom_response(
-            status.HTTP_204_NO_CONTENT,
+            status.HTTP_200_OK,
             None,
-            'Driver deleted successfully'
+            'Driver deactivated successfully'
+        )
+    
+@extend_schema(tags=['drivers'])    
+class DriverReactivateView(CustomResponseMixin, UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Driver.objects.all()
+    serializer_class = DriverSerializer
+    lookup_field = 'id'
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = instance.user
+
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+
+        return self.get_custom_response(
+            status.HTTP_200_OK,
+            None,
+            'Driver reactivated successfully'
         )
