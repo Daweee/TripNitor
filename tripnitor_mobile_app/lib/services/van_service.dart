@@ -105,7 +105,14 @@ class VanService {
             'Failed to delete van with status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      throw Exception('Failed to delete van: ${e.message}');
+      if (e.response != null &&
+          e.response!.data != null &&
+          e.response!.data is Map &&
+          e.response!.data['message'] != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception('Failed to delete van: ${e.message}');
+      }
     }
   }
 
