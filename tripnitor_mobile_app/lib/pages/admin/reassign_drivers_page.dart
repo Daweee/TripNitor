@@ -315,7 +315,7 @@ class _ReassignDriversPageState extends ConsumerState<ReassignDriversPage> {
     return Container(
       height: 30,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           if (isSelected)
             Text(
@@ -328,46 +328,7 @@ class _ReassignDriversPageState extends ConsumerState<ReassignDriversPage> {
             )
           else
             SizedBox.shrink(),
-          Row(
-            children: [
-              _actionButton(
-                icon: FontAwesomeIcons.comments,
-                onPressed: () {},
-              ),
-              SizedBox(width: 5),
-              _actionButton(
-                icon: FontAwesomeIcons.phone,
-                onPressed: () {},
-              ),
-            ],
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _actionButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      height: 30,
-      width: 30,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey, width: 1),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Center(
-        child: IconButton(
-          icon: FaIcon(
-            icon,
-            color: Colors.grey,
-            size: 16.0,
-          ),
-          padding: EdgeInsets.zero,
-          constraints: BoxConstraints(),
-          onPressed: onPressed,
-        ),
       ),
     );
   }

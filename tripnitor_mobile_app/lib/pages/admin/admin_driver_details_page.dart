@@ -5,6 +5,7 @@ import '../../core/constants/constant.dart';
 import '../../models/booking_model.dart';
 import '../../models/driver_model.dart';
 import '../../providers/booking_provider.dart';
+import '../../services/url_launcher_service.dart';
 import 'reassign_drivers_page.dart';
 
 class AdminDriverDetailsPage extends ConsumerStatefulWidget {
@@ -174,14 +175,14 @@ class _AdminDriverDetailsPageState
           _actionButton(
             icon: FontAwesomeIcons.comments,
             onPressed: () {
-              print('Message driver: ${driver.user.name}');
+              UrlLauncherService.sendSMS(driver.user.phoneNumber);
             },
           ),
           SizedBox(width: 5),
           _actionButton(
             icon: FontAwesomeIcons.phone,
             onPressed: () {
-              print('Call driver: ${driver.user.phoneNumber}');
+              UrlLauncherService.makePhoneCall(driver.user.phoneNumber);
             },
           ),
         ],
