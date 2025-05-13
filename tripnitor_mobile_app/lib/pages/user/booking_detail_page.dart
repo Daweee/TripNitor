@@ -215,7 +215,7 @@ class BookingDetailsContent extends StatelessWidget {
                       booking.package.maxParticipants != null)
                     _buildInfoRow(
                       "Package Participants",
-                      "${booking.package.currentParticipants}/${booking.package.maxParticipants}",
+                      "${(booking.package.currentParticipants! + booking.numberOfPassengers)}/${booking.package.maxParticipants}",
                     ),
                   _buildStatusRow(
                     "Booking status:",
