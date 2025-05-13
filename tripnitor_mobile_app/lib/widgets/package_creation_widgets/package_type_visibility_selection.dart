@@ -1,36 +1,58 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/constant.dart';
+import '../../providers/auth_provider.dart';
 import 'package_details_creation_page.dart';
 import 'package_start_final_location.dart';
 
-class PackageTypeVisibilitySelection extends StatefulWidget {
+class PackageTypeVisibilitySelection extends ConsumerStatefulWidget {
   const PackageTypeVisibilitySelection({super.key});
 
   @override
-  State<PackageTypeVisibilitySelection> createState() =>
+  ConsumerState<PackageTypeVisibilitySelection> createState() =>
       _PackageTypeVisibilitySelectionState();
 }
 
 class _PackageTypeVisibilitySelectionState
-    extends State<PackageTypeVisibilitySelection> {
+    extends ConsumerState<PackageTypeVisibilitySelection> {
   String selectedType = "NORTH";
-  String selectedVisibility = "PRIVATE";
+  String selectedVisibility = "JOINER";
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authProvider);
+      if (authState.user?.role == 'ADMIN') {
+        setState(() {
+          selectedVisibility = "PRIVATE";
+        });
+      } else {
+        setState(() {
+          selectedVisibility = "JOINER";
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final isAdmin = authState.user?.role == 'ADMIN';
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       elevation: 0,
       backgroundColor: Color(ColorConstants.BACKGROUND_COLOR),
-      child: _selectionBox(),
+      child: _selectionBox(isAdmin),
     );
   }
 
-  Widget _selectionBox() {
+  Widget _selectionBox(bool isAdmin) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
@@ -55,7 +77,7 @@ class _PackageTypeVisibilitySelectionState
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
-              'Create Package',
+              isAdmin ? 'Create Pre-set Package' : 'Create Package',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -78,7 +100,7 @@ class _PackageTypeVisibilitySelectionState
                 SizedBox(height: 25),
                 _titleRow('Visibility'),
                 SizedBox(height: 10),
-                _visibilityChoices(),
+                _visibilityChoices(isAdmin),
                 SizedBox(height: 10),
                 _visibilityInfo(),
                 SizedBox(height: 40),
@@ -92,6 +114,9 @@ class _PackageTypeVisibilitySelectionState
   }
 
   Widget _visibilityInfo() {
+    final authState = ref.watch(authProvider);
+    final isAdmin = authState.user?.role == 'ADMIN';
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Row(
@@ -106,8 +131,10 @@ class _PackageTypeVisibilitySelectionState
           Expanded(
             child: Text(
               selectedVisibility == "PRIVATE"
-                  ? "Private packages are only visible to you."
-                  : "Public packages can be viewed by all users of the platform and can be joined by them.",
+                  ? isAdmin
+                      ? "Pre-set private packages are visible to all users."
+                      : "Private packages are only visible to you."
+                  : "Joiner packages can be viewed by all users of the platform and can be joined by them.",
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 12,
@@ -120,14 +147,14 @@ class _PackageTypeVisibilitySelectionState
     );
   }
 
-  Widget _visibilityChoices() {
+  Widget _visibilityChoices(bool isAdmin) {
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _choiceBox("PRIVATE", selectedVisibility),
-          SizedBox(width: 10),
-          _choiceBox("PUBLIC", selectedVisibility),
+          isAdmin
+              ? _choiceBox("PRIVATE", selectedVisibility)
+              : _choiceBox("JOINER", selectedVisibility),
         ],
       ),
     );
@@ -138,11 +165,32 @@ class _PackageTypeVisibilitySelectionState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _choiceBox("NORTH", selectedType),
+          InkWell(
+            onTap: () {
+              setState(() {
+                selectedType = "NORTH";
+              });
+            },
+            child: _choiceBox("NORTH", selectedType),
+          ),
           SizedBox(width: 10),
-          _choiceBox("SOUTH", selectedType),
+          InkWell(
+            onTap: () {
+              setState(() {
+                selectedType = "SOUTH";
+              });
+            },
+            child: _choiceBox("SOUTH", selectedType),
+          ),
           SizedBox(width: 10),
-          _choiceBox("CITY", selectedType),
+          InkWell(
+            onTap: () {
+              setState(() {
+                selectedType = "CITY";
+              });
+            },
+            child: _choiceBox("CITY", selectedType),
+          ),
         ],
       ),
     );
@@ -151,43 +199,31 @@ class _PackageTypeVisibilitySelectionState
   Widget _choiceBox(String value, String selectedValue) {
     bool isSelected = selectedValue == value;
 
-    return InkWell(
-      onTap: () {
-        setState(() {
-          if (selectedValue == selectedType) {
-            selectedType = value;
-          } else {
-            selectedVisibility = value;
-          }
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color:
-              isSelected ? Color(ColorConstants.PRIMARY_COLOR) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Color(ColorConstants.PRIMARY_COLOR),
-            width: 1,
-          ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.3),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-          ],
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? Color(ColorConstants.PRIMARY_COLOR) : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Color(ColorConstants.PRIMARY_COLOR),
+          width: 1,
         ),
-        child: Text(
-          value,
-          style: TextStyle(
-            color:
-                isSelected ? Colors.white : Color(ColorConstants.PRIMARY_COLOR),
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
+        boxShadow: [
+          if (isSelected)
+            BoxShadow(
+              color: Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.3),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+        ],
+      ),
+      child: Text(
+        value,
+        style: TextStyle(
+          color:
+              isSelected ? Colors.white : Color(ColorConstants.PRIMARY_COLOR),
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
       ),
     );

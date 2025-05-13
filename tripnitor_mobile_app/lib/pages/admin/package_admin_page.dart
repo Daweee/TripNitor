@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/constants/constant.dart';
 import '../../models/package_model.dart';
 import '../../providers/package_provider.dart';
 import 'admin_drawer.dart';
 import 'profile/package_admin_profile.dart';
+import '../../widgets/package_creation_widgets/package_type_visibility_selection.dart';
 
 class PackageAdminPage extends ConsumerStatefulWidget {
   const PackageAdminPage({super.key});
@@ -169,6 +171,21 @@ class _PackageAdminPageState extends ConsumerState<PackageAdminPage> {
                       ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return PackageTypeVisibilitySelection();
+            },
+          );
+        },
+        child: FaIcon(
+          FontAwesomeIcons.boxOpen,
+          color: Color(ColorConstants.BACKGROUND_COLOR),
+        ),
       ),
     );
   }
