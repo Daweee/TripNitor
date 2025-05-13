@@ -193,4 +193,25 @@ class BookingService {
       rethrow;
     }
   }
+
+  Future<void> confirmJoinerPackageBookings(String packageId) async {
+    try {
+      final response = await _dio.post(
+        'api/bookings/confirm-joiner-package-bookings/',
+        data: {
+          'package_id': packageId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception(
+            'Failed to confirm joiner package bookings: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+          'Failed to confirm joiner package bookings: ${e.message}');
+    }
+  }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tripnitor_mobile_app/pages/admin/profile/booking_admin_profile.dart';
+import 'package:tripnitor_mobile_app/providers/booking_provider.dart';
 
 import '../../../core/constants/constant.dart';
 import '../../../models/package_model.dart';
@@ -86,6 +88,14 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
               height: 1,
             ),
           ),
+          leading: IconButton(
+            icon: FaIcon(
+              FontAwesomeIcons.angleLeft,
+              color: Colors.black,
+              size: 20.0,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
       ),
       body: _isLoading || package == null
@@ -137,11 +147,18 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
                         ),
                       ),
                       const SizedBox(height: 16),
+                      if (package.assignedDriver != null)
+                        _buildDriverInfoCard(package),
+                      if (package.assignedDriver != null)
+                        const SizedBox(height: 16),
                       _buildItineraries(package),
                       const SizedBox(height: 16),
                       if (package.visibility.toUpperCase() == 'JOINER' &&
-                          joiners != null)
+                          joiners != null) ...[
+                        _buildPaymentInfoCard(joiners, package),
+                        const SizedBox(height: 16),
                         _buildJoiners(joiners),
+                      ],
                       const SizedBox(height: 40),
                       if (package.visibility.toUpperCase() == 'JOINER' &&
                           !package.isConfirmed)
@@ -154,7 +171,175 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
     );
   }
 
+  Widget _buildPaymentInfoCard(List<PackageUser> joiners, Package package) {
+    bool hasJoiners = joiners.isNotEmpty;
+
+    String labelText = hasJoiners
+        ? 'To be paid by all joiners'
+        : 'Price will be shown when users join';
+
+    String valueText = hasJoiners ? '₱${joiners[0].booking.totalPrice}' : '';
+
+    int totalPassengers = package.currentParticipants ?? 0;
+
+    double perJoinerAmount = 0;
+    if (hasJoiners && totalPassengers > 0) {
+      perJoinerAmount =
+          double.parse(joiners[0].booking.totalPrice) / totalPassengers;
+    }
+
+    return _buildInfoCard(
+      title: 'Payment Information',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          hasJoiners
+              ? _buildInfoRow(labelText, valueText)
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Text(
+                      labelText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ),
+          if (hasJoiners) ...[
+            const SizedBox(height: 8),
+            Divider(),
+            const SizedBox(height: 8),
+            Text(
+              'Payment Breakdown',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(ColorConstants.PRIMARY_COLOR),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Per joiner ($totalPassengers total)',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Text(
+                    '₱${perJoinerAmount.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDriverInfoCard(Package package) {
+    final driver = package.assignedDriver!;
+
+    return _buildInfoCard(
+      title: 'Driver Information',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor:
+                    Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.2),
+                radius: 25,
+                child: FaIcon(
+                  FontAwesomeIcons.user,
+                  color: Color(ColorConstants.PRIMARY_COLOR),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      driver.user.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...[
+                      Row(
+                        children: [
+                          Icon(Icons.phone, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            driver.user.phoneNumber,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                    ...[
+                      Row(
+                        children: [
+                          Icon(Icons.email, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            driver.user.email,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          ...[
+            const SizedBox(height: 16),
+            Divider(),
+            const SizedBox(height: 8),
+            Text(
+              'Vehicle Information',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildInfoRow('Model', driver.van.model),
+            _buildInfoRow('Plate Number', driver.van.plateNumber),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _confirmPackageButton(Package package) {
+    final joiners = ref.watch(packageProvider).packageJoiners;
+    final bool hasJoiners = joiners != null && joiners.isNotEmpty;
+
     void _showConfirmationDialog(BuildContext context) {
       showDialog(
         context: context,
@@ -164,11 +349,34 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
             content:
                 'Are you sure you want to confirm all bookings for this package?',
             onConfirm: () async {
-              // provider method
+              try {
+                setState(() {
+                  _isLoading = true;
+                });
 
-              // reload after call
-              if (mounted) {
-                _loadPackageDetails();
+                await ref
+                    .read(bookingStateProvider.notifier)
+                    .confirmJoinerPackageBookings(widget.packageId);
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('All bookings confirmed successfully')),
+                  );
+                }
+
+                if (mounted) {
+                  _loadPackageDetails();
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to confirm bookings: $e')),
+                  );
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
               }
             },
             color: Color(ColorConstants.PRIMARY_COLOR),
@@ -182,15 +390,18 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
       width: double.infinity,
       height: 45,
       child: ElevatedButton(
-        onPressed: () => _showConfirmationDialog(context),
+        onPressed: hasJoiners ? () => _showConfirmationDialog(context) : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(ColorConstants.PRIMARY_COLOR),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
+          disabledBackgroundColor:
+              Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.3),
+          disabledForegroundColor: Colors.white.withOpacity(0.5),
         ),
         child: Text(
-          'Confirm all bookings',
+          hasJoiners ? 'Confirm all bookings' : 'No joiners to confirm',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -505,39 +716,60 @@ class _PackageAdminProfileState extends ConsumerState<PackageAdminProfile> {
               itemCount: joiners.length,
               itemBuilder: (context, index) {
                 final joiner = joiners[index];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor:
-                        Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.2),
-                    child: Text(
-                      joiner.user.name.substring(0, 1).toUpperCase(),
-                      style: TextStyle(
-                        color: Color(ColorConstants.PRIMARY_COLOR),
-                        fontWeight: FontWeight.bold,
+                return InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BookingAdminProfile(
+                          bookingId: joiner.booking.id,
+                        ),
+                      ),
+                    );
+                  },
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor:
+                          Color(ColorConstants.PRIMARY_COLOR).withOpacity(0.2),
+                      child: Text(
+                        joiner.user.name.substring(0, 1).toUpperCase(),
+                        style: TextStyle(
+                          color: Color(ColorConstants.PRIMARY_COLOR),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  title: Text(
-                    joiner.user.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
+                    title: Text(
+                      joiner.user.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  subtitle: Text(
-                    'Joined on ${DateFormat('d MMM yyyy').format(joiner.localCreatedAt!)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                    subtitle: Text(
+                      'Joined on ${DateFormat('d MMM yyyy').format(joiner.localCreatedAt!)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
                     ),
-                  ),
-                  trailing: Text(
-                    joiner.numberOfPassengers > 1
-                        ? '${joiner.numberOfPassengers} people'
-                        : '1 person',
-                    style: TextStyle(
-                      color: Color(ColorConstants.PRIMARY_COLOR),
-                      fontWeight: FontWeight.w500,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          joiner.numberOfPassengers > 1
+                              ? '${joiner.numberOfPassengers} people'
+                              : '1 person',
+                          style: TextStyle(
+                            color: Color(ColorConstants.PRIMARY_COLOR),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.chevron_right,
+                          color: Colors.grey,
+                        ),
+                      ],
                     ),
                   ),
                 );
