@@ -206,8 +206,7 @@ class PackageService:
             return package
         
     @staticmethod
-    def join_package(package_id, user_id, number_of_passengers):
-    
+    def join_package(package_id, user_id, number_of_passengers, booking=None):
         try:
             with transaction.atomic():
                 package = Package.objects.select_for_update().get(id=package_id)
@@ -217,10 +216,16 @@ class PackageService:
                     raise ValueError("Only packages of type JOINER can be joined")
                 
                 if PackageUser.objects.filter(user_id=user_id, package_id=package_id).exists():
-                    raise ValueError("User has already joined this package")
+                    if booking:
+                        package_user = PackageUser.objects.get(user_id=user_id, package_id=package_id)
+                        package_user.booking = booking
+                        package_user.save(update_fields=['booking'])
+                        return package_user
+                    else:
+                        raise ValueError("User has already joined this package")
                     
                 current_passengers = PackageUser.objects.filter(package=package).aggregate(
-                total=Sum('number_of_passengers')
+                    total=Sum('number_of_passengers')
                 )['total'] or 0
                 
                 if current_passengers + number_of_passengers > 15:
@@ -233,7 +238,8 @@ class PackageService:
                 package_user = PackageUser.objects.create(
                     user=user,
                     package=package,
-                    number_of_passengers=number_of_passengers
+                    number_of_passengers=number_of_passengers,
+                    booking=booking 
                 )
 
                 package.current_participants = current_passengers + number_of_passengers

@@ -1,4 +1,5 @@
 import 'auth_model.dart';
+import 'booking_model.dart';
 import 'package_model.dart';
 
 class PackageUser {
@@ -6,6 +7,7 @@ class PackageUser {
   final User user;
   final Package package;
   final int numberOfPassengers;
+  final Booking booking;
   final DateTime joinedAt;
 
   PackageUser({
@@ -13,6 +15,7 @@ class PackageUser {
     required this.user,
     required this.package,
     required this.numberOfPassengers,
+    required this.booking,
     required this.joinedAt,
   });
 
@@ -24,6 +27,7 @@ class PackageUser {
         user: User.fromJson(json['user']),
         package: Package.fromJson(json['package']),
         numberOfPassengers: json['number_of_passengers'],
+        booking: Booking.fromJson(json['booking']),
         joinedAt: DateTime.parse(json['joined_at']));
   }
 }

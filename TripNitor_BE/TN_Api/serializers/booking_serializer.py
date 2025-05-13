@@ -73,11 +73,6 @@ class BookingCreationSerializer(serializers.ModelSerializer):
 
         if package and package.visibility == Package.PackageVisibility.JOINER:
             number_of_passengers = validated_data.get('number_of_passengers', 1)
-            package_user = PackageService.join_package(
-                package_id=package.id,
-                user_id=user.id,
-                number_of_passengers=number_of_passengers
-            )
             
             validated_data['start_date'] = package.start_date
             validated_data['end_date'] = package.end_date
@@ -90,7 +85,7 @@ class BookingCreationSerializer(serializers.ModelSerializer):
             
             if has_conflicts:
                 raise serializers.ValidationError(error_message)
-    
+
             validated_data['number_of_nights'] = BookingService.get_nights(
                 package.start_date, package.end_date
             )
@@ -110,6 +105,14 @@ class BookingCreationSerializer(serializers.ModelSerializer):
             
             BookingService.set_booking_locations(booking)
             booking.save(update_fields=['start_location', 'final_destination'])
+            
+            if package and package.visibility == Package.PackageVisibility.JOINER:
+                package_user = PackageService.join_package(
+                    package_id=package.id,
+                    user_id=user.id,
+                    number_of_passengers=number_of_passengers,
+                    booking=booking 
+                )
             
             for driver in drivers_data:
                 DriverAssignment.objects.create(booking=booking, driver=driver, user=user)
